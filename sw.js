@@ -1,6 +1,6 @@
 /* Service Worker for the offline-capable THPT math quiz. */
 'use strict';
-var CACHE_NAME = 'de-toan-thpt-pwa-v1';
+var CACHE_NAME = 'de-toan-thpt-pwa-v2';
 var APP_FILES = [
   './de_toan_thpt_mau2.html',
   './manifest.webmanifest',
