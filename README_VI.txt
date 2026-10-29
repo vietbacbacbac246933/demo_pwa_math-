@@ -29,3 +29,9 @@ LƯU Ý QUAN TRỌNG
 - Khi cập nhật đề hoặc code, tải lại các file lên hosting và tăng phiên bản CACHE_NAME trong sw.js (ví dụ v1 thành v2). Nếu thiết bị vẫn dùng bản cũ, đóng/mở lại trang hoặc xóa dữ liệu website rồi tải lại.
 - Nội dung đề/đáp án nằm trong HTML phía máy khách như bản gốc. Đây không phải hệ thống bảo mật đáp án chống người có kiến thức kỹ thuật.
 - Khả năng lưu offline phụ thuộc vào trình duyệt và chính sách lưu trữ của WebView; cần thử trên thiết bị thực tế.
+
+
+BAN SUA LOI KHONG CUON MAN HINH (29/10/2026)
+- Ban nay bat lai cuon doc tren chuot va man hinh cam ung.
+- Da tat che do lockdown/toan man hinh de tranh can tro thao tac cuon. Noi dung cau hoi, dap an va cach cham diem duoc giu nguyen.
+- Neu da dang len GitHub Pages: tai len de thay the cac file cung ten trong repository, dac biet la de_toan_thpt_mau2.html va sw.js. Sau do cho Actions deploy thanh cong, mo lai trang va nhan Ctrl+F5 de tai lai. Tren dien thoai, dong tab cu roi mo lai link khi co mang de nhan ban cap nhat.
