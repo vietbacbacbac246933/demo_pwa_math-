@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4338ca">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Đề Toán THPT">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>de-toan-thpt-mau2</title>
+<style>
+:root{
+  --bg:#eef2f8;--card:#fff;--ink:#172033;--muted:#5b6577;--line:#dbe2ee;
+  --brand:#4338ca;--brand-soft:#eef0ff;--ok:#15803d;--ok-soft:#e8f7ee;
+  --bad:#b91c1c;--bad-soft:#fdeaea;--warn:#b45309;--warn-soft:#fff6e5;
+  --shadow:0 10px 30px rgba(23,32,51,.08)
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%;overscroll-behavior-y:contain}
+#app{width:100%;max-width:880px;margin:0 auto;padding:20px 16px calc(96px + env(safe-area-inset-bottom))}
+h1,h2,h3{margin:0;line-height:1.25}
+p{margin:.4em 0}
+.kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);font-weight:800}
+.title{font-size:1.55rem;margin:6px 0 8px;letter-spacing:-.01em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.start{padding:28px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px}
+.chip{background:var(--brand-soft);color:var(--brand);border:1px solid #d9dcfa;border-radius:99px;padding:4px 12px;font-size:.82rem;font-weight:700}
+.panel{background:#f8faff;border:1px solid var(--line);border-radius:14px;padding:16px;margin:18px 0}
+.field{display:block;font-size:.86rem;font-weight:700;color:var(--muted)}
+.field .input{margin-top:6px}
+.input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff;color:var(--ink)}
+.input:focus,.short:focus{outline:2px solid var(--brand);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:11px 20px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-weight:800;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:#3730a3}
+.btn.primary:disabled{background:#b9bdd6;border-color:#b9bdd6;cursor:not-allowed}
+.btn.ghost{background:#f4f6fb}
+.btn.block{width:100%;margin-top:18px}
+.note{font-size:.86rem;color:var(--muted)}
+.warnbox{background:var(--warn-soft);border:1px solid #f6d9a8;color:#7c4a03;border-radius:12px;padding:12px 14px;font-size:.9rem;margin-top:16px}
+.quizhead{position:sticky;top:8px;z-index:5;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.quizhead h1{font-size:1.02rem}
+.timer{font-variant-numeric:tabular-nums;font-weight:900;font-size:1.12rem;background:var(--brand-soft);color:var(--brand);padding:6px 12px;border-radius:10px;white-space:nowrap}
+.timer.low{background:var(--bad-soft);color:var(--bad)}
+.progress{height:8px;background:#e3e8f3;border-radius:99px;overflow:hidden;margin:14px 2px 5px}
+.progress>i{display:block;height:100%;width:100%;background:var(--brand);transform:scaleX(0);transform-origin:left;transition:transform .2s}
+.progressmeta{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;color:var(--muted);margin:0 2px 6px}
+.q{padding:18px;margin:14px 0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.qnum{font-weight:900;color:var(--brand)}
+.qpts{font-size:.78rem;color:var(--muted);white-space:nowrap}
+.q-text p{margin:.35em 0}
+.q-text img,.rev img,.opt img{max-width:100%;height:auto;border-radius:8px}
+.opts{display:grid;gap:9px;margin-top:14px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;background:#fff}
+.opt:hover{border-color:#b9c3da;background:#fbfcff}
+.opt input{margin-top:4px;accent-color:var(--brand);flex:none}
+.opt .letter{font-weight:900;color:var(--brand);min-width:1.2em}
+.opt .txt{min-width:0}
+.opt:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.tf{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.tf-text{flex:1 1 260px;min-width:0}
+.tf-choice{display:flex;gap:8px;flex:none;margin-left:auto}
+.tf-choice label{display:block;cursor:pointer;position:relative}
+.tf-choice span{display:block;min-width:74px;min-height:44px;line-height:24px;padding:10px 14px;text-align:center;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:.95rem;font-weight:700;transition:background .15s,border-color .15s}
+.tf-choice span:hover{border-color:#b9c3da}
+.tf-choice input{position:absolute;opacity:0;pointer-events:none}
+.tf-choice input:checked + span{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.tf-choice input:focus-visible + span{outline:2px solid var(--brand);outline-offset:2px}
+.short{width:100%;max-width:340px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:1.05rem;margin-top:12px;background:#fff}
+.short-hint{font-size:.82rem;color:var(--muted);margin-top:6px}
+.bottombar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.96);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;gap:12px;backdrop-filter:blur(8px)}
+.bottombar .count{font-size:.86rem;color:var(--muted)}
+.btn.submit{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:12px 24px;font:inherit;font-weight:900;cursor:pointer;min-height:48px}
+.btn.submit:hover{background:#3730a3}
+.result{padding:26px}
+.bigscore{font-size:2.7rem;font-weight:900;letter-spacing:-.03em;line-height:1.1}
+.bigscore small{font-size:1rem;color:var(--muted);font-weight:700}
+.scoreline{display:flex;flex-wrap:wrap;gap:22px;align-items:center;margin:16px 0}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stat{background:#f4f6fb;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:.84rem;font-weight:700}
+.stat.ok{background:var(--ok-soft);color:var(--ok);border-color:#bbebc9}
+.stat.bad{background:var(--bad-soft);color:var(--bad);border-color:#f3c6c6}
+.stat.warn{background:var(--warn-soft);color:var(--warn);border-color:#f0d6a4}
+.rev-slot{padding-top:2px}
+.rev-title{font-size:1.02rem;margin-bottom:4px}
+.rev-filter{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.rev-grid{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 6px}
+.cell{min-width:36px;height:32px;padding:0 7px;border-radius:8px;border:1px solid var(--line);background:#eef1f7;color:var(--muted);font:inherit;font-size:.82rem;font-weight:800;cursor:pointer;font-variant-numeric:tabular-nums}
+.cell.ok{background:var(--ok-soft);border-color:#bbebc9;color:var(--ok)}
+.cell.part{background:var(--warn-soft);border-color:#f0d6a4;color:var(--warn)}
+.cell.bad{background:var(--bad-soft);border-color:#f3c6c6;color:var(--bad)}
+.cell:hover{filter:brightness(.95)}
+.rev-item.hit{background:var(--brand-soft);border-radius:10px;padding-left:10px;padding-right:10px}
+.fb{margin-top:12px;border-radius:12px;padding:10px 12px;font-size:.9rem;font-weight:700}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.part{background:var(--warn-soft);color:var(--warn)}
+.fb.bad{background:var(--bad-soft);color:var(--bad)}
+.rev-tab{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:5px 11px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+.rev-tab span{color:var(--muted);font-weight:800}
+.rev-tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.rev-tab.on span{color:#dfe2ff}
+.rev-item{padding:14px 0;border-top:1px solid var(--line)}
+.rev-item:first-of-type{border-top:0;padding-top:10px}
+.rev-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.badge{font-size:.75rem;font-weight:900;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.part{background:var(--warn-soft);color:var(--warn)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.mute{background:#eef1f7;color:var(--muted)}
+.rev-opt{display:flex;gap:8px;padding:6px 9px;border-radius:8px;margin-top:4px;align-items:flex-start;flex-wrap:wrap}
+.rev-opt.is-correct{background:var(--ok-soft)}
+.rev-opt.is-wrong{background:var(--bad-soft)}
+.tag{font-size:.72rem;font-weight:800;padding:1px 7px;border-radius:99px;background:#fff;border:1px solid currentColor}
+.tag.ok{color:var(--ok)}
+.tag.bad{color:var(--bad)}
+.tag.pick{color:var(--brand)}
+.answerline{font-size:.9rem;margin-top:8px;color:var(--muted)}
+.answerline b{color:var(--ink)}
+.result-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.ask{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.45)}
+.ask[hidden]{display:none}
+.ask-box{width:100%;max-width:430px;background:var(--card);border-radius:16px;padding:20px;box-shadow:0 18px 50px rgba(15,23,42,.3)}
+.ask-box p{margin:0;font-weight:700;line-height:1.45}
+.ask-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+@media (max-width:420px){.ask-actions .btn{flex:1}}
+.hist{margin-top:16px;padding:18px}
+.hist-title{font-size:1.02rem;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.hist-count{font-size:.8rem;color:var(--muted);font-weight:700}
+.run{border:1px solid var(--line);border-radius:10px;background:#fff;margin-top:8px}
+.run>summary{cursor:pointer;padding:9px 12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:.9rem}
+.run>summary::-webkit-details-marker{display:none}
+.run>summary::before{content:'▸';color:var(--brand);font-weight:900}
+.run[open]>summary::before{content:'▾'}
+.run-no{font-weight:800}
+.run-score{font-weight:800;font-variant-numeric:tabular-nums}
+.run-at{margin-left:auto;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+.run-body{padding:0 12px 12px 30px}
+.run-meta{font-size:.84rem;color:var(--muted);margin-bottom:4px}
+.jumpnav{position:fixed;right:14px;bottom:84px;z-index:15;display:flex;flex-direction:column;gap:8px}
+.jumpnav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.96);box-shadow:var(--shadow);color:var(--brand);font-size:1rem;font-weight:900;cursor:pointer;line-height:1}
+.jumpnav button:hover{background:var(--brand-soft)}
+body.locked{-webkit-user-select:none;user-select:none}
+body.locked .input,body.locked .short{-webkit-user-select:text;user-select:text}
+@media (max-width:560px){
+  #app{padding:12px 10px calc(92px + env(safe-area-inset-bottom))}
+  .start,.result{padding:20px}
+  .q{padding:14px}
+  .title{font-size:1.3rem}
+  .quizhead{padding:12px 14px;top:6px}
+  .bottombar{padding:9px 10px}
+  .bottombar .count{max-width:45%}
+  .btn.submit{padding:11px 18px}
+  .jumpnav{right:10px;bottom:76px}
+  .jumpnav button{width:40px;height:40px}
+}
+@media print{
+  body{background:#fff}
+  #app{max-width:none;padding:0}
+  .bottombar,.result-actions,.jumpnav,.ask{display:none}
+  .quizhead{position:static;box-shadow:none}
+}
+#offline-status{margin:8px auto 0;padding:6px 12px;max-width:880px;width:calc(100% - 24px);border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted);font-size:.78rem;line-height:1.35}
+#offline-status[data-state="ready"]{background:var(--ok-soft);border-color:#b8e5c6;color:#166534}
+#offline-status[data-state="limited"]{background:var(--warn-soft);border-color:#f6d9a8;color:#7c4a03}
+@media (max-width:560px){#offline-status{margin-top:6px;font-size:.74rem}}
+</style>
+</head>
+<body>
+<div id="offline-status" role="status" aria-live="polite">Đang kiểm tra khả năng dùng ngoại tuyến…</div>
+<div id="app"></div>
+<script id="quiz-data" type="application/json">{"v":1,"title":"de-toan-thpt-mau2","settings":{"mode":"practice","attempts":0,"minutes":0,"showAnswers":true,"shuffle":true,"instant":false,"lockdown":true},"questions":[{"type":"single","question":"Hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^3 - 3x\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> nghịch biến trên khoảng nào?","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(-1; 1)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(-\\infty; -1)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(1; +\\infty)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmn>0\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(-1; 0)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>4\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^4 - 2x^2 + 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> đạt cực tiểu tại:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, giá trị cực tiểu là 3","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>±\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = \\pm 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, giá trị cực tiểu là 2","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, giá trị cực tiểu là 0","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>±\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = \\pm 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, giá trị cực tiểu là 0"],"correct":1,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tìm \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>m\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">m\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> để hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmi>m\u003c/mi>\u003c/mrow>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\dfrac{x+m}{x-2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> đồng biến trên từng khoảng xác định?","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>m\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">m &gt; 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>m\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">m &lt; -2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>m\u003c/mi>\u003cmo mathvariant=\"normal\">≠\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">m \\neq 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>m\u003c/mi>\u003cmo mathvariant=\"normal\">≠\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">m \\neq -2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":3,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Đường tiệm cận ngang của đồ thị \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmrow>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>5\u003c/mn>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\dfrac{3x-1}{2x+5}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>3\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\dfrac{3}{2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>5\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = -\\dfrac{1}{5}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giá trị lớn nhất của hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^3 - 3x\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> trên đoạn \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">[\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo stretchy=\"false\">]\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">[-2; 2]\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["2","4","-2","-4"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Hàm số nào sau đây có đúng 3 điểm cực trị?","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>4\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^4 - 2x^2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^3 + 3x\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\dfrac{x+1}{x-1}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^2 - 4x + 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Phương trình tiếp tuyến của đồ thị \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^3 - 3x^2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> tại điểm có hoành độ \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = -4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>8\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = -8\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Số điểm cực trị của hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>3\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = (x^2 - 1)^3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["1","2","3","0"],"correct":2,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Rút gọn biểu thức \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>P\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmfrac>\u003cmn>2\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/msup>\u003cmo>⋅\u003c/mo>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>6\u003c/mn>\u003c/mfrac>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">P = a^{\\frac{2}{3}} \\cdot a^{\\frac{1}{6}}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> (\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>a\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a &gt; 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>):","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmfrac>\u003cmn>5\u003c/mn>\u003cmn>6\u003c/mn>\u003c/mfrac>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a^{\\frac{5}{6}}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>4\u003c/mn>\u003c/mfrac>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a^{\\frac{1}{4}}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a^{\\frac{1}{2}}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>a\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giá trị của \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmn>27\u003c/mn>\u003cmfrac>\u003cmn>2\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">27^{\\frac{2}{3}}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> bằng:","options":["3","6","9","18"],"correct":2,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giải phương trình \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmn>4\u003c/mn>\u003cmi>x\u003c/mi>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmn>2\u003c/mn>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">4^x = 2^{x+3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":2,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>2\u003c/mn>\u003c/msub>\u003cmn>8\u003c/mn>\u003cmo>+\u003c/mo>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>2\u003c/mn>\u003c/msub>\u003cmn>4\u003c/mn>\u003cmo>−\u003c/mo>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>2\u003c/mn>\u003c/msub>\u003cmn>16\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\log_2 8 + \\log_2 4 - \\log_2 16\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["1","2","3","0"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giải bất phương trình \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>3\u003c/mn>\u003c/msub>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>≥\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\log_3(x-1) \\geq 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>≥\u003c/mo>\u003cmn>10\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x \\geq 10\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>≥\u003c/mo>\u003cmn>9\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x \\geq 9\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>≥\u003c/mo>\u003cmn>7\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x \\geq 7\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>≥\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x \\geq 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giải phương trình \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>2\u003c/mn>\u003c/msub>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>+\u003c/mo>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>2\u003c/mn>\u003c/msub>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\log_2(x+1) + \\log_2(x-1) = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsqrt>\u003cmn>10\u003c/mn>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = \\sqrt{10}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsqrt>\u003cmn>7\u003c/mn>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = \\sqrt{7}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giải bất phương trình \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmn>2\u003c/mn>\u003cmrow>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003c/msup>\u003cmo>&lt;\u003c/mo>\u003cmsup>\u003cmn>2\u003c/mn>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">2^{x^2-4} &lt; 2^{2x-3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>1\u003c/mn>\u003cmo>&lt;\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">1 &lt; x &lt; 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &lt; 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> hoặc \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &gt; 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo>&lt;\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">-3 &lt; x &lt; 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &lt; -3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> hoặc \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &gt; 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tập xác định của hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmi>ln\u003c/mi>\u003cmo>⁡\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>6\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\ln(3x - 6)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(2; +\\infty)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">[\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">[-2; +\\infty)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(-2; +\\infty)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(3; +\\infty)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Đạo hàm của hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>e\u003c/mi>\u003cmrow>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = e^{x^2+1}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>y\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>⋅\u003c/mo>\u003cmsup>\u003cmi>e\u003c/mi>\u003cmrow>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y&#x27; = 2x \\cdot e^{x^2+1}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>y\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>e\u003c/mi>\u003cmrow>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y&#x27; = e^{x^2+1}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>y\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y&#x27; = x^2+1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>y\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y&#x27; = 2x\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Nguyên hàm của \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">f(x) = \\dfrac{1}{x+2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>F\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmi>ln\u003c/mi>\u003cmo>⁡\u003c/mo>\u003cmi mathvariant=\"normal\">∣\u003c/mi>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi mathvariant=\"normal\">∣\u003c/mi>\u003cmo>+\u003c/mo>\u003cmi>C\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">F(x) = \\ln|x+2| + C\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>F\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003cmo>+\u003c/mo>\u003cmi>C\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">F(x) = -\\dfrac{1}{(x+2)^2} + C\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>F\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmi>ln\u003c/mi>\u003cmo>⁡\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">F(x) = \\ln(x+2)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>F\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmi>ln\u003c/mi>\u003cmo>⁡\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi>C\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">F(x) = (x+2)\\ln(x+2) + C\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>I\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmn>0\u003c/mn>\u003cmn>1\u003c/mn>\u003c/msubsup>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">I = \\int_0^1 x^2\\,dx\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","1","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>2\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{2}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>I\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmn>0\u003c/mn>\u003cmn>1\u003c/mn>\u003c/msubsup>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">I = \\int_0^1 (x^2 + 2x + 1)\\,dx\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>7\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{7}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>5\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{5}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>4\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{4}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","2"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>I\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmn>0\u003c/mn>\u003cmfrac>\u003cmi>π\u003c/mi>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/msubsup>\u003cmi>sin\u003c/mi>\u003cmo>⁡\u003c/mo>\u003cmi>x\u003c/mi>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">I = \\int_0^{\\frac{\\pi}{2}} \\sin x\\,dx\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["0","1","2","-1"],"correct":1,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>I\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmn>1\u003c/mn>\u003cmi>e\u003c/mi>\u003c/msubsup>\u003cmi>ln\u003c/mi>\u003cmo>⁡\u003c/mo>\u003cmi>x\u003c/mi>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">I = \\int_1^e \\ln x\\,dx\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["0","1","e","e - 1"],"correct":1,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>I\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmn>0\u003c/mn>\u003cmn>1\u003c/mn>\u003c/msubsup>\u003cmi>x\u003c/mi>\u003cmsup>\u003cmi>e\u003c/mi>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/msup>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">I = \\int_0^1 x e^{x^2}\\,dx\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmrow>\u003cmi>e\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{e-1}{2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>e\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">e - 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmi>e\u003c/mi>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{e}{2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","1"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Diện tích hình phẳng giới hạn bởi \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsqrt>\u003cmi>x\u003c/mi>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\sqrt{x}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> và \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>6\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{6}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","1"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Thể tích vật thể tròn xoay khi quay \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsqrt>\u003cmi>x\u003c/mi>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\sqrt{x}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>0\u003c/mn>\u003cmo>≤\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>≤\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">0 \\leq x \\leq 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> quanh \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>O\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">Ox\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>4\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">4\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>6\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">6\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>8\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">8\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>16\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">16\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":2,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Diện tích hình phẳng giới hạn bởi \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^2 - 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> và trục hoành là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>32\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{32}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>16\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{16}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","8","16"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Cho số phức \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">z = 3 - 4i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>. Môđun \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi mathvariant=\"normal\">∣\u003c/mi>\u003cmi>z\u003c/mi>\u003cmi mathvariant=\"normal\">∣\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">|z|\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> bằng:","options":["3","4","5","7"],"correct":2,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>i\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi>i\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(2 + 3i)(1 - 2i)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>8\u003c/mn>\u003cmo>−\u003c/mo>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">8 - i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmo>−\u003c/mo>\u003cmn>6\u003c/mn>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">2 - 6i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>8\u003c/mn>\u003cmo>+\u003c/mo>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">8 + i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmo>+\u003c/mo>\u003cmn>6\u003c/mn>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">2 + 6i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Số phức liên hợp của \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmo>+\u003c/mo>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cmrow>\u003cmn>1\u003c/mn>\u003cmo>−\u003c/mo>\u003cmi>i\u003c/mi>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">z = \\dfrac{2+i}{1-i}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003cmo>−\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>3\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{2} - \\dfrac{3}{2}i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003cmo>+\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>3\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{2} + \\dfrac{3}{2}i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>1\u003c/mn>\u003cmo>+\u003c/mo>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">1 + i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>1\u003c/mn>\u003cmo>−\u003c/mo>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">1 - i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Điểm biểu diễn số phức \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">z = -2 + 3i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> trên mặt phẳng tọa độ là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>M\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmn>3\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">M(-2;\\, 3)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>M\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">M(2;\\, -3)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>M\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">M(-2;\\, -3)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>M\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">M(3;\\, -2)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giải phương trình \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>z\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi>z\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>5\u003c/mn>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">z^2 + 2z + 5 = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo>±\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">z = -1 \\pm 2i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo>±\u003c/mo>\u003cmn>2\u003c/mn>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">z = 1 \\pm 2i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo>±\u003c/mo>\u003cmi>i\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">z = -1 \\pm i\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Vô nghiệm trong \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi mathvariant=\"double-struck\">C\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\mathbb{C}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Thể tích khối chóp S.ABCD có đáy là hình vuông cạnh \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>a\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>S\u003c/mi>\u003cmi>A\u003c/mi>\u003cmo>⊥\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">SA \\perp\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> đáy, \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>S\u003c/mi>\u003cmi>A\u003c/mi>\u003cmo>=\u003c/mo>\u003cmi>a\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">SA = a\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{a^3}{3}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmn>6\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{a^3}{6}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a^3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{a^3}{2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Thể tích hình cầu bán kính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>R\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">R\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>4\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003cmi>π\u003c/mi>\u003cmsup>\u003cmi>R\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{4}{3}\\pi R^3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>4\u003c/mn>\u003cmi>π\u003c/mi>\u003cmsup>\u003cmi>R\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">4\\pi R^2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>2\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003cmi>π\u003c/mi>\u003cmsup>\u003cmi>R\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{2}{3}\\pi R^3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>3\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003cmi>π\u003c/mi>\u003cmsup>\u003cmi>R\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{3}\\pi R^3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Trong không gian \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>O\u003c/mi>\u003cmi>x\u003c/mi>\u003cmi>y\u003c/mi>\u003cmi>z\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">Oxyz\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, khoảng cách từ \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>M\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">M(1, 2, 3)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> đến gốc tọa độ là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsqrt>\u003cmn>5\u003c/mn>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\sqrt{5}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsqrt>\u003cmn>14\u003c/mn>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\sqrt{14}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsqrt>\u003cmn>13\u003c/mn>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\sqrt{13}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","6"],"correct":1,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Phương trình mặt phẳng qua \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>M\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmn>0\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">M(1, 0, -1)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, vectơ pháp tuyến \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmover accent=\"true\">\u003cmi>n\u003c/mi>\u003cmo>⃗\u003c/mo>\u003c/mover>\u003cmo>=\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\vec{n} = (2, -1, 3)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmi>y\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">2x - y + 3z = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmi>y\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>z\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>5\u003c/mn>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">2x - y + 3z - 5 = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmi>y\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>z\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">2x - y + 3z + 1 = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmi>y\u003c/mi>\u003cmo>+\u003c/mo>\u003cmi>z\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x - y + z = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":2,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Hình nón có bán kính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>R\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">R = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, chiều cao \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>h\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">h = 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>. Thể tích là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>12\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">12\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>36\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">36\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>48\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">48\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>9\u003c/mn>\u003cmi>π\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">9\\pi\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Cho hình hộp chữ nhật \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>A\u003c/mi>\u003cmi>B\u003c/mi>\u003cmi>C\u003c/mi>\u003cmi>D\u003c/mi>\u003cmi mathvariant=\"normal\">.\u003c/mi>\u003cmsup>\u003cmi>A\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmsup>\u003cmi>B\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmsup>\u003cmi>C\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmsup>\u003cmi>D\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">ABCD.A&#x27;B&#x27;C&#x27;D&#x27;\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> có \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>A\u003c/mi>\u003cmi>B\u003c/mi>\u003cmo>=\u003c/mo>\u003cmi>a\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">AB = a\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>A\u003c/mi>\u003cmi>D\u003c/mi>\u003cmo>=\u003c/mo>\u003cmi>b\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">AD = b\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>A\u003c/mi>\u003cmsup>\u003cmi>A\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmi>c\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">AA&#x27; = c\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>. Đường chéo \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>A\u003c/mi>\u003cmi>G\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">AG\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> có độ dài:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsqrt>\u003cmrow>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmsup>\u003cmi>b\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmsup>\u003cmi>c\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/mrow>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\sqrt{a^2 + b^2 + c^2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsqrt>\u003cmrow>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmsup>\u003cmi>b\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/mrow>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\sqrt{a^2 + b^2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsqrt>\u003cmrow>\u003cmsup>\u003cmi>b\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmsup>\u003cmi>c\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003c/mrow>\u003c/msqrt>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\sqrt{b^2 + c^2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>a\u003c/mi>\u003cmo>+\u003c/mo>\u003cmi>b\u003c/mi>\u003cmo>+\u003c/mo>\u003cmi>c\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a + b + c\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Mặt cầu tâm \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>I\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmn>2\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">I(1, -1, 2)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>, bán kính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>R\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">R = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> có phương trình:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>y\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>z\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmn>9\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(x-1)^2 + (y+1)^2 + (z-2)^2 = 9\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>y\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>z\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>2\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(x-1)^2 + (y+1)^2 + (z-2)^2 = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmsup>\u003cmi>y\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmsup>\u003cmi>z\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmn>9\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x^2 + y^2 + z^2 = 9\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>y\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>z\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003cmsup>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmn>9\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(x+1)^2 + (y-1)^2 + (z+2)^2 = 9\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tính \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsubsup>\u003cmi>C\u003c/mi>\u003cmn>5\u003c/mn>\u003cmn>2\u003c/mn>\u003c/msubsup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">C_5^2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>:","options":["5","10","15","20"],"correct":1,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tung đồng xu 3 lần. Xác suất được đúng 2 mặt ngửa là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>4\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{4}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>3\u003c/mn>\u003cmn>8\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{3}{8}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>2\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>8\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{8}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":1,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Tổ có 5 HS giỏi và 3 HS khá. Chọn ngẫu nhiên 2 HS. Xác suất cả 2 đều giỏi là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>5\u003c/mn>\u003cmn>14\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{5}{14}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>25\u003c/mn>\u003cmn>64\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{25}{64}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>4\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{4}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>10\u003c/mn>\u003cmn>28\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{10}{28}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Xác suất khi tung 2 xúc xắc có tổng = 7 là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>6\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{6}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>12\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{12}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>1\u003c/mn>\u003cmn>36\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{1}{36}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmn>5\u003c/mn>\u003cmn>36\u003c/mn>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\dfrac{5}{36}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"multi","question":"Hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = x^3 - 3x\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> có các tính chất nào sau đây đúng?","options":["Đồng biến trên \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(-\\infty; -1)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> và \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(1; +\\infty)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Nghịch biến trên \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo separator=\"true\">;\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(-1; 1)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Đạt cực đại tại \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = -1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Đạt cực tiểu tại \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[0,1,2,3],"correctTF":[],"correctAnswer":"","points":1},{"type":"multi","question":"Các khẳng định nào đúng về tích phân?","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmi>a\u003c/mi>\u003cmi>b\u003c/mi>\u003c/msubsup>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmi>b\u003c/mi>\u003cmi>a\u003c/mi>\u003c/msubsup>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\int_a^b f(x)\\,dx = -\\int_b^a f(x)\\,dx\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmi>a\u003c/mi>\u003cmi>a\u003c/mi>\u003c/msubsup>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\int_a^a f(x)\\,dx = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmi>a\u003c/mi>\u003cmi>b\u003c/mi>\u003c/msubsup>\u003cmi>k\u003c/mi>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmi>k\u003c/mi>\u003cmsubsup>\u003cmo>∫\u003c/mo>\u003cmi>a\u003c/mi>\u003cmi>b\u003c/mi>\u003c/msubsup>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmtext> \u003c/mtext>\u003cmi>d\u003c/mi>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\int_a^b k f(x)\\,dx = k\\int_a^b f(x)\\,dx\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Tích phân của hàm chẵn trên \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">[\u003c/mo>\u003cmo>−\u003c/mo>\u003cmi>a\u003c/mi>\u003cmo separator=\"true\">,\u003c/mo>\u003cmi>a\u003c/mi>\u003cmo stretchy=\"false\">]\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">[-a, a]\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> bằng 0 (sai)"],"correct":0,"correctList":[0,1,2],"correctTF":[],"correctAnswer":"","points":1},{"type":"truefalse","question":"Xác định đúng/sai:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>2\u003c/mn>\u003c/msub>\u003cmn>8\u003c/mn>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\log_2 8 = 3\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>.","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmn>3\u003c/mn>\u003c/msub>\u003cmn>1\u003c/mn>\u003cmo>=\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\log_3 1 = 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>.","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmi>a\u003c/mi>\u003c/msub>\u003cmn>1\u003c/mn>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\log_a 1 = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> với mọi \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>a\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmn>0\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmi>a\u003c/mi>\u003cmo mathvariant=\"normal\">≠\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a &gt; 0, a \\neq 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>.","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>log\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmi>a\u003c/mi>\u003c/msub>\u003cmsup>\u003cmi>a\u003c/mi>\u003cmi>n\u003c/mi>\u003c/msup>\u003cmo>=\u003c/mo>\u003cmi>n\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\log_a a^n = n\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> với \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>a\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmn>0\u003c/mn>\u003cmo separator=\"true\">,\u003c/mo>\u003cmi>a\u003c/mi>\u003cmo mathvariant=\"normal\">≠\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">a &gt; 0, a \\neq 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>."],"correct":0,"correctList":[],"correctTF":[true,false,true,true],"correctAnswer":"","points":1},{"type":"truefalse","question":"Cho hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003c/mrow>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = \\dfrac{2x}{x-1}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>. Xác định đúng/sai:","options":["Miền xác định \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>D\u003c/mi>\u003cmo>=\u003c/mo>\u003cmi mathvariant=\"double-struck\">R\u003c/mi>\u003cmo>∖\u003c/mo>\u003cmo stretchy=\"false\">{\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">}\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">D = \\mathbb{R} \\setminus \\{1\\}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>.","Hàm số đồng biến trên từng khoảng xác định.","Đồ thị có tiệm cận ngang \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>y\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">y = 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>.","Đồ thị có tiệm cận đứng \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>=\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x = 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>."],"correct":0,"correctList":[],"correctTF":[true,false,true,true],"correctAnswer":"","points":1},{"type":"single","question":"Bất phương trình \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmn>2\u003c/mn>\u003cmrow>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003c/mrow>\u003c/msup>\u003cmo>&lt;\u003c/mo>\u003cmsup>\u003cmn>2\u003c/mn>\u003cmrow>\u003cmn>2\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003c/msup>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">2^{x^2-3x} &lt; 2^{2x-4}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> có nghiệm là:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmn>1\u003c/mn>\u003cmo>&lt;\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">1 &lt; x &lt; 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &lt; 1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> hoặc \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &gt; 4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003cmo>&lt;\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">-4 &lt; x &lt; -1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&lt;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>4\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &lt; -4\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> hoặc \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>&gt;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">x &gt; -1\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Số nghiệm của phương trình \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>ln\u003c/mi>\u003cmo>⁡\u003c/mo>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmn>0\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\ln(x^2 - 3x + 3) = 0\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> là:","options":["0","1","2","3"],"correct":2,"correctList":[],"correctTF":[],"correctAnswer":"","points":1},{"type":"multi","question":"Hàm số \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>3\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>3\u003c/mn>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>9\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">f(x) = x^3 - 3x^2 - 9x + 2\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>. Chọn các khẳng định đúng:","options":["\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsup>\u003cmi>f\u003c/mi>\u003cmo mathvariant=\"normal\" lspace=\"0em\" rspace=\"0em\">′\u003c/mo>\u003c/msup>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmi>x\u003c/mi>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmn>3\u003c/mn>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>−\u003c/mo>\u003cmn>6\u003c/mn>\u003cmi>x\u003c/mi>\u003cmo>−\u003c/mo>\u003cmn>9\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">f&#x27;(x) = 3x^2 - 6x - 9\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Cực đại \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmn>7\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">f(-1) = 7\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Cực tiểu \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmi>f\u003c/mi>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmn>3\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003cmo>=\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>25\u003c/mn>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">f(3) = -25\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>","Hàm tăng trên \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo stretchy=\"false\">(\u003c/mo>\u003cmo>−\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003cmo separator=\"true\">;\u003c/mo>\u003cmo>−\u003c/mo>\u003cmn>1\u003c/mn>\u003cmo stretchy=\"false\">)\u003c/mo>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">(-\\infty; -1)\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":0,"correctList":[0,1,2,3],"correctTF":[],"correctAnswer":"","points":1},{"type":"single","question":"Giới hạn \u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmsub>\u003cmrow>\u003cmi>lim\u003c/mi>\u003cmo>⁡\u003c/mo>\u003c/mrow>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>→\u003c/mo>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003c/mrow>\u003c/msub>\u003cmstyle displaystyle=\"true\" scriptlevel=\"0\">\u003cmfrac>\u003cmsqrt>\u003cmrow>\u003cmsup>\u003cmi>x\u003c/mi>\u003cmn>2\u003c/mn>\u003c/msup>\u003cmo>+\u003c/mo>\u003cmn>1\u003c/mn>\u003c/mrow>\u003c/msqrt>\u003cmrow>\u003cmi>x\u003c/mi>\u003cmo>+\u003c/mo>\u003cmn>2\u003c/mn>\u003c/mrow>\u003c/mfrac>\u003c/mstyle>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">\\lim_{x \\to +\\infty} \\dfrac{\\sqrt{x^2+1}}{x+2}\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span> bằng:","options":["0","1","2","\u003cspan class=\"katex\">\u003cmath xmlns=\"http://www.w3.org/1998/Math/MathML\">\u003csemantics>\u003cmrow>\u003cmo>+\u003c/mo>\u003cmi mathvariant=\"normal\">∞\u003c/mi>\u003c/mrow>\u003cannotation encoding=\"application/x-tex\">+\\infty\u003c/annotation>\u003c/semantics>\u003c/math>\u003c/span>"],"correct":1,"correctList":[],"correctTF":[],"correctAnswer":"","points":1}],"id":"86fe1612f631"}</script>
+<script>(function clientApp(buildOrder) {
+    'use strict';
+
+    var DATA = JSON.parse(document.getElementById('quiz-data').textContent);
+    var QS = DATA.questions || [];
+    var CFG = DATA.settings || {};
+    var app = document.getElementById('app');
+    var KEY = 'offlineQuiz:' + DATA.id;
+    var MAX_ATTEMPTS = CFG.mode === 'practice' ? (CFG.attempts || 0) : 1;
+    var timerId = null;
+    var state = readState();
+
+    function readState() {
+        try {
+            var raw = JSON.parse(localStorage.getItem(KEY));
+            if (raw && typeof raw === 'object') {
+                raw.runs = Array.isArray(raw.runs) ? raw.runs : [];
+                return raw;
+            }
+        } catch (e) {}
+        return { runs: [] };
+    }
+
+    function writeState() {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function esc(v) {
+        return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function pointsOf(q) {
+        var n = Number(q.points);
+        if (!isFinite(n) || n <= 0) return 1;
+        return Math.min(n, 100);
+    }
+
+    function round2(n) { return Math.round(n * 100) / 100; }
+    function fmtNum(n) { return String(round2(n)).replace('.', ','); }
+    function letter(i) { return String.fromCharCode(65 + i); }
+
+    // Thu tu hien thi cac phuong an cua 1 cau trong 1 luot (luu theo cau goc de
+    // cham diem khong doi). Luot cu / cau dung-sai -> giu nguyen thu tu goc.
+    function optionOrderOf(qi, source) {
+        var n = ((QS[qi] || {}).options || []).length;
+        var saved = source && source.optOrder ? source.optOrder[qi] : null;
+        if (Array.isArray(saved) && saved.length === n) return saved;
+        var order = [];
+        for (var i = 0; i < n; i++) order.push(i);
+        return order;
+    }
+
+    // Chu cai theo vi tri hien thi cua luot, sap xep A..D cho de doc.
+    function displayLetters(list, order) {
+        return (list || []).map(function (oi) {
+            return order.indexOf(oi);
+        }).filter(function (at) {
+            return at >= 0;
+        }).sort(function (a, b) {
+            return a - b;
+        }).map(letter).join(', ');
+    }
+
+    // Tron lua chon rieng cho tung cau (chi cau co A/B/C/D; cau dung-sai giu a) b) c) d)).
+    function newOptionOrder() {
+        var map = {};
+        QS.forEach(function (q, qi) {
+            if ((q.type === 'single' || q.type === 'multi') && (q.options || []).length > 1) {
+                map[qi] = buildOrder(q.options.length, CFG.shuffle);
+            }
+        });
+        return map;
+    }
+
+    // So sanh dap an tra loi ngan giong lib/short-answer.js (so nguyen/thap phan).
+    function normNum(v) {
+        if (typeof v !== 'string' && typeof v !== 'number') return null;
+        var s = String(v).trim();
+        if (!s || s.length > 50) return null;
+        s = s.replace(',', '.');
+        var m = /^([+-]?)(\d*)(?:\.(\d*))?$/.exec(s);
+        if (!m) return null;
+        var intPart = m[2] || '';
+        var frac = m[3] || '';
+        if (!intPart && !frac) return null;
+        intPart = intPart.replace(/^0+/, '') || '0';
+        frac = frac.replace(/0+$/, '');
+        var neg = m[1] === '-' && !(intPart === '0' && frac === '');
+        return (neg ? '-' : '') + intPart + (frac ? '.' + frac : '');
+    }
+
+    function numEquals(a, b) {
+        var x = normNum(a), y = normNum(b);
+        return !!x && x === y;
+    }
+
+    function scoreQuestion(q, ans) {
+        if (q.type === 'single') return ans === q.correct ? 1 : 0;
+        if (q.type === 'multi') {
+            var given = Array.isArray(ans) ? ans.slice().sort(function (a, b) { return a - b; }) : [];
+            var right = Array.isArray(q.correctList) ? q.correctList.slice().sort(function (a, b) { return a - b; }) : [];
+            if (given.length !== right.length || !given.length) return 0;
+            for (var i = 0; i < given.length; i++) if (given[i] !== right[i]) return 0;
+            return 1;
+        }
+        if (q.type === 'truefalse') {
+            var correct = 0;
+            var total = (q.correctTF || []).length;
+            if (!total) return 0;
+            for (var j = 0; j < total; j++) {
+                if (Array.isArray(ans) && ans[j] === q.correctTF[j]) correct++;
+            }
+            if (total === 4) return [0, 0.1, 0.25, 0.5, 1][correct];
+            return correct / total;
+        }
+        if (q.type === 'shortanswer') return numEquals(ans, q.correctAnswer) ? 1 : 0;
+        return 0;
+    }
+
+    function hasAnyAnswer(q, a) {
+        if (q.type === 'single') return typeof a === 'number' && a >= 0;
+        if (q.type === 'multi') return Array.isArray(a) && a.length > 0;
+        if (q.type === 'truefalse') return Array.isArray(a) && a.some(function (v) { return v === true || v === false; });
+        return String(a == null ? '' : a).trim() !== '';
+    }
+
+    function isComplete(q, a) {
+        if (q.type === 'single') return typeof a === 'number' && a >= 0;
+        if (q.type === 'multi') return Array.isArray(a) && a.length > 0;
+        if (q.type === 'truefalse') {
+            return Array.isArray(a) && a.length === (q.options || []).length &&
+                a.every(function (v) { return v === true || v === false; });
+        }
+        return String(a == null ? '' : a).trim() !== '';
+    }
+
+    function computeResult(answers) {
+        var score = 0, max = 0, correct = 0, partial = 0, wrong = 0, unanswered = 0;
+        QS.forEach(function (q, i) {
+            var pts = pointsOf(q);
+            var ratio = scoreQuestion(q, answers[i]);
+            max += pts;
+            score += ratio * pts;
+            if (ratio === 1) correct++;
+            else if (!hasAnyAnswer(q, answers[i])) unanswered++;
+            else if (ratio > 0) partial++;
+            else wrong++;
+        });
+        return {
+            score: round2(score), maxScore: round2(max),
+            correct: correct, partial: partial, wrong: wrong, unanswered: unanswered
+        };
+    }
+
+    function canStart() {
+        return MAX_ATTEMPTS === 0 || state.runs.length < MAX_ATTEMPTS;
+    }
+
+    function clearedTimer() {
+        if (timerId) { clearInterval(timerId); timerId = null; }
+    }
+
+    function fmtTime(ms) {
+        var s = Math.max(0, Math.ceil(ms / 1000));
+        var h = Math.floor(s / 3600);
+        var m = Math.floor((s % 3600) / 60);
+        var sec = s % 60;
+        function two(n) { return (n < 10 ? '0' : '') + n; }
+        return (h ? h + ':' : '') + two(m) + ':' + two(sec);
+    }
+
+    function fmtDate(ts) {
+        var d = new Date(ts);
+        if (isNaN(d.getTime())) return '';
+        function two(n) { return (n < 10 ? '0' : '') + n; }
+        return two(d.getHours()) + ':' + two(d.getMinutes()) + ' ' +
+            two(d.getDate()) + '/' + two(d.getMonth() + 1) + '/' + d.getFullYear();
+    }
+
+    // Hai nut nhay nhanh, dat co dinh o goc phai gan cuoi man hinh.
+    function jumpNav() {
+        return '<div class="jumpnav">' +
+            '<button type="button" data-scroll="top" aria-label="Lên đầu trang" title="Lên đầu trang">▲</button>' +
+            '<button type="button" data-scroll="bottom" aria-label="Xuống cuối trang" title="Xuống cuối trang">▼</button>' +
+        '</div>';
+    }
+
+    // Moi luot la mot <details> thu gon; bai lam chi duoc ve khi mo dung luot do.
+    function renderHistory(openLatest) {
+        if (!state.runs.length) return '';
+        var rows = state.runs.map(function (run, idx) {
+            var key = 'run' + idx;
+            var hasAnswers = CFG.showAnswers && run.answers && typeof run.answers === 'object';
+            var meta = [];
+            if (run.name) meta.push(esc(run.name));
+            if (run.timedOut) meta.push('Hết giờ');
+            if (typeof run.correct === 'number') meta.push('Đúng ' + run.correct + ' · Sai ' + run.wrong);
+            var body = '<div class="run-body">' +
+                (meta.length ? '<div class="run-meta">' + meta.join(' · ') + '</div>' : '') +
+                (hasAnswers
+                    ? reviewSlot(key, run.answers, orderOf(run), run.optOrder)
+                    : '<p class="note">' + (CFG.showAnswers ? 'Lượt này chỉ lưu điểm, không có chi tiết bài làm.' : 'Đáp án và chi tiết bài làm do giáo viên giữ.') + '</p>') +
+                '</div>';
+            return '<details class="run"' + (hasAnswers ? ' data-rev-key="' + key + '"' : '') +
+                (openLatest && idx === state.runs.length - 1 ? ' open' : '') + '>' +
+                '<summary>' +
+                    '<span class="run-no">Lần ' + (idx + 1) + '</span>' +
+                    '<span class="run-score">' + fmtNum(run.score) + '/' + fmtNum(run.maxScore) + ' điểm</span>' +
+                    '<span class="run-at">' + fmtDate(run.at) + '</span>' +
+                '</summary>' + body + '</details>';
+        }).reverse().join('');
+
+        return '<div class="card hist"><h2 class="hist-title">Lịch sử làm bài' +
+            '<span class="hist-count">' + state.runs.length + ' lượt</span></h2>' +
+            '<p class="note" style="margin-top:4px">Bấm vào một lượt để xem chi tiết bài làm.</p>' +
+            rows + '</div>';
+    }
+
+    // ===== Xem lai bai lam (dung chung cho lich su va ket qua) =====
+    // reviewState: key -> { answers, order, filter }
+    var reviewState = {};
+
+    var FILTERS = [
+        ['all', 'Tất cả'], ['ok', 'Đúng'], ['part', 'Đúng một phần'],
+        ['bad', 'Sai'], ['mute', 'Chưa trả lời']
+    ];
+
+    function orderOf(run) {
+        if (run && Array.isArray(run.order) && run.order.length === QS.length) return run.order;
+        var order = [];
+        for (var i = 0; i < QS.length; i++) order.push(i);
+        return order;
+    }
+
+    function reviewSlot(key, answers, order, optOrder) {
+        reviewState[key] = {
+            answers: answers || {},
+            order: order,
+            optOrder: optOrder || null,
+            filter: reviewState[key] ? reviewState[key].filter : 'all'
+        };
+        return '<div class="rev-slot" data-rev="' + key + '"></div>';
+    }
+
+    function reviewItem(q, qi, pos, a, info, source) {
+        return '<div class="rev-item" data-pos="' + pos + '">' +
+            '<div class="rev-top"><span class="qnum">Câu ' + (pos + 1) + '</span>' +
+                '<span class="badge ' + info.cls + '">' + info.text + '</span></div>' +
+            '<div class="q-text">' + q.question + '</div>' +
+            reviewOptions(q, a, qi, source) +
+        '</div>';
+    }
+
+    function fillReview(key) {
+        var st = reviewState[key];
+        var slot = st ? document.querySelector('[data-rev="' + key + '"]') : null;
+        if (!slot) return;
+
+        var counts = { all: 0, ok: 0, part: 0, bad: 0, mute: 0 };
+        var cells = [];
+        var rows = [];
+        st.order.forEach(function (qi, pos) {
+            var q = QS[qi];
+            if (!q) return;
+            var a = st.answers[qi];
+            var info = statusInfo(q, a);
+            counts.all++;
+            counts[info.cls]++;
+            cells.push('<button type="button" class="cell ' + info.cls + '" data-jump="' + key + '|' + pos + '"' +
+                ' title="Câu ' + (pos + 1) + ': ' + info.text + '"' +
+                ' aria-label="Câu ' + (pos + 1) + ': ' + info.text + '">' + (pos + 1) + '</button>');
+            if (st.filter === 'all' || st.filter === info.cls) rows.push(reviewItem(q, qi, pos, a, info, st));
+        });
+
+        var tabs = FILTERS.map(function (f) {
+            return '<button type="button" class="rev-tab' + (st.filter === f[0] ? ' on' : '') + '"' +
+                ' data-rev-key="' + key + '" data-rev-filter="' + f[0] + '">' +
+                f[1] + ' <span>' + counts[f[0]] + '</span></button>';
+        }).join('');
+
+        slot.innerHTML =
+            '<h2 class="rev-title">Xem lại bài làm</h2>' +
+            '<div class="rev-grid">' + cells.join('') + '</div>' +
+            '<div class="note">Xanh: đúng · Vàng: đúng một phần · Đỏ: sai · Xám: chưa trả lời. Bấm số câu để xem chi tiết.</div>' +
+            '<div class="rev-filter" role="group" aria-label="Lọc câu theo kết quả">' + tabs + '</div>' +
+            (rows.length ? rows.join('') : '<p class="note">Không có câu nào trong nhóm này.</p>');
+    }
+
+    // Bam so cau trong bang dap an -> nhay toi dung cau do trong bai lam.
+    function jumpTo(spec) {
+        var cut = spec.lastIndexOf('|');
+        var key = spec.slice(0, cut);
+        var pos = spec.slice(cut + 1);
+        var st = reviewState[key];
+        if (!st) return;
+        st.filter = 'all';
+        fillReview(key);
+        var el = document.querySelector('[data-rev="' + key + '"] .rev-item[data-pos="' + pos + '"]');
+        if (!el) return;
+        el.scrollIntoView({ block: 'center' });
+        el.classList.add('hit');
+        setTimeout(function () { el.classList.remove('hit'); }, 2000);
+    }
+
+    // Mo luot nao moi ve bai lam cua luot do (khong dung san HTML cho tat ca).
+    function wireReviews() {
+        var list = document.querySelectorAll('details.run[data-rev-key]');
+        for (var i = 0; i < list.length; i++) {
+            (function (d) {
+                var key = d.getAttribute('data-rev-key');
+                if (d.open) fillReview(key);
+                d.ontoggle = function () { if (d.open) fillReview(key); };
+            })(list[i]);
+        }
+    }
+
+
+    function renderStart() {
+        clearedTimer();
+        var used = state.runs.length;
+        var blocked = !canStart();
+        var modeText = CFG.mode === 'practice' ? 'Ôn tập' : 'Thi';
+        var rules = [];
+        if (CFG.mode === 'practice') {
+            rules.push(MAX_ATTEMPTS > 0 ? 'Tối đa ' + MAX_ATTEMPTS + ' lượt làm bài.' : 'Được làm lại không giới hạn số lần.');
+        } else {
+            rules.push('Chỉ làm một lần. Nộp bài xong không làm lại.');
+        }
+        if (CFG.mode === 'exam' && CFG.minutes > 0) {
+            rules.push('Thời gian làm bài ' + CFG.minutes + ' phút; hết giờ hệ thống tự nộp.');
+        }
+        if (CFG.shuffle) rules.push('Thứ tự câu hỏi được xáo trộn ở mỗi lượt làm.');
+        if (CFG.instant) rules.push('Chọn đáp án xong sẽ biết ngay câu đó đúng hay sai.');
+        if (CFG.lockdown) rules.push('Chống gian lận: tự bật toàn màn hình, không copy được nội dung, chặn phím tắt.');
+        rules.push(CFG.showAnswers ? 'Sau khi nộp, xem được đáp án đúng và bài làm của mình.' : 'Sau khi nộp, chỉ xem điểm; đáp án do giáo viên giữ.');
+
+        app.innerHTML =
+            '<div class="card start">' +
+                '<div class="kicker">Bài kiểm tra ' + (CFG.mode === 'practice' ? 'ôn tập' : 'trực tuyến (offline)') + '</div>' +
+                '<h1 class="title">' + esc(DATA.title) + '</h1>' +
+                '<div class="meta">' +
+                    '<span class="chip">' + QS.length + ' câu</span>' +
+                    '<span class="chip">' + fmtNum(QS.reduce(function (s, q) { return s + pointsOf(q); }, 0)) + ' điểm</span>' +
+                    '<span class="chip">' + modeText + '</span>' +
+                    (CFG.mode === 'exam' && CFG.minutes > 0 ? '<span class="chip">' + CFG.minutes + ' phút</span>' : '') +
+                    (CFG.mode === 'practice' && MAX_ATTEMPTS > 0 ? '<span class="chip">' + used + '/' + MAX_ATTEMPTS + ' lượt đã làm</span>' : '') +
+                '</div>' +
+                '<div class="panel">' +
+                    '<label class="field">Họ và tên (không bắt buộc)' +
+                        '<input id="studentName" class="input" maxlength="80" autocomplete="off" placeholder="Nhập họ tên để hiện trên kết quả" value="' + esc(state.name || '') + '">' +
+                    '</label>' +
+                '</div>' +
+                '<div class="note"><b>Thể lệ</b><br>' + rules.map(function (r) { return '• ' + r; }).join('<br>') + '</div>' +
+                (blocked ? '<div class="warnbox">Bạn đã dùng hết ' + MAX_ATTEMPTS + ' lượt làm bài của đề này.</div>' : '') +
+                '<button id="startBtn" class="btn primary block" ' + (blocked ? 'disabled' : '') + '>' +
+                    (blocked ? 'Đã hết lượt' : 'Bắt đầu làm bài') +
+                '</button>' +
+            '</div>' +
+            renderHistory(false) +
+            jumpNav();
+        wireReviews();
+
+        var btn = document.getElementById('startBtn');
+        if (btn && !blocked) btn.onclick = function () {
+            var nameEl = document.getElementById('studentName');
+            var name = nameEl ? nameEl.value.trim() : '';
+            state.name = name;
+            state.last = null;
+            state.current = {
+                startedAt: Date.now(),
+                name: name,
+                answers: {},
+                order: buildOrder(QS.length, CFG.shuffle),
+                optOrder: newOptionOrder(),
+                deadline: (CFG.mode === 'exam' && CFG.minutes > 0) ? Date.now() + CFG.minutes * 60000 : null
+            };
+            writeState();
+            showQuiz();
+        };
+        window.scrollTo(0, 0);
+    }
+
+    // qi = chi so goc cua cau (khoa dap an), pos = vi tri hien thi trong luot lam.
+    function renderQuestion(q, qi, pos) {
+        var a = state.current && state.current.answers ? state.current.answers[qi] : undefined;
+        var body = '';
+
+        if (q.type === 'single') {
+            body = '<div class="opts">' + optionOrderOf(qi, state.current).map(function (oi, at) {
+                return '<label class="opt"><input type="radio" data-role="single" data-qi="' + qi + '" data-oi="' + oi + '" name="s_' + qi + '" value="' + oi + '" ' + (a === oi ? 'checked' : '') + '>' +
+                    '<span class="letter">' + letter(at) + '.</span><span class="txt">' + q.options[oi] + '</span></label>';
+            }).join('') + '</div>';
+        } else if (q.type === 'multi') {
+            var picked = Array.isArray(a) ? a : [];
+            body = '<div class="opts">' + optionOrderOf(qi, state.current).map(function (oi, at) {
+                return '<label class="opt"><input type="checkbox" data-role="multi" data-qi="' + qi + '" data-oi="' + oi + '" ' + (picked.indexOf(oi) >= 0 ? 'checked' : '') + '>' +
+                    '<span class="letter">' + letter(at) + '.</span><span class="txt">' + q.options[oi] + '</span></label>';
+            }).join('') + '</div>';
+        } else if (q.type === 'truefalse') {
+            var tf = Array.isArray(a) ? a : [];
+            body = q.options.map(function (o, oi) {
+                var v = tf[oi];
+                var name = 'tf_' + qi + '_' + oi;
+                var y = 'abcd'.charAt(oi);
+                return '<div class="tf"><div class="tf-text"><b>' + y + ')</b> ' + o + '</div>' +
+                    '<div class="tf-choice" role="group" aria-label="Ý ' + y + '">' +
+                        '<label><input type="radio" data-role="tf" data-qi="' + qi + '" data-oi="' + oi + '" name="' + name + '" value="true" aria-label="Ý ' + y + ': Đúng" ' + (v === true ? 'checked' : '') + '><span>Đúng</span></label>' +
+                        '<label><input type="radio" data-role="tf" data-qi="' + qi + '" data-oi="' + oi + '" name="' + name + '" value="false" aria-label="Ý ' + y + ': Sai" ' + (v === false ? 'checked' : '') + '><span>Sai</span></label>' +
+                    '</div></div>';
+            }).join('');
+        } else {
+            body = '<input type="text" class="short" inputmode="decimal" enterkeyhint="done" autocomplete="off" autocapitalize="off" spellcheck="false" ' +
+                'data-role="short" data-qi="' + qi + '" aria-label="Trả lời ngắn cho câu ' + (pos + 1) + '" ' +
+                'value="' + esc(a || '') + '" placeholder="Nhập đáp án (số nguyên hoặc số thập phân)">' +
+                '<div class="short-hint">Chỉ nhập số, dùng dấu phẩy hoặc dấu chấm cho phần thập phân.</div>';
+        }
+
+        return '<section class="card q" id="q' + qi + '">' +
+            '<div class="qhead"><span class="qnum">Câu ' + (pos + 1) + '</span>' +
+                '<span class="qpts">' + fmtNum(pointsOf(q)) + ' điểm</span></div>' +
+            '<div class="q-text">' + q.question + '</div>' + body +
+            (CFG.instant ? '<div class="fb" id="fb' + qi + '"></div>' : '') +
+        '</section>';
+    }
+
+    function showQuiz() {
+        if (!state.current) { renderStart(); return; }
+        clearedTimer();
+        var order = orderOf(state.current);
+        var nameLine = state.current.name ? ' · ' + esc(state.current.name) : '';
+        var timer = (CFG.mode === 'exam' && CFG.minutes > 0) ? '<div class="timer" id="timer">--:--</div>' : '';
+        app.innerHTML =
+            '<div class="quizhead"><div><div class="kicker">' + (CFG.mode === 'practice' ? 'Ôn tập' : 'Thi') + nameLine + '</div>' +
+                '<h1>' + esc(DATA.title) + '</h1></div>' + timer + '</div>' +
+            '<div class="progress"><i id="progBar"></i></div>' +
+            '<div class="progressmeta"><span id="progText">Đã trả lời 0/' + QS.length + ' câu</span><span>' +
+                (CFG.mode === 'practice' ? 'Làm lại được' : 'Chỉ một lượt') + '</span></div>' +
+            order.map(function (qi, pos) { return renderQuestion(QS[qi], qi, pos); }).join('') +
+            '<div class="bottombar"><span class="count" id="botText">0/' + QS.length + ' câu</span>' +
+                '<button class="btn submit" id="submitBtn">Nộp bài</button></div>' +
+            '<div class="ask" id="ask" hidden>' +
+                '<div class="ask-box" role="dialog" aria-modal="true" aria-labelledby="askMsg">' +
+                    '<p id="askMsg"></p>' +
+                    '<div class="ask-actions">' +
+                        '<button type="button" class="btn ghost" id="askCancel">Làm tiếp</button>' +
+                        '<button type="button" class="btn submit" id="askOk">Nộp bài</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+        document.getElementById('submitBtn').onclick = function () { submit(false); };
+        document.getElementById('askCancel').onclick = function () { document.getElementById('ask').hidden = true; };
+        document.getElementById('askOk').onclick = function () {
+            document.getElementById('ask').hidden = true;
+            doSubmit(false);
+        };
+        updateProgress();
+        if (CFG.instant) order.forEach(function (qi) { updateFeedback(qi); });
+        startTimer();
+        window.scrollTo(0, 0);
+    }
+
+    function updateProgress() {
+        if (!state.current) return;
+        var done = 0;
+        QS.forEach(function (q, i) {
+            if (isComplete(q, state.current.answers[i])) done++;
+        });
+        var bar = document.getElementById('progBar');
+        var text = document.getElementById('progText');
+        var bot = document.getElementById('botText');
+        var pct = QS.length ? Math.round(done / QS.length * 100) : 0;
+        if (bar) bar.style.transform = 'scaleX(' + (pct / 100) + ')';
+        if (text) text.textContent = 'Đã trả lời ' + done + '/' + QS.length + ' câu';
+        if (bot) bot.textContent = done + '/' + QS.length + ' câu';
+    }
+
+    function onAnswer(e) {
+        if (!state.current) return;
+        var t = e.target;
+        var role = t.getAttribute && t.getAttribute('data-role');
+        if (!role) return;
+        var qi = parseInt(t.getAttribute('data-qi'), 10);
+        if (!(qi >= 0 && qi < QS.length)) return;
+        var oi = parseInt(t.getAttribute('data-oi'), 10);
+        var answers = state.current.answers;
+
+        if (role === 'single') {
+            answers[qi] = oi;
+        } else if (role === 'multi') {
+            var list = Array.isArray(answers[qi]) ? answers[qi].slice() : [];
+            if (t.checked) { if (list.indexOf(oi) < 0) list.push(oi); }
+            else list = list.filter(function (x) { return x !== oi; });
+            list.sort(function (a, b) { return a - b; });
+            answers[qi] = list;
+        } else if (role === 'tf') {
+            var tf = Array.isArray(answers[qi]) ? answers[qi].slice() : [];
+            var need = (QS[qi].options || []).length;
+            while (tf.length < need) tf.push(null);
+            tf[oi] = t.value === 'true';
+            answers[qi] = tf;
+        } else if (role === 'short') {
+            answers[qi] = t.value;
+        } else {
+            return;
+        }
+        writeState();
+        updateProgress();
+        updateFeedback(qi);
+    }
+
+    function startTimer() {
+        clearedTimer();
+        if (CFG.mode !== 'exam' || !CFG.minutes || !state.current) return;
+        tick();
+        timerId = setInterval(tick, 1000);
+
+        function tick() {
+            if (!state.current) { clearedTimer(); return; }
+            var left = state.current.deadline - Date.now();
+            var el = document.getElementById('timer');
+            if (left <= 0) { clearedTimer(); submit(true); return; }
+            if (el) {
+                el.textContent = fmtTime(left);
+                el.className = 'timer' + (left < 60000 ? ' low' : '');
+            }
+        }
+    }
+
+    // Hoi lai bang hop thoai TRONG TRANG: window.confirm bi chan o mot so
+    // trinh duyet di dong (Safari iOS mo file trong app/iframe) nen bam "Nop bai"
+    // khong lam gi ca. (shortcut: khong dung confirm/prompt o bat ky dau.)
+    function submit(auto) {
+        if (!state.current) return;
+        if (auto) { doSubmit(true); return; }
+        var order = orderOf(state.current);
+        var missing = [];
+        order.forEach(function (qi, pos) {
+            if (!isComplete(QS[qi], state.current.answers[qi])) missing.push(pos + 1);
+        });
+        var msg;
+        if (missing.length) {
+            var sample = missing.slice(0, 12).join(', ') + (missing.length > 12 ? '…' : '');
+            msg = 'Còn ' + missing.length + ' câu chưa trả lời (câu ' + sample + ').<br>Vẫn nộp bài?';
+        } else {
+            msg = 'Nộp bài? Sau khi nộp sẽ không sửa được nữa.';
+        }
+        var box = document.getElementById('ask');
+        if (!box) { doSubmit(false); return; }
+        document.getElementById('askMsg').innerHTML = msg;
+        box.hidden = false;
+    }
+
+    function doSubmit(auto) {
+        if (!state.current) return;
+        var order = orderOf(state.current);
+        clearedTimer();
+        var answers = state.current.answers;
+        var res = computeResult(answers);
+        var last = {
+            answers: answers,
+            at: Date.now(),
+            name: state.current.name || '',
+            timedOut: !!auto,
+            score: res.score,
+            maxScore: res.maxScore
+        };
+        state.last = last;
+        state.runs.push({
+            at: last.at, name: last.name, score: res.score, maxScore: res.maxScore,
+            correct: res.correct, partial: res.partial, wrong: res.wrong,
+            unanswered: res.unanswered, total: QS.length, timedOut: last.timedOut,
+            order: order, optOrder: state.current.optOrder || null, answers: answers
+        });
+        // shortcut: chi giu bai lam 30 luot gan nhat de localStorage khong phinh.
+        if (state.runs.length > 30) {
+            delete state.runs[state.runs.length - 31].answers;
+            delete state.runs[state.runs.length - 31].optOrder;
+        }
+        state.current = null;
+        writeState();
+        renderResult(last);
+    }
+
+    function statusInfo(q, a) {
+        var ratio = scoreQuestion(q, a);
+        if (ratio === 1) return { cls: 'ok', text: 'Đúng' };
+        if (!hasAnyAnswer(q, a)) return { cls: 'mute', text: 'Chưa trả lời' };
+        if (ratio > 0) return { cls: 'part', text: 'Đúng một phần' };
+        return { cls: 'bad', text: 'Sai' };
+    }
+
+    // Dap an dung dang chu de hien ngay sau khi chon (chi khi giao vien cho xem dap an).
+    // Chu cai phai theo VI TRI HIEN THI cua luot lam, khong phai chi so goc.
+    function correctText(q, qi) {
+        var order = optionOrderOf(qi, state.current);
+        if (q.type === 'single') {
+            var at = order.indexOf(q.correct);
+            return at >= 0 && q.options[q.correct] ? letter(at) + '. ' + q.options[q.correct] : '';
+        }
+        if (q.type === 'multi') return displayLetters(q.correctList, order);
+        if (q.type === 'truefalse') {
+            return (q.correctTF || []).map(function (v, i) {
+                return 'abcd'.charAt(i) + ') ' + (v ? 'Đúng' : 'Sai');
+            }).join(' · ');
+        }
+        return esc(q.correctAnswer);
+    }
+
+    function updateFeedback(qi) {
+        var box = document.getElementById('fb' + qi);
+        if (!box || !state.current || !QS[qi]) return;
+        var q = QS[qi];
+        var a = state.current.answers[qi];
+        var info = statusInfo(q, a);
+        if (info.cls === 'mute') { box.innerHTML = ''; return; }
+        var mark = info.cls === 'ok' ? '✔ ' : (info.cls === 'part' ? '◐ ' : '✘ ');
+        box.className = 'fb ' + info.cls;
+        box.innerHTML = mark + info.text +
+            (CFG.showAnswers ? ' · Đáp án: <b>' + correctText(q, qi) + '</b>' : '');
+    }
+
+    function reviewOptions(q, a, qi, source) {
+        var order = optionOrderOf(qi, source);
+        if (q.type === 'single') {
+            return '<div class="opts">' + order.map(function (oi, at) {
+                var cls = '';
+                if (oi === q.correct) cls += ' is-correct';
+                if (a === oi && oi !== q.correct) cls += ' is-wrong';
+                return '<div class="rev-opt' + cls + '"><span class="letter">' + letter(at) + '.</span><span class="txt">' + q.options[oi] + '</span>' +
+                    (oi === q.correct ? '<span class="tag ok">Đáp án</span>' : '') +
+                    (a === oi ? '<span class="tag pick">Bạn chọn</span>' : '') + '</div>';
+            }).join('') + '</div>';
+        }
+        if (q.type === 'multi') {
+            var picked = Array.isArray(a) ? a : [];
+            var right = q.correctList || [];
+            return '<div class="opts">' + order.map(function (oi, at) {
+                var isRight = right.indexOf(oi) >= 0;
+                var isPicked = picked.indexOf(oi) >= 0;
+                var cls = isRight ? ' is-correct' : (isPicked ? ' is-wrong' : '');
+                return '<div class="rev-opt' + cls + '"><span class="letter">' + letter(at) + '.</span><span class="txt">' + q.options[oi] + '</span>' +
+                    (isRight ? '<span class="tag ok">Đáp án</span>' : '') +
+                    (isPicked ? '<span class="tag pick">Bạn chọn</span>' : '') + '</div>';
+            }).join('') + '</div>' +
+            '<div class="answerline">Đáp án: <b>' + (displayLetters(right, order) || '—') + '</b> · Bạn chọn: <b>' + (displayLetters(picked, order) || '—') + '</b></div>';
+        }
+        if (q.type === 'truefalse') {
+            var tf = Array.isArray(a) ? a : [];
+            return '<div class="opts">' + (q.options || []).map(function (o, oi) {
+                var rightV = (q.correctTF || [])[oi];
+                var pick = tf[oi];
+                var isRight = pick === rightV;
+                var cls = isRight ? ' is-correct' : (pick === null || pick === undefined ? '' : ' is-wrong');
+                var mark = (pick === null || pick === undefined) ? '' : (isRight ? '✔ ' : '✘ ');
+                return '<div class="rev-opt' + cls + '"><span class="txt"><b>' + 'abcd'.charAt(oi) + ')</b> ' + o + '</span>' +
+                    '<span class="tag ok">Đáp án: ' + (rightV ? 'Đúng' : 'Sai') + '</span>' +
+                    '<span class="tag ' + (pick === null || pick === undefined ? '' : (isRight ? 'ok' : 'bad')) + '">' + mark + 'Bạn chọn: ' + (pick === true ? 'Đúng' : pick === false ? 'Sai' : '—') + '</span></div>';
+            }).join('') + '</div>';
+        }
+        var yours = String(a == null ? '' : a).trim();
+        return '<div class="answerline">Đáp án: <b>' + esc(q.correctAnswer) + '</b> · Bạn trả lời: <b>' +
+            (yours ? esc(yours) : '—') + '</b></div>';
+    }
+
+    function renderResult(last) {
+        clearedTimer();
+        var res = computeResult(last.answers);
+        var pct = res.maxScore > 0 ? Math.round(res.score / res.maxScore * 100) : 0;
+        var msg;
+        if (CFG.mode === 'exam') {
+            msg = last.timedOut
+                ? 'Hết giờ làm bài. Điểm đã được ghi nhận trên máy này.'
+                : 'Đã nộp bài. Điểm đã được ghi nhận trên máy này.';
+        } else if (pct === 100) msg = 'Hoàn hảo! Bạn đã làm đúng toàn bộ bài.';
+        else if (pct >= 80) msg = 'Rất tốt! Chỉ còn vài chỗ cần xem lại.';
+        else if (pct >= 50) msg = 'Khá ổn. Hãy xem lại những câu còn sai để chắc kiến thức.';
+        else msg = 'Đừng lo — xem lại đáp án và thử làm lại để tiến bộ.';
+
+        var runText = '';
+        if (CFG.mode === 'practice' && MAX_ATTEMPTS > 0) {
+            runText = 'Lượt ' + state.runs.length + '/' + MAX_ATTEMPTS;
+        }
+
+        var actions = '';
+        if (canStart()) {
+            actions += '<button class="btn primary" id="retryBtn">Làm lại</button>';
+        }
+        actions += '<button class="btn ghost" id="homeBtn">Về trang đầu</button>';
+
+        app.innerHTML =
+            '<div class="card result">' +
+                '<div class="kicker">Kết quả ' + (CFG.mode === 'practice' ? 'ôn tập' : 'bài thi') + (runText ? ' · ' + esc(runText) : '') + '</div>' +
+                '<h1 class="title">' + esc(DATA.title) + '</h1>' +
+                (last.name ? '<div class="note">Học sinh: <b>' + esc(last.name) + '</b></div>' : '') +
+                (last.timedOut ? '<div class="warnbox">Hết giờ — bài đã được tự động nộp.</div>' : '') +
+                '<div class="scoreline">' +
+                    '<div class="bigscore">' + fmtNum(res.score) + ' <small>/ ' + fmtNum(res.maxScore) + ' điểm</small></div>' +
+                    '<div class="stats">' +
+                        '<span class="stat">' + pct + '%</span>' +
+                        '<span class="stat ok">Đúng ' + res.correct + '</span>' +
+                        (res.partial ? '<span class="stat warn">Đúng một phần ' + res.partial + '</span>' : '') +
+                        '<span class="stat bad">Sai ' + res.wrong + '</span>' +
+                        '<span class="stat">Chưa trả lời ' + res.unanswered + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="note">' + msg + '</div>' +
+                '<div class="note" style="margin-top:10px;">Chụp màn hình kết quả này để gửi giáo viên (nếu được yêu cầu).</div>' +
+                '<div class="result-actions">' + actions + '</div>' +
+            '</div>' +
+            renderHistory(true) +
+            jumpNav();
+        wireReviews();
+
+        var retry = document.getElementById('retryBtn');
+        if (retry) retry.onclick = function () {
+            if (!canStart()) { renderStart(); return; }
+            state.last = null;
+            state.current = {
+                startedAt: Date.now(),
+                name: state.name || last.name || '',
+                answers: {},
+                order: buildOrder(QS.length, CFG.shuffle),
+                optOrder: newOptionOrder(),
+                deadline: (CFG.mode === 'exam' && CFG.minutes > 0) ? Date.now() + CFG.minutes * 60000 : null
+            };
+            writeState();
+            showQuiz();
+        };
+        var home = document.getElementById('homeBtn');
+        if (home) home.onclick = renderStart;
+        window.scrollTo(0, 0);
+    }
+
+    app.addEventListener('change', onAnswer);
+    app.addEventListener('input', onAnswer);
+
+    // Bam so cau trong bang dap an -> nhay toi cau do; bam bo loc -> chi ve lai phan xem lai.
+    app.addEventListener('click', function (e) {
+        var el = e.target;
+        var nav = el && el.closest ? el.closest('[data-scroll]') : null;
+        if (nav) {
+            window.scrollTo(0, nav.getAttribute('data-scroll') === 'top' ? 0 : document.documentElement.scrollHeight);
+            return;
+        }
+        var jump = el && el.closest ? el.closest('[data-jump]') : null;
+        if (jump) { jumpTo(jump.getAttribute('data-jump')); return; }
+        var btn = el && el.closest ? el.closest('[data-rev-filter]') : null;
+        if (!btn) return;
+        var key = btn.getAttribute('data-rev-key');
+        if (!reviewState[key]) return;
+        reviewState[key].filter = btn.getAttribute('data-rev-filter');
+        fillReview(key);
+    });
+
+    // Chong gian lan: toan man hinh, chan copy va phim tat (tat duoc khi xuat file).
+    var BLOCK_KEYS = ['c', 'x', 'a', 's', 'p', 'u', 'f'];
+    function enterFullscreen() {
+        var el = document.documentElement;
+        try {
+            if (!document.fullscreenElement && el.requestFullscreen) {
+                var p = el.requestFullscreen();
+                if (p && p.catch) p.catch(function () {});
+            }
+        } catch (e) {}
+    }
+    if (CFG.lockdown) {
+        document.body.classList.add('locked');
+        ['copy', 'cut', 'contextmenu', 'dragstart'].forEach(function (name) {
+            document.addEventListener(name, function (e) { e.preventDefault(); });
+        });
+        document.addEventListener('keydown', function (e) {
+            var k = (e.key || '').toLowerCase();
+            if (k === 'f12') { e.preventDefault(); return; }
+            if (!(e.ctrlKey || e.metaKey)) return;
+            if (BLOCK_KEYS.indexOf(k) >= 0 || (e.shiftKey && ['i', 'j', 'c'].indexOf(k) >= 0)) e.preventDefault();
+        });
+        // Trinh duyet chi cho vao toan man hinh tu mot cu dong cua nguoi dung.
+        document.addEventListener('click', enterFullscreen);
+        enterFullscreen();
+    }
+
+    // Khoi dong: dang lam -> tiep tuc; da nop -> xem ket qua; chua lam -> trang dau.
+    if (state.current) {
+        if (state.current.deadline && Date.now() >= state.current.deadline) {
+            submit(true);
+        } else {
+            showQuiz();
+        }
+    } else if (state.last) {
+        renderResult(state.last);
+    } else {
+        renderStart();
+    }
+})(function buildOrder(count, shuffle, rng) {
+    var order = [];
+    for (var i = 0; i < count; i++) order.push(i);
+    if (!shuffle) return order;
+    rng = rng || Math.random;
+    for (var j = order.length - 1; j > 0; j--) {
+        var k = Math.floor(rng() * (j + 1));
+        var tmp = order[j];
+        order[j] = order[k];
+        order[k] = tmp;
+    }
+    return order;
+});</script>
+<script>
+(function () {
+  var status = document.getElementById('offline-status');
+  function setStatus(message, state) {
+    if (!status) return;
+    status.textContent = message;
+    status.setAttribute('data-state', state || 'limited');
+  }
+  function onlineMessage() {
+    if (!navigator.onLine) {
+      setStatus('Bạn đang ngoại tuyến. Nếu trang đã được lưu trước đó, bạn vẫn có thể làm bài; lịch sử được lưu trên thiết bị này.', 'ready');
+    }
+  }
+  window.addEventListener('online', function () {
+    setStatus('Đã có kết nối mạng. Bài làm và lịch sử vẫn được lưu trên thiết bị này.', 'ready');
+  });
+  window.addEventListener('offline', onlineMessage);
+  if (!('serviceWorker' in navigator)) {
+    setStatus('Trình duyệt này không hỗ trợ lưu bài để dùng ngoại tuyến. Hãy mở bằng Safari hoặc Chrome.', 'limited');
+    return;
+  }
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    setStatus('Cần mở bài thi bằng đường link HTTPS để bật chế độ ngoại tuyến.', 'limited');
+    return;
+  }
+  navigator.serviceWorker.register('./sw.js')
+    .then(function (registration) {
+      if (registration.active || navigator.serviceWorker.controller) {
+        setStatus('Chế độ ngoại tuyến đã sẵn sàng. Hãy mở trang này online một lần trước khi ngắt mạng.', 'ready');
+      } else {
+        setStatus('Đang lưu bản dùng ngoại tuyến. Giữ trang mở thêm vài giây, rồi tải lại một lần.', 'limited');
+      }
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        setStatus('Chế độ ngoại tuyến đã sẵn sàng. Bạn có thể mở lại bài thi khi mất mạng.', 'ready');
+      });
+      if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    })
+    .catch(function () {
+      setStatus('Chưa bật được chế độ ngoại tuyến trong trình duyệt này. Hãy mở link bằng Safari hoặc Chrome.', 'limited');
+    });
+  onlineMessage();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "id": "./de_toan_thpt_mau2.html",
+  "name": "Đề Toán THPT",
+  "short_name": "Đề Toán",
+  "description": "Bài thi trắc nghiệm Toán THPT, có thể dùng ngoại tuyến sau lần tải đầu tiên.",
+  "lang": "vi-VN",
+  "start_url": "./de_toan_thpt_mau2.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef2f8",
+  "theme_color": "#4338ca",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
