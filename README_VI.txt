@@ -1,37 +1,22 @@
-HUONG DAN TRIỂN KHAI FILE DE TOAN THPT (PWA OFFLINE)
+THƯ VIỆN ĐỀ THI THPT (PWA OFFLINE)
 
-Trong thư mục này có:
-- de_toan_thpt_mau2.html: file bài thi đã bổ sung hỗ trợ PWA/mobile; giữ nguyên dữ liệu đề và logic chấm điểm.
-- sw.js: lưu bản HTML và các tài nguyên cần thiết để mở lại khi ngoại tuyến.
-- manifest.webmanifest: thông tin ứng dụng web.
-- icon-192.png, icon-512.png: biểu tượng cài vào màn hình chính.
+Tài liệu chính đã được chuyển sang README.md trong cùng thư mục.
+Hãy đọc README.md để biết cấu trúc thư mục, cách thêm đề mới, cách deploy
+lên GitHub Pages hiện tại và cách kiểm tra PWA/ngoại tuyến.
 
-CÁCH ĐƯA LÊN GITHUB PAGES (HTTPS MIỄN PHÍ)
-1. Đăng nhập GitHub và tạo một repository mới, ví dụ: de-toan-thpt.
-2. Tải LÊN CẢ 5 FILE ở trên vào cùng một thư mục gốc của repository. Không chỉ tải riêng file HTML.
-3. Vào Settings > Pages.
-4. Ở phần Build and deployment, chọn Deploy from a branch; chọn branch main và folder /(root), sau đó Save.
-5. Chờ GitHub Pages xuất bản website. Đường link thường có dạng:
-   https://TEN-TAI-KHOAN.github.io/de-toan-thpt/de_toan_thpt_mau2.html
-   Thay TEN-TAI-KHOAN bằng tên tài khoản GitHub thực tế.
-6. Mở đường link HTTPS trên điện thoại khi đang có mạng. Chờ thông báo “Chế độ ngoại tuyến đã sẵn sàng”. Nếu thông báo đang lưu, đợi vài giây rồi tải lại trang.
-7. Thử làm bài, chọn đáp án, nộp bài và mở lại để kiểm tra lịch sử.
-8. Thử bật chế độ máy bay và mở lại cùng đường link trong cùng trình duyệt. Nếu hoạt động, bản offline đã được lưu.
-9. Gửi đường link HTTPS qua Zalo/Messenger. Nếu trình duyệt tích hợp không lưu được, chọn menu chia sẻ/mở ngoài rồi dùng Safari (iPhone) hoặc Chrome (Android).
+TÓM TẮT NHANH
+- Trang chủ: index.html
+- Các đề: exams/<môn>/de_<môn>_<số>.html (mỗi đề là một file HTML độc lập)
+- Danh mục đề: assets/js/catalog.js (nơi duy nhất cần sửa khi thêm đề)
+- Service Worker: sw.js ở thư mục gốc, cache toàn bộ website và các đề trong danh mục
+- Kiểm tra trước khi deploy: node tools/check-library.js
+- Khi cập nhật nội dung, tăng CACHE_VERSION trong sw.js (v1 -> v2 -> ...)
+- Link cũ de_toan_thpt_mau2.html tự chuyển sang exams/toan/de_toan_01.html
 
-CÀI BIỂU TƯỢNG MÀN HÌNH CHÍNH (TÙY CHỌN)
-iPhone: mở link bằng Safari > Chia sẻ > Thêm vào Màn hình chính.
-Android: mở link bằng Chrome > menu ⋮ > Cài đặt/Thêm vào màn hình chính hoặc Cài đặt ứng dụng.
-
-LƯU Ý QUAN TRỌNG
-- Cần có mạng trong lần đầu để tải HTML và kích hoạt Service Worker. Việc chỉ tải file HTML về máy rồi mở bằng ứng dụng Files không bật được cơ chế PWA offline.
-- Dữ liệu lịch sử làm bài dùng localStorage, nên nằm trên thiết bị/trình duyệt đó. Nó không tự đồng bộ giữa Zalo WebView, Safari, Chrome hoặc các thiết bị khác.
-- Khi cập nhật đề hoặc code, tải lại các file lên hosting và tăng phiên bản CACHE_NAME trong sw.js (ví dụ v1 thành v2). Nếu thiết bị vẫn dùng bản cũ, đóng/mở lại trang hoặc xóa dữ liệu website rồi tải lại.
-- Nội dung đề/đáp án nằm trong HTML phía máy khách như bản gốc. Đây không phải hệ thống bảo mật đáp án chống người có kiến thức kỹ thuật.
-- Khả năng lưu offline phụ thuộc vào trình duyệt và chính sách lưu trữ của WebView; cần thử trên thiết bị thực tế.
-
-
-BAN SUA LOI KHONG CUON MAN HINH (29/10/2026)
-- Ban nay bat lai cuon doc tren chuot va man hinh cam ung.
-- Da tat che do lockdown/toan man hinh de tranh can tro thao tac cuon. Noi dung cau hoi, dap an va cach cham diem duoc giu nguyen.
-- Neu da dang len GitHub Pages: tai len de thay the cac file cung ten trong repository, dac biet la de_toan_thpt_mau2.html va sw.js. Sau do cho Actions deploy thanh cong, mo lai trang va nhan Ctrl+F5 de tai lai. Tren dien thoai, dong tab cu roi mo lai link khi co mang de nhan ban cap nhat.
+LƯU Ý
+- Cần mạng ở lần mở đầu tiên để cài Service Worker.
+- Không mở bằng file:// nếu muốn thử chế độ ngoại tuyến; dùng GitHub Pages
+  hoặc chạy localhost.
+- Lịch sử làm bài lưu bằng localStorage trên từng thiết bị/trình duyệt.
+  Khóa mới có dạng exam_history_toan_01; dữ liệu cũ từ
+  offlineQuiz:86fe1612f631 được tự động chuyển sang và vẫn giữ lại bản cũ.

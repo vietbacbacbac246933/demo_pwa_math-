@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4338ca">
+<meta name="description" content="Thư viện đề thi THPT: nhiều đề trắc nghiệm theo môn, làm bài và chấm điểm ngay trên trình duyệt, dùng được ngoại tuyến.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Thư viện đề thi">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<link rel="stylesheet" href="assets/css/library.css">
+<title>Thư viện đề thi THPT</title>
+</head>
+<body>
+<a class="skip-link" href="#main">Bỏ qua điều hướng, tới danh sách đề</a>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">THPT</span>
+        <div>
+          <p class="eyebrow">Ôn tập · Kiểm tra · Ngoại tuyến</p>
+          <h1 id="library-title">Thư viện đề thi THPT</h1>
+        </div>
+      </div>
+      <dl class="hero-stats" id="stats" aria-label="Thống kê thư viện"></dl>
+    </div>
+
+    <p class="lede" id="library-subtitle">Chọn một đề để bắt đầu làm bài. Kết quả và lịch sử được lưu riêng cho từng đề trên thiết bị của bạn.</p>
+
+    <div class="searchbar" role="search">
+      <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+        <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path d="m16.5 16.5 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+      </svg>
+      <input id="search" type="search" placeholder="Tìm theo tên đề, môn học hoặc chủ đề…" autocomplete="off" enterkeyhint="search" aria-label="Tìm kiếm đề thi">
+      <button type="button" id="clearSearch" class="clear-search" aria-label="Xóa từ khóa tìm kiếm" hidden>×</button>
+    </div>
+
+    <nav class="filters" id="filters" aria-label="Lọc theo môn học"></nav>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <div class="result-bar">
+    <p class="result-count" id="resultCount" aria-live="polite"></p>
+  </div>
+
+  <div id="library"></div>
+
+  <div id="empty" class="empty" hidden>
+    <p class="empty-title">Không tìm thấy đề phù hợp</p>
+    <p>Thử từ khóa khác hoặc chọn lại môn học.</p>
+    <button type="button" class="btn ghost" id="resetFilters">Xóa bộ lọc</button>
+  </div>
+
+  <section class="info" aria-labelledby="info-title">
+    <h2 id="info-title">Cách dùng thư viện</h2>
+    <div class="info-grid">
+      <div>
+        <h3>Làm bài trên mọi thiết bị</h3>
+        <p>Mỗi đề là một trang độc lập. Bạn có thể làm lại, xem đáp án và lịch sử ngay trên trình duyệt, không cần đăng nhập.</p>
+      </div>
+      <div>
+        <h3>Dùng khi mất mạng</h3>
+        <p>Sau lần mở đầu tiên bằng HTTPS, trang chủ và các đề đã có sẽ được lưu để mở lại khi ngoại tuyến.</p>
+      </div>
+      <div>
+        <h3>Dữ liệu riêng trên thiết bị</h3>
+        <p>Lịch sử làm bài nằm trong bộ nhớ trình duyệt của từng máy. Đổi trình duyệt hoặc xóa dữ liệu website sẽ mất lịch sử.</p>
+      </div>
+    </div>
+    <p class="offline-note" id="offline-note" role="status" aria-live="polite">Đang kiểm tra khả năng dùng ngoại tuyến…</p>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><strong id="footer-title">Thư viện đề thi THPT</strong> · <span id="footer-updated"></span></p>
+    <p>Không cần tài khoản · Không gửi dữ liệu lên máy chủ · Chạy trên GitHub Pages</p>
+  </div>
+</footer>
+
+<div class="update-toast" id="updateToast" hidden>
+  <span>Đã có phiên bản mới của thư viện.</span>
+  <button type="button" id="updateBtn" class="btn primary small">Cập nhật</button>
+</div>
+
+<noscript>
+  <div class="wrap noscript">Trang chủ cần JavaScript để hiển thị danh mục đề. Bạn vẫn có thể mở trực tiếp từng đề trong thư mục <code>exams/</code>.</div>
+</noscript>
+
+<script src="assets/js/catalog.js"></script>
+<script src="assets/js/library.js"></script>
+</body>
+</html>
