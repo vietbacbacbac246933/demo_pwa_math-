@@ -73,6 +73,30 @@
             mode: 'practice',
             tags: [],
             addedAt: '2026-11-06'
+          },
+          {
+            id: 'sinh_01',
+            title: 'Bài 1',
+            file: 'exams/sinh/de_sinh_01.html',
+            description: 'Đề trắc nghiệm Sinh học: 14 câu, 10 điểm.',
+            questions: 14,
+            points: 10,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-06'
+          },
+          {
+            id: 'sinh_05',
+            title: 'Bài 5',
+            file: 'exams/sinh/de_sinh_05.html',
+            description: 'Đề trắc nghiệm Sinh học: 16 câu, 16 điểm.',
+            questions: 16,
+            points: 16,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-06'
           }
         ]
       },
@@ -81,7 +105,20 @@
         name: 'Ngữ văn',
         icon: '✎',
         description: 'Đề đọc hiểu và nghị luận Ngữ văn THPT.',
-        exams: []
+        exams: [
+          {
+            id: 'van_01',
+            title: 'Đúng sai Sử',
+            file: 'exams/van/de_van_01.html',
+            description: 'Đề trắc nghiệm Ngữ văn: 20 câu, 20 điểm.',
+            questions: 20,
+            points: 20,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-06'
+          }
+        ]
       },
       {
         id: 'anh',
