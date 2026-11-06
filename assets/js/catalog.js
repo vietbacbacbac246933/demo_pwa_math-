@@ -61,8 +61,19 @@
             mode: 'practice',
             tags: ['Đột biến gene', 'Đột biến điểm', 'Thể đột biến'],
             addedAt: '2026-11-06'
+          },
+          {
+            id: 'sinh_02',
+            title: 'Bài 2',
+            file: 'exams/sinh/de_sinh_02.html',
+            description: 'Đề trắc nghiệm Sinh học: 23 câu, 23 điểm.',
+            questions: 23,
+            points: 23,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-06'
           }
-          
         ]
       },
       {
