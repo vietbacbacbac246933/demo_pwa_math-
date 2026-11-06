@@ -97,6 +97,18 @@
             mode: 'practice',
             tags: [],
             addedAt: '2026-11-06'
+          },
+          {
+            id: 'sinh_03',
+            title: 'Bài 3',
+            file: 'exams/sinh/de_sinh_03.html',
+            description: 'Đề trắc nghiệm Sinh học: 16 câu, 10 điểm.',
+            questions: 16,
+            points: 10,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-06'
           }
         ]
       },
