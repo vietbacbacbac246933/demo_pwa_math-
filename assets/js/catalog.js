@@ -62,18 +62,7 @@
             tags: ['Đột biến gene', 'Đột biến điểm', 'Thể đột biến'],
             addedAt: '2026-11-06'
           }
-          {
-            id: 'bai02-sinh',
-            title: 'Bài 2',
-            file: 'exams/sinh/Bai_2.html',
-            description: 'chibadadidumdum',
-            questions: 23,
-            points: 10,
-            minutes: 0,
-            mode: 'practice',
-            tags: ['no idea'],
-            addedAt: '2026-11-06'
-          }
+          
         ]
       },
       {

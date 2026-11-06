@@ -39,8 +39,11 @@ repository/
 │   └── images/                    # Tạo thư mục này khi cần ảnh dùng chung
 │
 └── tools/
-    └── check-library.js           # Kiểm tra danh mục trước khi deploy
+    ├── check-library.js           # Kiểm tra danh mục trước khi deploy
+    └── import-exam.js             # Tự động nhập đề mới (START.bat gọi file này)
 ```
+
+Ngoài ra ở thư mục gốc có `START.bat` — chạy một lần để nhập đề, kiểm tra, commit và push.
 
 ### Vai trò các file
 
@@ -54,6 +57,8 @@ repository/
 | `manifest.webmanifest` | Thông tin cài đặt PWA. `start_url` là trang chủ, `scope` là toàn repository. |
 | `sw.js` | Cache trang chủ, tài nguyên và **tất cả file đề trong catalog**; cập nhật theo phiên bản cache. |
 | `tools/check-library.js` | Kiểm tra file tồn tại, id trùng, số câu/điểm lệch, đường dẫn sai, và **đề có file nhưng quên khai báo trong catalog**. |
+| `tools/import-exam.js` | Chuẩn hóa đề mới, chép vào `exams/`, cập nhật catalog và `sw.js`; tự hoàn tác nếu kiểm tra lỗi. |
+| `START.bat` | Chạy importer → kiểm tra → commit → push `main`. |
 
 > **Nguyên tắc:** Service Worker nằm ở thư mục gốc nên có scope `/` (hoặc `/<tên-repo>/` trên GitHub Pages), kiểm soát được cả `exams/toan/...`. Không đặt Service Worker trong thư mục con.
 
@@ -84,6 +89,8 @@ Bản gốc `de_toan_thpt_mau2.html` đã được chuyển thành `exams/toan/d
 ---
 
 ## 3. Thêm một đề mới
+
+> **Cách nhanh:** chép file đề (hoặc cả thư mục export / `.zip`) vào thư mục gốc repo rồi nháy đúp `START.bat`. Script tự làm các bước 1–5 dưới đây. Phần dưới là quy trình thủ công nếu bạn muốn kiểm soát từng bước.
 
 ### Bước 1 — Đặt file đúng chỗ
 
@@ -237,19 +244,72 @@ Checklist trước khi deploy:
 
 ---
 
-## 7. Quy ước dữ liệu để tích hợp `START.bat` sau này
+## 7. Tự động hóa bằng `START.bat`
 
-Quy trình Word → HTML → deploy có thể tự động hóa theo các điểm sau:
+`START.bat` là lối tắt cho toàn bộ quy trình: nhập đề → kiểm tra → commit → push `main` → GitHub Pages tự xuất bản.
+
+### Cách dùng hằng ngày
+
+1. Chép đề mới vào **thư mục gốc repo**. Chấp nhận:
+   - một file `.html` (ví dụ `de_toan_02.html`),
+   - một thư mục export (HTML + manifest/sw/icon riêng cũng được),
+   - một file `.zip` chứa đề.
+2. Nháy đúp `START.bat` (hoặc chạy `START.bat` trong cmd tại thư mục repo).
+3. Trả lời các câu hỏi: môn, số đề, tiêu đề, mô tả. Nếu tên file đã đúng dạng `de_<môn>_<số>.html` thì chỉ cần Enter để nhận mặc định.
+4. Chờ script chạy xong. Nếu thành công, đề đã được commit và push; mở lại trang sau 1–2 phút.
+
+Script sẽ tự:
+
+| Bước | Việc làm |
+|---|---|
+| 1 | Đọc khối `<script id="quiz-data">`, giữ nguyên câu hỏi/đáp án/cách chấm. |
+| 2 | Đặt `"id"` theo tên file: `de_toan_02.html` → `toan_02`. |
+| 3 | Chuyển file vào `exams/<môn>/de_<môn>_<số>.html`. |
+| 4 | Sửa manifest/icon/SW sang `../../`, thêm nút **← Thư viện đề**. |
+| 5 | Đổi khóa lịch sử sang `exam_history_<id>`, giữ lịch sử cũ qua `legacyIds`. |
+| 6 | Thêm object vào `assets/js/catalog.js` (tự tạo môn mới nếu cần). |
+| 7 | Tăng `CACHE_VERSION` trong `sw.js`. |
+| 8 | Chạy `node tools/check-library.js`; nếu lỗi thì **hoàn tác toàn bộ**. |
+| 9 | `git add -A` → commit → `git push origin main`. |
+
+Bản gốc sau khi nhập được chuyển ra khỏi repo, lưu tại:
+`%TEMP%\opencode\imported-sources\<thời-gian>\`.
+
+### Tùy chọn
+
+```bat
+START.bat --dry-run        REM chỉ xem kế hoạch, không sửa/commit/push
+START.bat --no-push        REM nhập + commit nhưng không push
+START.bat --yes            REM không hỏi lại, dùng mặc định
+START.bat --help           REM xem tùy chọn của importer
+```
+
+Có thể chỉ định nguồn và thông tin ngay từ dòng lệnh:
+
+```bat
+START.bat de_toan_02.html --subject toan --title "Đề Toán số 2"
+START.bat "de sinh 3" --new-subject sinh --subject-name "Sinh học"
+START.bat --subject toan --number 2 --description "Đề ôn tập chương 1"
+```
+
+Các tùy chọn importer: `--subject`, `--new-subject`, `--subject-name`, `--subject-icon`, `--subject-description`, `--number`, `--title`, `--description`, `--tags`, `--yes`, `--dry-run`, `--include-legacy`.
+
+### An toàn dữ liệu
+
+- Nếu `check-library.js` báo lỗi, importer khôi phục `catalog.js`, `sw.js`, `library.js`, xóa file đề vừa tạo và trả nguồn về chỗ cũ.
+- Nếu đang có thay đổi chưa commit của **file đã theo dõi**, `START.bat` cảnh báo và hỏi trước khi `git add -A`.
+- Nếu đang ở nhánh khác `main`, script dừng, không commit.
+- Push thất bại (ví dụ máy đang lùi so với GitHub), commit vẫn còn trên máy; chạy `git pull --rebase origin main` rồi `git push origin main`.
+
+### Quy ước dữ liệu (giữ nguyên)
 
 1. **Đầu ra HTML** phải giữ khối `<script id="quiz-data" type="application/json">`.
 2. **Mã đề** lấy từ tên file: `de_toan_02.html` → `toan_02`; ghi vào `"id"` trong quiz-data.
 3. **Vị trí file**: `exams/<môn>/de_<môn>_<số>.html`.
-4. **Danh mục**: thêm object vào `assets/js/catalog.js` (đúng schema ở mục 3).
+4. **Danh mục**: thêm object vào `assets/js/catalog.js`.
 5. **Kiểm tra**: gọi `node tools/check-library.js`; dừng nếu exit code khác 0.
-6. **Cache**: tăng `CACHE_VERSION` trong `sw.js` bằng tìm–thay hoặc script.
+6. **Cache**: tăng `CACHE_VERSION` trong `sw.js`.
 7. **Deploy**: commit + push nhánh `main`; GitHub Pages tự xuất bản.
-
-Nên đặt `tools/check-library.js` vào `START.bat` ở bước cuối trước khi push để tránh deploy đề thiếu file hoặc trùng id.
 
 ---
 
