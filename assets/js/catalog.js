@@ -126,6 +126,27 @@
         icon: 'A',
         description: 'Đề trắc nghiệm Tiếng Anh THPT.',
         exams: []
+      },
+      {
+        id: 'ly',
+        name: 'Vật lí',
+        icon: '⚛',
+        description: 'Đề trắc nghiệm Vật lí THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
+        exams: []
+      },
+      {
+        id: 'hoa',
+        name: 'Hóa học',
+        icon: '⚗',
+        description: 'Đề trắc nghiệm Hóa học THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
+        exams: []
+      },
+      {
+        id: 'su',
+        name: 'Lịch sử',
+        icon: '🏛',
+        description: 'Đề trắc nghiệm Lịch sử THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
+        exams: []
       }
     ]
   };

@@ -15,7 +15,7 @@
  *   7. Chạy tools/check-library.js; nếu lỗi thì hoàn tác toàn bộ.
  *
  * Tùy chọn:
- *   --subject <id>          Môn đã có (toan, sinh, van, anh, ...)
+ *   --subject <id>          Môn đã có (toan, ly, hoa, sinh, van, su, anh, ...)
  *   --new-subject <id>      Tạo môn mới với id này
  *   --subject-name <tên>    Tên hiển thị của môn mới
  *   --subject-icon <ký tự>  Icon của môn mới
@@ -62,6 +62,22 @@ const ACCENT_PALETTE = [
   { color: '#0369a1', soft: '#e5f4fd' },
   { color: '#a16207', soft: '#fdf6e3' }
 ];
+
+// Tên gọi khác của môn, dùng khi đoán môn từ tên file nguồn.
+const SUBJECT_ALIASES = {
+  li: 'ly',
+  ly: 'ly',
+  vatli: 'ly',
+  vat_li: 'ly',
+  vatly: 'ly',
+  vat_ly: 'ly',
+  hoa: 'hoa',
+  hoahoc: 'hoa',
+  hoa_hoc: 'hoa',
+  su: 'su',
+  lichsu: 'su',
+  lich_su: 'su'
+};
 
 const QUIZ_RE = /(<script\b[^>]*\bid=["']quiz-data["'][^>]*>)([\s\S]*?)(<\/script>)/i;
 const QUIZ_OPEN = '<script id="quiz-data" type="application/json">';
@@ -229,7 +245,7 @@ if (opts.help) {
     'Không truyền nguồn: tự quét file/thư mục mới ở thư mục gốc.',
     '',
     'Tùy chọn chính:',
-    '  --subject <id>        Môn đã có (toan, sinh, van, anh...)',
+    '  --subject <id>        Môn đã có (toan, ly, hoa, sinh, van, su, anh...)',
     '  --new-subject <id>    Tạo môn mới',
     '  --subject-name <tên>  Tên môn mới',
     '  --number <số>         Số đề, ví dụ 2 hoặc 02',
@@ -713,10 +729,17 @@ function ensureAccent(text, subjectId) {
 function inferSubject(file) {
   const base = path.basename(file, path.extname(file)).toLowerCase();
   const normalized = toSlug(base);
-  const direct = normalized.match(/^de[_-]([a-z0-9]+)[_-]\d+$/);
-  if (direct && existingSubjectIds.has(direct[1])) return direct[1];
-  const parts = normalized.split('_');
-  const found = parts.find((p) => existingSubjectIds.has(p));
+  const tokens = normalized.split('_');
+  // Thử từng từ, rồi từng cặp từ liền nhau (vat_li, lich_su...).
+  for (let i = 0; i < tokens.length; i += 1) {
+    const single = SUBJECT_ALIASES[tokens[i]];
+    if (single && existingSubjectIds.has(single)) return single;
+    if (i + 1 < tokens.length) {
+      const pair = SUBJECT_ALIASES[tokens[i] + '_' + tokens[i + 1]];
+      if (pair && existingSubjectIds.has(pair)) return pair;
+    }
+  }
+  const found = tokens.find((p) => existingSubjectIds.has(p));
   return found || null;
 }
 

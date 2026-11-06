@@ -13,7 +13,10 @@
     toan: { color: '#4338ca', soft: '#eef0ff' },
     sinh: { color: '#15803d', soft: '#e8f7ee' },
     van: { color: '#b45309', soft: '#fff6e5' },
-    anh: { color: '#0f766e', soft: '#e6f7f4' }
+    anh: { color: '#0f766e', soft: '#e6f7f4' },
+    ly: { color: '#0369a1', soft: '#e5f4fd' },
+    hoa: { color: '#be123c', soft: '#ffe9ef' },
+    su: { color: '#6d28d9', soft: '#f2eefe' }
   };
 
   var state = { query: '', subject: 'all' };
