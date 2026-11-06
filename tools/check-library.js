@@ -107,6 +107,35 @@ if (!library || !Array.isArray(library.subjects)) {
   });
 }
 
+// 1b. Đề có file trên đĩa nhưng quên khai báo trong catalog => không hiện ở trang chủ.
+// Đây là lỗi hay gặp nhất khi thêm đề mới, nên chặn ngay trước khi deploy.
+const IGNORED_ORPHAN_DIRS = new Set([
+  'de-kt-15p',   // đề mẫu cũ, chỉ để thử
+  'de-toan-thpt' // bản gốc một đề, đã chuyển vào exams/toan/
+]);
+
+function listHtmlFiles(dir, out) {
+  fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
+    if (entry.name === '.git' || entry.name === 'node_modules') return;
+    const abs = path.join(dir, entry.name);
+    if (entry.isDirectory()) listHtmlFiles(abs, out);
+    else if (/\.html$/i.test(entry.name)) out.push(abs);
+  });
+  return out;
+}
+
+listHtmlFiles(ROOT, []).forEach(function (abs) {
+  const rel = path.relative(ROOT, abs).replace(/\\/g, '/');
+  if (rel === 'index.html') return;
+  if (rel.indexOf('assets/') === 0 || rel.indexOf('tools/') === 0) return;
+  if (IGNORED_ORPHAN_DIRS.has(rel.split('/')[0])) return;
+  if (examFiles.has(rel)) return;
+  const html = read(rel);
+  if (html.indexOf('id="quiz-data"') !== -1) {
+    fail('Đề có file nhưng chưa có trong catalog (sẽ không hiện trên trang chủ): ' + rel);
+  }
+});
+
 // 2. Tài nguyên dùng chung
 ['index.html', 'manifest.webmanifest', 'sw.js', 'assets/css/library.css', 'assets/js/library.js', 'assets/js/catalog.js', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png']
   .forEach(function (file) {

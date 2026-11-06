@@ -21,8 +21,10 @@ repository/
 ├── README_VI.txt                  # Ghi chú phiên bản cũ
 │
 ├── exams/
-│   └── toan/
-│       └── de_toan_01.html        # Đề gốc, giữ nguyên câu hỏi/đáp án/cách chấm
+│   ├── toan/
+│   │   └── de_toan_01.html        # Đề gốc, giữ nguyên câu hỏi/đáp án/cách chấm
+│   └── sinh/
+│       └── bai_4.html             # Bài 4 – Đột biến gene
 │   # exams/van/, exams/anh/       # Tạo khi có đề tương ứng
 │
 ├── assets/
@@ -51,7 +53,7 @@ repository/
 | `exams/<môn>/<đề>.html` | Một đề hoàn chỉnh, độc lập: giao diện, dữ liệu, chấm điểm, lịch sử. |
 | `manifest.webmanifest` | Thông tin cài đặt PWA. `start_url` là trang chủ, `scope` là toàn repository. |
 | `sw.js` | Cache trang chủ, tài nguyên và **tất cả file đề trong catalog**; cập nhật theo phiên bản cache. |
-| `tools/check-library.js` | Kiểm tra file tồn tại, id trùng, số câu/điểm lệch, đường dẫn sai. |
+| `tools/check-library.js` | Kiểm tra file tồn tại, id trùng, số câu/điểm lệch, đường dẫn sai, và **đề có file nhưng quên khai báo trong catalog**. |
 
 > **Nguyên tắc:** Service Worker nằm ở thư mục gốc nên có scope `/` (hoặc `/<tên-repo>/` trên GitHub Pages), kiểm soát được cả `exams/toan/...`. Không đặt Service Worker trong thư mục con.
 
@@ -146,7 +148,7 @@ Môn mới: thêm một object vào `subjects`:
 node tools/check-library.js
 ```
 
-Lệnh này báo lỗi nếu thiếu file, trùng id, sai số câu/điểm hoặc sai đường dẫn tương đối.
+Lệnh này báo lỗi nếu thiếu file, trùng id, sai số câu/điểm, sai đường dẫn tương đối, hoặc **có file đề nằm trong repo nhưng chưa khai báo trong catalog** (trường hợp này đề sẽ không hiện trên trang chủ).
 
 ### Bước 5 — Tăng phiên bản cache và deploy
 
@@ -254,7 +256,7 @@ Nên đặt `tools/check-library.js` vào `START.bat` ở bước cuối trướ
 ## 8. Câu hỏi thường gặp
 
 **Thêm đề mà trang chủ không đổi?**
-Kiểm tra `assets/js/catalog.js` đã lưu đúng chưa, đúng môn chưa, và đã tải lại trang chưa. Nếu đang offline, cần tăng `CACHE_VERSION` rồi mở online một lần.
+Kiểm tra `assets/js/catalog.js` đã lưu đúng chưa, đúng môn chưa, và đã tải lại trang chưa. Chạy `node tools/check-library.js`: nếu báo *“Đề có file nhưng chưa có trong catalog”* thì file đề đã có trên đĩa nhưng chưa được khai báo nên trang chủ không hiển thị. Thêm mục vào `catalog.js` rồi chạy lại. Nếu đang offline, cần tăng `CACHE_VERSION` rồi mở online một lần.
 
 **Đề mới mở được nhưng không dùng offline?**
 Tăng `CACHE_VERSION` trong `sw.js` để Service Worker cài lại và cache đề. Sau đó mở trang chủ online một lần.

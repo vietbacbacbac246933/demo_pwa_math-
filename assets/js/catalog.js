@@ -21,7 +21,7 @@
     version: 1,
     title: 'Thư viện đề thi THPT',
     subtitle: 'Ôn tập và kiểm tra trực tuyến, dùng được ngoại tuyến trên điện thoại và máy tính.',
-    updatedAt: '2026-10-30',
+    updatedAt: '2026-11-06',
 
     subjects: [
       {
@@ -41,6 +41,26 @@
             mode: 'practice',
             tags: ['Hàm số', 'Mũ – Lôgarit', 'Tích phân', 'Hình học', 'Xác suất'],
             addedAt: '2026-10-30'
+          }
+        ]
+      },
+      {
+        id: 'sinh',
+        name: 'Sinh học',
+        icon: '🧬',
+        description: 'Đề trắc nghiệm Sinh học THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
+        exams: [
+          {
+            id: '71efc4fda2de',
+            title: 'Bài 4',
+            file: 'exams/sinh/bai_4.html',
+            description: 'Đột biến gene: đột biến điểm, thể đột biến và mức độ gây hại của allele đột biến.',
+            questions: 18,
+            points: 10,
+            minutes: 0,
+            mode: 'practice',
+            tags: ['Đột biến gene', 'Đột biến điểm', 'Thể đột biến'],
+            addedAt: '2026-11-06'
           }
         ]
       },

@@ -11,6 +11,7 @@
   var SUBJECTS = Array.isArray(LIB.subjects) ? LIB.subjects : [];
   var ACCENTS = {
     toan: { color: '#4338ca', soft: '#eef0ff' },
+    sinh: { color: '#15803d', soft: '#e8f7ee' },
     van: { color: '#b45309', soft: '#fff6e5' },
     anh: { color: '#0f766e', soft: '#e6f7f4' }
   };
