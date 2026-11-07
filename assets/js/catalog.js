@@ -57,6 +57,46 @@
         ]
       },
       {
+        id: 'ly',
+        name: 'Vật lí',
+        icon: '⚛',
+        description: 'Đề trắc nghiệm Vật lí THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
+        exams: [
+          {
+            id: 'ly_01',
+            title: 'Đề Thi THPT Lý 2026',
+            file: 'exams/ly/de_ly_01.html',
+            description: 'Đề trắc nghiệm Vật lí: 28 câu, 10 điểm.',
+            questions: 28,
+            points: 10,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-07'
+          }
+        ]
+      },
+      {
+        id: 'hoa',
+        name: 'Hóa học',
+        icon: '⚗',
+        description: 'Đề trắc nghiệm Hóa học THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
+        exams: [
+          {
+            id: 'hoa_01',
+            title: 'Đề Thi THPT Hóa 2026',
+            file: 'exams/hoa/de_hoa_01.html',
+            description: 'Đề trắc nghiệm Hóa học: 28 câu, 10 điểm.',
+            questions: 28,
+            points: 10,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-07'
+          }
+        ]
+      },
+      {
         id: 'sinh',
         name: 'Sinh học',
         icon: '🧬',
@@ -125,10 +165,10 @@
         ]
       },
       {
-        id: 'van',
-        name: 'Ngữ văn',
-        icon: '✎',
-        description: 'Đề đọc hiểu và nghị luận Ngữ văn THPT.',
+        id: 'su',
+        name: 'Lịch sử',
+        icon: '🏛',
+        description: 'Đề trắc nghiệm Lịch sử THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
         exams: []
       },
       {
@@ -139,50 +179,10 @@
         exams: []
       },
       {
-        id: 'ly',
-        name: 'Vật lí',
-        icon: '⚛',
-        description: 'Đề trắc nghiệm Vật lí THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
-        exams: [
-          {
-            id: 'ly_01',
-            title: 'Đề Thi THPT Lý 2026',
-            file: 'exams/ly/de_ly_01.html',
-            description: 'Đề trắc nghiệm Vật lí: 28 câu, 10 điểm.',
-            questions: 28,
-            points: 10,
-            minutes: 0,
-            mode: 'practice',
-            tags: [],
-            addedAt: '2026-11-07'
-          }
-        ]
-      },
-      {
-        id: 'hoa',
-        name: 'Hóa học',
-        icon: '⚗',
-        description: 'Đề trắc nghiệm Hóa học THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
-        exams: [
-          {
-            id: 'hoa_01',
-            title: 'Đề Thi THPT Hóa 2026',
-            file: 'exams/hoa/de_hoa_01.html',
-            description: 'Đề trắc nghiệm Hóa học: 28 câu, 10 điểm.',
-            questions: 28,
-            points: 10,
-            minutes: 0,
-            mode: 'practice',
-            tags: [],
-            addedAt: '2026-11-07'
-          }
-        ]
-      },
-      {
-        id: 'su',
-        name: 'Lịch sử',
-        icon: '🏛',
-        description: 'Đề trắc nghiệm Lịch sử THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
+        id: 'van',
+        name: 'Ngữ văn',
+        icon: '✎',
+        description: 'Đề đọc hiểu và nghị luận Ngữ văn THPT.',
         exams: []
       }
     ]
