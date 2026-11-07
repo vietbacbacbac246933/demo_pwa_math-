@@ -129,20 +129,7 @@
         name: 'Ngữ văn',
         icon: '✎',
         description: 'Đề đọc hiểu và nghị luận Ngữ văn THPT.',
-        exams: [
-          {
-            id: 'van_01',
-            title: 'Đúng sai Sử',
-            file: 'exams/van/de_van_01.html',
-            description: 'Đề trắc nghiệm Ngữ văn: 20 câu, 20 điểm.',
-            questions: 20,
-            points: 20,
-            minutes: 0,
-            mode: 'practice',
-            tags: [],
-            addedAt: '2026-11-06'
-          }
-        ]
+        exams: []
       },
       {
         id: 'anh',
@@ -156,14 +143,40 @@
         name: 'Vật lí',
         icon: '⚛',
         description: 'Đề trắc nghiệm Vật lí THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
-        exams: []
+        exams: [
+          {
+            id: 'ly_01',
+            title: 'Đề Thi THPT Lý 2026',
+            file: 'exams/ly/de_ly_01.html',
+            description: 'Đề trắc nghiệm Vật lí: 28 câu, 10 điểm.',
+            questions: 28,
+            points: 10,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-07'
+          }
+        ]
       },
       {
         id: 'hoa',
         name: 'Hóa học',
         icon: '⚗',
         description: 'Đề trắc nghiệm Hóa học THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
-        exams: []
+        exams: [
+          {
+            id: 'hoa_01',
+            title: 'Đề Thi THPT Hóa 2026',
+            file: 'exams/hoa/de_hoa_01.html',
+            description: 'Đề trắc nghiệm Hóa học: 28 câu, 10 điểm.',
+            questions: 28,
+            points: 10,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-07'
+          }
+        ]
       },
       {
         id: 'su',
