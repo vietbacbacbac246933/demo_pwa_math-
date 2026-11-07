@@ -21,7 +21,7 @@
     version: 1,
     title: 'Thư viện đề thi THPT',
     subtitle: 'Ôn tập và kiểm tra trực tuyến, dùng được ngoại tuyến trên điện thoại và máy tính.',
-    updatedAt: '2026-11-06',
+    updatedAt: '2026-11-07',
 
     subjects: [
       {
@@ -41,6 +41,18 @@
             mode: 'practice',
             tags: ['Hàm số', 'Mũ – Lôgarit', 'Tích phân', 'Hình học', 'Xác suất'],
             addedAt: '2026-10-30'
+          },
+          {
+            id: 'toan_02',
+            title: 'Test đề toán THPT',
+            file: 'exams/toan/de_toan_02.html',
+            description: 'Đề trắc nghiệm Toán: 22 câu, 22 điểm.',
+            questions: 22,
+            points: 22,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-07'
           }
         ]
       },

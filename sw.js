@@ -9,7 +9,7 @@
    ================================================================== */
 'use strict';
 
-var CACHE_VERSION = 'v7';
+var CACHE_VERSION = 'v8';
 var CACHE_PREFIX = 'exam-library-';
 var CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 
