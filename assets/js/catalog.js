@@ -41,14 +41,14 @@
             mode: 'practice',
             tags: ['Hàm số', 'Mũ – Lôgarit', 'Tích phân', 'Hình học', 'Xác suất'],
             addedAt: '2026-10-30'
-          },,
+          },
           {
             id: 'toan_02',
             title: 'Đề Toán THPT',
             file: 'exams/toan/de_toan_02.html',
-            description: 'Đề trắc nghiệm Toán: 22 câu, 22 điểm.',
+            description: 'Đề trắc nghiệm Toán: 22 câu, 10 điểm.',
             questions: 22,
-            points: 22,
+            points: 10,
             minutes: 0,
             mode: 'practice',
             tags: [],
