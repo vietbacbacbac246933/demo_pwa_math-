@@ -65,25 +65,46 @@ npx wrangler d1 migrations list results-db --remote
 
 ## 4. Tạo Pages project
 
-Cách khuyến nghị: nối GitHub để tự deploy khi push `main`.
+Cách an toàn nhất cho project này: tạo project rồi deploy bằng script ở dưới.
+Lý do: repo còn chứa `tools/`, `migrations/`, `docs/` và các file cấu hình không
+nên được phục vụ công khai; deploy thẳng thư mục gốc sẽ đưa tất cả lên web.
+
+Nếu muốn nối GitHub để tự deploy:
 
 1. Cloudflare Dashboard → **Workers & Pages** → **Create** → **Pages** →
    **Connect to Git**.
 2. Chọn repository.
 3. Cấu hình build:
    - **Framework preset**: None
-   - **Build command**: để trống
-   - **Build output directory**: `/` (thư mục gốc repository)
+   - **Build command**: phải tạo ra thư mục đầu ra chỉ chứa file tĩnh
+     (`index.html`, `teacher.html`, `sw.js`, `manifest.webmanifest`, `assets/`,
+     `exams/`, `_headers`, `_routes.json`). Nếu chưa có bước build như vậy,
+     dùng script deploy thủ công bên dưới.
+   - **Build output directory**: thư mục sạch do build command tạo ra
 4. Deploy lần đầu.
 
-Cloudflare tự nhận thư mục `functions/` ở gốc làm Pages Functions và
-`migrations/` không bị đưa lên phần tĩnh nhờ `.assetsignore`.
+Cloudflare tự nhận thư mục `functions/` ở gốc làm Pages Functions. Phần tĩnh
+phải được tạo bằng script deploy ở dưới (không deploy thẳng thư mục gốc).
 
-### Deploy thủ công (không qua Git)
+### Deploy thủ công (khuyến nghị cho project này)
+
+> **Cảnh báo:** `wrangler pages deploy .` upload **toàn bộ** thư mục hiện tại.
+> `.assetsignore` **không** có tác dụng với Pages, nên `.dev.vars`, `backups/`,
+> `tools/`, `migrations/`, `docs/`... sẽ bị đưa lên web công khai.
+>
+> Luôn dùng script chỉ copy file tĩnh:
 
 ```powershell
-npx wrangler pages deploy . --project-name de-toan-thpt
+powershell -ExecutionPolicy Bypass -File tools/deploy-pages.ps1
 ```
+
+Script sẽ tạo thư mục tạm chỉ gồm `index.html`, `teacher.html`, `sw.js`,
+`manifest.webmanifest`, `_headers`, `_routes.json` và hai thư mục `assets/`,
+`exams/`; kiểm tra danh sách file rồi mới deploy. `functions/` vẫn được
+Wrangler đọc từ thư mục gốc để chạy API.
+
+Nếu nối GitHub để tự deploy, cần cấu hình build tạo ra một thư mục đầu ra
+sạch tương tự. Nếu chưa chắc, dùng script trên.
 
 ## 5. Biến môi trường (secrets)
 
@@ -102,6 +123,11 @@ Sinh giá trị:
 node tools/hash-password.js
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
+> `tools/hash-password.js` dùng **50.000 vòng** PBKDF2-SHA256. Không tăng lên
+> vài trăm nghìn vòng trên gói miễn phí: phép tính có thể vượt giới hạn CPU
+> của request và đăng nhập sẽ luôn trả `401` dù mật khẩu đúng. Mật khẩu dài,
+> ngẫu nhiên (≥ 16 ký tự) quan trọng hơn số vòng.
 
 Quy tắc an toàn:
 
@@ -151,7 +177,9 @@ Kiểm tra thêm:
 | `/api/health` trả `db: missing` | Thiếu binding `DB` hoặc chưa cấu hình `d1_databases` |
 | `schema: missing` | Chưa chạy migration `--remote` |
 | Login trả 503 | Thiếu `TEACHER_PASSWORD_HASH` hoặc `SESSION_SECRET` |
+| Login luôn 401 dù mật khẩu đúng | Hash tạo bằng quá nhiều vòng PBKDF2 (ví dụ 210.000) vượt giới hạn CPU gói miễn phí — tạo lại bằng `node tools/hash-password.js` (50.000 vòng) |
 | Login đúng nhưng vẫn 401 | Cookie bị chặn, domain/HTTPS sai, hoặc secret vừa đổi |
 | Nộp bài trả 404 | `exam_id` không khớp `functions/_lib/exam-data.js`; chạy `node tools/build-exam-data.js` |
 | Điểm khác client | Chạy `node tools/test-scoring.js` để đối chiếu engine |
 | Trang cũ vẫn hiện sau deploy | Tăng `CACHE_VERSION` trong `sw.js` rồi mở online một lần |
+| File nội bộ (`.dev.vars`, `backups/`) truy cập được | Đã deploy nhầm thư mục gốc. Dùng `tools/deploy-pages.ps1`, xoá deployment cũ; nếu file chứa secret thì đổi mật khẩu và `SESSION_SECRET` ngay |

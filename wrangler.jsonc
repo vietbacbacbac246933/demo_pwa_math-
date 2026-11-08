@@ -7,9 +7,7 @@
     {
       "binding": "DB",
       "database_name": "results-db",
-      // TODO: thay bằng database_id thật của results-db (wrangler d1 list).
-      // Giá trị 0 bên dưới chỉ dùng cho D1 local khi phát triển.
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      "database_id": "60728b3e-0a82-4a11-b74e-b8fac2337685"
     }
   ]
 }

@@ -197,13 +197,28 @@ phân quyền, SQL injection, CSV đầy đủ/BOM/chống formula, và đăng x
 
 Xem hướng dẫn chi tiết tại [`docs/DEPLOY.md`](docs/DEPLOY.md). Tóm tắt:
 
-1. Tạo D1 database `results-db` trên Cloudflare.
-2. Điền `database_id` thật vào `wrangler.jsonc` (giá trị hiện tại chỉ dùng local).
+1. Tạo D1 database `results-db` trên Cloudflare (hoặc dùng database đã có).
+2. Điền `database_id` thật vào `wrangler.jsonc` (file trong repo đã trỏ tới
+   database production; chỉ thay nếu tạo database mới).
 3. Tạo Pages project nối với repository GitHub.
 4. Thêm biến môi trường `TEACHER_PASSWORD_HASH`, `SESSION_SECRET`,
    `TEACHER_SESSION_HOURS` trong **Settings → Environment variables**.
 5. Chạy `wrangler d1 migrations apply results-db --remote` một lần.
 6. Deploy và kiểm tra `/api/health` trả `{"ok":true,"db":"ok","schema":"ready"}`.
+
+Bản production hiện tại: <https://de-toan-thpt.pages.dev/>. Deploy bằng script an toàn:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/deploy-pages.ps1
+```
+
+> **Không chạy `wrangler pages deploy .`**: lệnh đó upload cả `.dev.vars`,
+> `backups/`, `tools/`, `migrations/`, `docs/`... lên web. `.assetsignore`
+> không có tác dụng với Cloudflare Pages.
+
+> Hash mật khẩu phải dùng 50.000 vòng PBKDF2 (mặc định của
+> `tools/hash-password.js`). Hash vài trăm nghìn vòng có thể vượt giới hạn CPU
+> của gói miễn phí và làm đăng nhập luôn trả `401`.
 
 ---
 

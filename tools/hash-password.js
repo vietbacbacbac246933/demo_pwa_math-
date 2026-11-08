@@ -15,7 +15,10 @@
 const crypto = require('crypto');
 const readline = require('readline');
 
-const ITERATIONS = 210000;
+// 50.000 vòng là mức cân bằng cho Cloudflare Pages Functions gói miễn phí:
+// PBKDF2 chạy trong giới hạn CPU ngắn của request. Với 210.000 vòng, Workers
+// có thể hủy phép tính và đăng nhập luôn trả 401 dù mật khẩu đúng.
+const ITERATIONS = 50000;
 const KEY_LENGTH = 32;
 const MIN_LENGTH = 8;
 
