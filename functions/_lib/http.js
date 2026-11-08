@@ -7,11 +7,12 @@
 const DEFAULT_LIMIT = 64 * 1024;
 
 export class HttpError extends Error {
-  constructor(status, code, message) {
+  constructor(status, code, message, headers) {
     super(message || code);
     this.name = 'HttpError';
     this.status = status;
     this.code = code;
+    this.headers = headers || null;
   }
 }
 
@@ -50,7 +51,7 @@ export function methodNotAllowed(allow) {
 
 export function handleError(error) {
   if (error instanceof HttpError) {
-    return errorResponse(error.status, error.code, error.message);
+    return errorResponse(error.status, error.code, error.message, error.headers);
   }
   // Chỉ log tên lỗi và message; không log request body / secret.
   const name = error && error.name ? error.name : 'Error';

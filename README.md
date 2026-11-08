@@ -54,9 +54,12 @@ repository/
 │   │   ├── auth.js                 # PBKDF2 + cookie HMAC HttpOnly
 │   │   ├── scoring.js              # Chấm điểm phía máy chủ
 │   │   ├── exam-data.js            # Bộ đáp án chuẩn (sinh tự động)
-│   │   └── results-query.js        # Lọc/sắp xếp/phân trang an toàn
+│   │   ├── results-query.js        # Lọc/sắp xếp/phân trang an toàn
+│   │   ├── rate-limit.js           # Rate limit nộp bài lưu trong D1
+│   │   └── turnstile.js            # Xác minh Turnstile (tùy chọn)
 │   └── api/
 │       ├── health.js
+│       ├── config.js               # Cấu hình công khai (site key Turnstile)
 │       ├── exams.js
 │       ├── submit.js
 │       ├── results.js              # GET danh sách (giáo viên)
@@ -67,6 +70,7 @@ repository/
 ├── migrations/
 │   ├── 0001_create_submissions.sql
 │   ├── 0002_create_submissions_archive.sql
+│   ├── 0003_create_rate_limits.sql
 │   └── README.md
 │
 ├── docs/
@@ -96,8 +100,9 @@ Tất cả phản hồi là JSON (trừ CSV) và có `Cache-Control: no-store`.
 | Phương thức | Đường dẫn | Quyền | Mô tả |
 |---|---|---|---|
 | `GET` | `/api/health` | công khai | Kiểm tra DB và bảng `submissions` |
+| `GET` | `/api/config` | công khai | Site key Turnstile (nếu đã bật) |
 | `GET` | `/api/exams` | công khai | Danh mục đề; giáo viên đã đăng nhập thấy thêm số lượt nộp |
-| `POST` | `/api/submit` | công khai | Nhận bài, chấm lại, chống trùng |
+| `POST` | `/api/submit` | công khai | Nhận bài, chấm lại, chống trùng, rate limit |
 | `GET` | `/api/results` | giáo viên | Danh sách có lọc/sắp xếp/phân trang |
 | `GET` | `/api/results/export` | giáo viên | Xuất CSV toàn bộ kết quả khớp bộ lọc |
 | `POST` | `/api/results/delete` | giáo viên | Xóa / hoàn tác kết quả (có lưu trữ) |
@@ -128,6 +133,10 @@ Body tối đa 64 KB, `Content-Type: application/json`:
 - Trả `201` khi lưu mới, `200` + `duplicate: true` khi gửi lặp cùng dữ liệu,
   `409` khi dùng lại `submission_id` với dữ liệu khác.
 - `score`, `total_score`, `exam_title`, `submitted_at` do máy chủ tạo.
+- Rate limit theo IP (mặc định 60 lượt/10 phút, 20 lượt/phút) trả
+  `429 SUBMIT_RATE_LIMITED` kèm `Retry-After`.
+- Nếu bật Turnstile, body có thể kèm `turnstile_token`; thiếu/sai token trả
+  `403 TURNSTILE_REQUIRED` hoặc `403 TURNSTILE_FAILED`.
 
 ### `GET /api/results` và `/api/results/export`
 
@@ -212,8 +221,9 @@ node tools/test-api.js
 
 `test-api.js` chỉ ghi vào D1 **local**. Mỗi lần chạy dùng một lớp riêng
 (`T...`/`B...`) để không lẫn với dữ liệu Khác. Bộ test bao phủ: dữ liệu không
-hợp lệ, chấm lại phía máy chủ, gửi trùng, hai lượt đồng thời, ~100 lượt nộp,
-phân quyền, SQL injection, CSV đầy đủ/BOM/chống formula, và đăng xuất.
+hợp lệ, rate limit nộp bài, chấm lại phía máy chủ, gửi trùng, hai lượt đồng
+thời, ~100 lượt nộp, phân quyền, SQL injection, CSV đầy đủ/BOM/chống formula,
+và đăng xuất.
 
 > Khi đổi `teacher.js`, `result-queue.js`, `sw.js` hoặc bất kỳ file nào trong
 > `CORE_PATHS`, tăng `CACHE_VERSION` trong `sw.js` để trình duyệt cài lại cache.
@@ -230,7 +240,10 @@ Xem hướng dẫn chi tiết tại [`docs/DEPLOY.md`](docs/DEPLOY.md). Tóm t�
 3. Tạo Pages project nối với repository GitHub.
 4. Thêm biến môi trường `TEACHER_PASSWORD_HASH`, `SESSION_SECRET`,
    `TEACHER_SESSION_HOURS` trong **Settings → Environment variables**.
-5. Chạy `wrangler d1 migrations apply results-db --remote` một lần.
+   Tùy chọn: thêm `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` để bật
+   Turnstile cho `/api/submit`.
+5. Chạy `wrangler d1 migrations apply results-db --remote` một lần (gồm
+   migration `0003` tạo bảng rate limit).
 6. Deploy và kiểm tra `/api/health` trả `{"ok":true,"db":"ok","schema":"ready"}`.
 
 Bản production hiện tại: <https://de-toan-thpt.pages.dev/>. Deploy bằng script an toàn:

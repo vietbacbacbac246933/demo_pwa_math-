@@ -164,6 +164,12 @@ Vào **Pages project → Settings → Environment variables** và thêm cho cả
 | `TEACHER_PASSWORD_HASH` | có | Hash PBKDF2-SHA256 của mật khẩu giáo viên |
 | `SESSION_SECRET` | có | Chuỗi ngẫu nhiên ≥ 32 ký tự, ký cookie phiên |
 | `TEACHER_SESSION_HOURS` | không | Thời hạn phiên, 1–168 giờ, mặc định 12 |
+| `TURNSTILE_SITE_KEY` | không | Site key Turnstile (đặt cùng `TURNSTILE_SECRET_KEY` để bật) |
+| `TURNSTILE_SECRET_KEY` | không | Secret key Turnstile, dùng ở server để xác minh token |
+| `SUBMIT_RATE_LIMIT_MAX` | không | Số lượt nộp tối đa mỗi IP trong một cửa sổ, mặc định 60 |
+| `SUBMIT_RATE_LIMIT_WINDOW_SECONDS` | không | Độ dài cửa sổ giới hạn, mặc định 600 giây |
+| `SUBMIT_RATE_BURST_MAX` | không | Số lượt nộp tối đa mỗi IP trong cửa sổ ngắn, mặc định 20 |
+| `SUBMIT_RATE_BURST_WINDOW_SECONDS` | không | Độ dài cửa sổ burst, mặc định 60 giây |
 
 Sinh giá trị:
 
@@ -185,6 +191,44 @@ Quy tắc an toàn:
 - Đổi `TEACHER_PASSWORD_HASH` để đổi mật khẩu; đổi `SESSION_SECRET` để hủy toàn
   bộ phiên đang đăng nhập.
 - Biến môi trường chỉ có hiệu lực sau khi deploy lại / khởi động lại.
+
+### Giới hạn tần suất nộp bài
+
+`/api/submit` có rate limit theo IP, lưu trong bảng `rate_limits` của D1
+(migration `0003_create_rate_limits.sql`). Nhờ lưu trong D1, giới hạn có hiệu
+lực trên mọi instance Worker, không chỉ một máy.
+
+- Mặc định: **60 lượt / 10 phút / IP**, và tối đa **20 lượt / phút / IP**.
+- Vượt ngưỡng trả `429 SUBMIT_RATE_LIMITED` kèm header `Retry-After`.
+- IP được băm SHA-256 trước khi lưu; bảng không chứa IP thô hay dữ liệu học sinh.
+- IPv6 được gom theo /64 để không lách được giới hạn bằng cách đổi địa chỉ
+  trong cùng một mạng.
+- Request từ loopback (chỉ có khi chạy local) được bỏ qua để không cản kiểm thử.
+- Một lớp học dùng chung NAT/proxy của trường có thể có nhiều học sinh cùng IP.
+  Nếu thường xuyên bị `429` vào giờ cao điểm, tăng `SUBMIT_RATE_LIMIT_MAX` và
+  `SUBMIT_RATE_BURST_MAX` thay vì tắt giới hạn.
+- Trước lần deploy đầu tiên có tính năng này, chạy migration:
+  `npx wrangler d1 migrations apply results-db --remote`.
+
+### Turnstile (tùy chọn, khuyến nghị khi API bị spam)
+
+Rate limit giảm spam từ một IP nhưng không chặn được kẻ tấn công dùng nhiều IP.
+Bật Turnstile để yêu cầu mỗi lượt nộp có token xác minh:
+
+1. Cloudflare Dashboard → **Turnstile** → **Add widget**.
+2. Thêm hostname của trang (ví dụ `de-toan-thpt.pages.dev`) và lấy
+   **Site Key** + **Secret Key**.
+3. Đặt `TURNSTILE_SITE_KEY` và `TURNSTILE_SECRET_KEY` trong Environment
+   variables (cả Production và Preview nếu dùng), rồi deploy lại.
+4. Kiểm tra `GET /api/config` trả `turnstile_site_key` khác `null`.
+
+Khi đã đặt secret, server từ chối request thiếu/sai token bằng
+`403 TURNSTILE_REQUIRED` hoặc `403 TURNSTILE_FAILED`. Trình duyệt tự lấy token
+mới cho từng lượt gửi; bài đang chờ trong hàng đợi ngoại tuyến vẫn được giữ và
+thử lại, không bị mất.
+
+> Không đặt `TURNSTILE_SECRET_KEY` nếu chưa cấu hình widget: khi đó mọi lượt
+> nộp sẽ bị từ chối. Nếu chỉ đặt một trong hai biến, Turnstile được coi là tắt.
 
 ## 6. Kiểm tra sau deploy
 
@@ -229,5 +273,8 @@ Kiểm tra thêm:
 | Login đúng nhưng vẫn 401 | Cookie bị chặn, domain/HTTPS sai, hoặc secret vừa đổi |
 | Nộp bài trả 404 | `exam_id` không khớp `functions/_lib/exam-data.js`; chạy `node tools/build-exam-data.js` |
 | Điểm khác client | Chạy `node tools/test-scoring.js` để đối chiếu engine |
+| Nộp bài trả `429` | Đã chạm rate limit của IP; chờ theo `Retry-After` hoặc tăng `SUBMIT_RATE_LIMIT_MAX` / `SUBMIT_RATE_BURST_MAX` |
+| Nộp bài trả `403 TURNSTILE_*` | Thiếu/sai `TURNSTILE_SITE_KEY`, token hết hạn, hoặc secret không khớp widget |
+| `/api/config` trả `turnstile_site_key: null` | Chưa đặt đủ cả `TURNSTILE_SITE_KEY` và `TURNSTILE_SECRET_KEY` |
 | Trang cũ vẫn hiện sau deploy | Chạy `node tools/bump-cache-version.js` (hoặc dùng `tools/update-and-deploy.ps1`) rồi mở online một lần |
 | File nội bộ (`.dev.vars`, `backups/`) truy cập được | Đã deploy nhầm thư mục gốc. Dùng `tools/deploy-pages.ps1`, xoá deployment cũ; nếu file chứa secret thì đổi mật khẩu và `SESSION_SECRET` ngay |

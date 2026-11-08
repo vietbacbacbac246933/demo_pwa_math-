@@ -21,10 +21,22 @@
   var SENDING_LEASE_MS = 60000;
   var SYNCED_KEEP_MS = 7 * 24 * 60 * 60 * 1000;
 
+  var CONFIG_URL = '/api/config';
+  try {
+    CONFIG_URL = new URL('/api/config', window.location.origin).href;
+  } catch (error) {}
+
+  var TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  var TURNSTILE_TIMEOUT_MS = 30000;
+  var CONFIG_TTL_MS = 5 * 60 * 1000;
+  var CONFIG_STORAGE_KEY = 'exam-turnstile-config';
+
   var dbPromise = null;
   var flushing = false;
   var retryTimer = null;
   var toastTimer = null;
+  var turnstileConfigPromise = null;
+  var turnstileScriptPromise = null;
 
   function uuid() {
     if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -249,13 +261,152 @@
     }, RETRY_DELAYS[index]);
   }
 
-  function sendPayload(payload) {
-    return fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+  function readCachedConfig() {
+    try {
+      var raw = window.sessionStorage.getItem(CONFIG_STORAGE_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || !parsed.value || parsed.expires_at <= Date.now()) return null;
+      return parsed.value;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function cacheConfig(value) {
+    try {
+      window.sessionStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify({
+        value: value,
+        expires_at: Date.now() + CONFIG_TTL_MS
+      }));
+    } catch (error) {}
+  }
+
+  function loadTurnstileConfig() {
+    if (turnstileConfigPromise) return turnstileConfigPromise;
+
+    var cached = readCachedConfig();
+    if (cached) {
+      turnstileConfigPromise = Promise.resolve(cached);
+      return turnstileConfigPromise;
+    }
+
+    turnstileConfigPromise = fetch(CONFIG_URL, {
       credentials: 'same-origin',
       cache: 'no-store'
+    }).then(function (response) {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    }).then(function (data) {
+      var value = {
+        site_key: data && typeof data.turnstile_site_key === 'string'
+          ? data.turnstile_site_key
+          : ''
+      };
+      cacheConfig(value);
+      return value;
+    }).catch(function () {
+      // Ngoại tuyến hoặc API lỗi: lần gửi sau thử lại thay vì nhớ mãi.
+      turnstileConfigPromise = null;
+      return { site_key: '' };
+    });
+
+    return turnstileConfigPromise;
+  }
+
+  function loadTurnstileScript() {
+    if (window.turnstile) return Promise.resolve(window.turnstile);
+    if (turnstileScriptPromise) return turnstileScriptPromise;
+
+    turnstileScriptPromise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = TURNSTILE_SCRIPT_URL;
+      script.async = true;
+      script.defer = true;
+      script.onload = function () {
+        if (window.turnstile) resolve(window.turnstile);
+        else reject(new Error('Turnstile không khả dụng'));
+      };
+      script.onerror = function () {
+        reject(new Error('Không tải được Turnstile'));
+      };
+      document.head.appendChild(script);
+    }).catch(function (error) {
+      turnstileScriptPromise = null;
+      throw error;
+    });
+
+    return turnstileScriptPromise;
+  }
+
+  // Lấy token Turnstile mới cho từng lượt gửi. Token chỉ dùng một lần nên
+  // không lưu vào payload/IndexedDB. Trả null khi chưa bật hoặc không lấy được.
+  function getTurnstileToken() {
+    return loadTurnstileConfig().then(function (config) {
+      if (!config || !config.site_key) return null;
+
+      return loadTurnstileScript().then(function (turnstile) {
+        return new Promise(function (resolve) {
+          var container = document.createElement('div');
+          container.style.cssText =
+            'position:fixed;right:16px;bottom:76px;z-index:2147483001;';
+          document.body.appendChild(container);
+
+          var settled = false;
+          var widgetId = null;
+          var timer = setTimeout(function () { finish(null); }, TURNSTILE_TIMEOUT_MS);
+
+          function finish(token) {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            try {
+              if (widgetId !== null) turnstile.remove(widgetId);
+            } catch (error) {}
+            if (container.parentNode) container.parentNode.removeChild(container);
+            resolve(token || null);
+          }
+
+          try {
+            widgetId = turnstile.render(container, {
+              sitekey: config.site_key,
+              action: 'submit',
+              appearance: 'interaction-only',
+              execution: 'execute',
+              size: 'flexible',
+              callback: finish,
+              'error-callback': function () { finish(null); },
+              'timeout-callback': function () { finish(null); }
+            });
+            turnstile.execute(widgetId);
+          } catch (error) {
+            finish(null);
+          }
+        });
+      });
+    }).catch(function () {
+      return null;
+    });
+  }
+
+  function sendPayload(payload) {
+    return getTurnstileToken().then(function (token) {
+      var body = payload;
+      if (token) {
+        body = {};
+        Object.keys(payload).forEach(function (key) {
+          body[key] = payload[key];
+        });
+        body.turnstile_token = token;
+      }
+
+      return fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
     }).then(function (response) {
       return response.text().then(function (text) {
         var data = null;
@@ -342,8 +493,24 @@
         return markRejected(entry, conflict);
       }
 
+      if (result.status === 403) {
+        var code = data && data.error && data.error.code;
+        var turnstileMessage = data && data.error && data.error.message
+          ? data.error.message
+          : 'Chưa xác minh được bạn không phải robot.';
+
+        // Turnstile lỗi/hết hạn hoặc chưa tải được: giữ bài và thử lại,
+        // không đánh dấu bài là bị từ chối vĩnh viễn.
+        if (code === 'TURNSTILE_REQUIRED' || code === 'TURNSTILE_FAILED' ||
+            code === 'TURNSTILE_UNAVAILABLE') {
+          return markRetry(entry, turnstileMessage);
+        }
+
+        return markRejected(entry, turnstileMessage);
+      }
+
       if (result.status === 400 || result.status === 404 || result.status === 413 ||
-          result.status === 415 || result.status === 401 || result.status === 403) {
+          result.status === 415 || result.status === 401) {
         var message = data && data.error && data.error.message
           ? data.error.message
           : 'Dữ liệu không hợp lệ.';

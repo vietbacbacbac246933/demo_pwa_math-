@@ -21,6 +21,7 @@ const crypto = require('crypto');
 const BASE = (process.env.TEST_BASE_URL || 'http://127.0.0.1:8788').replace(/\/+$/, '');
 const PASSWORD = process.env.TEST_TEACHER_PASSWORD || '';
 const ROOT = path.resolve(__dirname, '..');
+const IS_LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(new URL(BASE).hostname);
 
 let passed = 0;
 let failed = 0;
@@ -146,6 +147,10 @@ function csvRows(text) {
 
 async function main() {
   console.log('API test: ' + BASE);
+  if (!IS_LOCAL) {
+    console.log('CẢNH BÁO: test-api chỉ dành cho dev server local. Trên production,');
+    console.log('Cloudflare tự đặt CF-Connecting-IP nên không giả lập được IP để test rate limit.');
+  }
   const runId = 'T' + Date.now().toString(36).toUpperCase();
   const bulkClass = ('B' + runId).slice(0, 20);
   const exam = EXAMS[EXAM_LIST[0].id];
@@ -160,7 +165,9 @@ async function main() {
 
   const exams = await request('/api/exams');
   check('GET /api/exams công khai trả 200', exams.status === 200, 'status=' + exams.status);
-  check('có đủ 9 đề', !!exams.json && Array.isArray(exams.json.exams) && exams.json.exams.length === 9, 'count=' + (exams.json && exams.json.exams ? exams.json.exams.length : '?'));
+  check('có đủ ' + EXAM_LIST.length + ' đề',
+    !!exams.json && Array.isArray(exams.json.exams) && exams.json.exams.length === EXAM_LIST.length,
+    'count=' + (exams.json && exams.json.exams ? exams.json.exams.length : '?'));
   check('không lộ đáp án qua /api/exams', exams.text.indexOf('"correct"') < 0 && exams.text.indexOf('correctList') < 0);
   check('không lộ danh sách câu hỏi', exams.text.indexOf('"questions"') < 0);
 
@@ -218,6 +225,77 @@ async function main() {
     body: '{not-json'
   });
   check('JSON hỏng trả 400', badJson.status === 400, 'status=' + badJson.status);
+
+  const config = await request('/api/config');
+  check('GET /api/config trả 200', config.status === 200, 'status=' + config.status);
+  check('config chỉ trả site key công khai',
+    !!config.json && (config.json.turnstile_site_key === null ||
+      typeof config.json.turnstile_site_key === 'string'));
+  check('config không lộ secret Turnstile',
+    config.text.indexOf('TURNSTILE_SECRET') < 0 && config.text.indexOf('secret') < 0);
+
+  /* ---------------------------------------------------------------- */
+  section('Giới hạn tần suất nộp bài');
+
+  if (!IS_LOCAL) {
+    console.log('  (bỏ qua kiểm thử rate limit: cần dev server local để giả lập IP)');
+  } else {
+    // Header CF-Connecting-IP chỉ dùng được ở local (Cloudflare edge ghi đè
+    // header này trên production). Nhờ vậy kiểm thử được rate limit mà không
+    // ảnh hưởng các request loopback khác trong bộ test.
+    let rateIp = '';
+    let limited = null;
+    let beforeLimit = 0;
+    let onlyBadRequests = true;
+
+    // Thử tối đa 3 IP ngẫu nhiên (phòng trường hợp IP trùng lần chạy trước).
+    for (let round = 0; round < 3 && !limited; round += 1) {
+      rateIp = '198.51.100.' + (1 + Math.floor(Math.random() * 254));
+      beforeLimit = 0;
+      onlyBadRequests = true;
+
+      for (let i = 0; i < 250; i += 1) {
+        const attempt = await request('/api/submit', {
+          method: 'POST',
+          headers: { 'CF-Connecting-IP': rateIp },
+          body: JSON.stringify({})
+        });
+        if (attempt.status === 429) {
+          limited = attempt;
+          break;
+        }
+        beforeLimit += 1;
+        if (attempt.status !== 400) onlyBadRequests = false;
+      }
+
+      // 429 ngay request đầu nghĩa là IP này còn bộ đếm cũ; thử IP khác.
+      if (limited && beforeLimit === 0) limited = null;
+    }
+
+    check('bơm nhiều lượt từ một IP bị chặn 429', !!limited,
+      'không thấy 429 sau ' + beforeLimit + ' request');
+    check('request trước ngưỡng bị từ chối vì dữ liệu rỗng (400)',
+      !!limited && beforeLimit > 0 && onlyBadRequests, 'count=' + beforeLimit);
+    check('429 có header Retry-After hợp lệ',
+      !!limited && /^\d+$/.test(limited.headers.get('retry-after') || ''),
+      limited ? 'retry-after=' + limited.headers.get('retry-after') : 'không có');
+
+    const afterLimit = await request('/api/submit', {
+      method: 'POST',
+      headers: { 'CF-Connecting-IP': rateIp },
+      body: JSON.stringify({})
+    });
+    check('IP đã vượt ngưỡng tiếp tục bị chặn 429', afterLimit.status === 429,
+      'status=' + afterLimit.status);
+
+    const escapedIp = '203.0.113.' + (1 + Math.floor(Math.random() * 254));
+    const otherIp = await request('/api/submit', {
+      method: 'POST',
+      headers: { 'CF-Connecting-IP': escapedIp },
+      body: JSON.stringify({})
+    });
+    check('IP khác không bị chặn nhầm', otherIp.status !== 429, 'status=' + otherIp.status);
+  }
 
   /* ---------------------------------------------------------------- */
   section('Nộp bài, chấm điểm phía máy chủ, chống trùng');

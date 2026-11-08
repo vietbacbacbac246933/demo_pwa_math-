@@ -9,7 +9,9 @@ import {
   stableStringify
 } from '../_lib/http.js';
 import { EXAMS } from '../_lib/exam-data.js';
+import { enforceSubmitRateLimit } from '../_lib/rate-limit.js';
 import { computeResult, normalizeAnswers } from '../_lib/scoring.js';
+import { verifyTurnstile } from '../_lib/turnstile.js';
 
 const MAX_BODY = 64 * 1024;
 const MAX_NAME = 80;
@@ -80,10 +82,16 @@ export async function onRequestPost(context) {
       throw new HttpError(503, 'DB_NOT_CONFIGURED', 'Database chưa được cấu hình.');
     }
 
+    // Chặn bơm dữ liệu hàng loạt trước khi đọc/parse body và chấm điểm.
+    await enforceSubmitRateLimit(request, env);
+
     const body = await readJson(request, MAX_BODY);
     if (!body || typeof body !== 'object' || Array.isArray(body)) {
       throw new HttpError(400, 'INVALID_BODY', 'Body phải là một object JSON.');
     }
+
+    // Tùy chọn: bật khi đã cấu hình TURNSTILE_SECRET_KEY.
+    await verifyTurnstile(request, env, body.turnstile_token);
 
     const submissionId = typeof body.submission_id === 'string' ? body.submission_id.trim() : '';
     if (!/^[A-Za-z0-9_-]{8,64}$/.test(submissionId)) {

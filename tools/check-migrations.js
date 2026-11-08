@@ -234,12 +234,44 @@ try {
     ).get(batchToken);
     check(stillArchived.total === 1, 'Archive phải giữ lại bản ghi sau khi hoàn tác.');
 
+    // 9. Bảng rate limit + UPSERT nguyên tử.
+    const rateLimitColumns = db.prepare('PRAGMA table_info(rate_limits)').all().map(function (row) {
+      return row.name;
+    });
+    ['bucket_key', 'count', 'window_start', 'expires_at'].forEach(function (name) {
+      check(rateLimitColumns.indexOf(name) >= 0, 'Thiếu cột rate_limits.' + name);
+    });
+
+    const rateLimitIndexes = db.prepare('PRAGMA index_list(rate_limits)').all().map(function (row) {
+      return row.name;
+    });
+    check(rateLimitIndexes.indexOf('idx_rate_limits_expires') >= 0,
+      'Thiếu index idx_rate_limits_expires');
+
+    const upsertRateLimit = db.prepare(
+      'INSERT INTO rate_limits (bucket_key, count, window_start, expires_at) ' +
+      'VALUES (?, 1, ?, ?) ' +
+      'ON CONFLICT(bucket_key) DO UPDATE SET count = rate_limits.count + 1 ' +
+      'RETURNING count'
+    );
+    const firstRateLimit = upsertRateLimit.get('submit:test:0', 0, 1000);
+    check(firstRateLimit && firstRateLimit.count === 1,
+      'UPSERT rate_limits lần đầu phải trả count=1.');
+    const secondRateLimit = upsertRateLimit.get('submit:test:0', 0, 1000);
+    check(secondRateLimit && secondRateLimit.count === 2,
+      'UPSERT rate_limits lần hai phải trả count=2.');
+
+    db.prepare('DELETE FROM rate_limits WHERE expires_at <= ?').run(1000);
+    const remainingRateLimits = db.prepare('SELECT COUNT(*) AS total FROM rate_limits').get();
+    check(remainingRateLimits.total === 0, 'Không dọn được bucket rate limit hết hạn.');
+
     if (!errors.length) {
       console.log('Đã nạp: ' + files.join(', '));
       console.log('Cột (' + columns.length + '): ' + columns.join(', '));
       console.log('Index: ' + indexes.join(', '));
       console.log('submitted_at mặc định: ' + inserted.submitted_at);
       console.log('Archive: ' + archiveColumns.length + ' cột, xóa/hoàn tác OK');
+      console.log('Rate limits: ' + rateLimitColumns.length + ' cột, UPSERT/dọn hết hạn OK');
       console.log('KẾT QUẢ: OK');
     }
   }

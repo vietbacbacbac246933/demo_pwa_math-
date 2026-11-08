@@ -72,6 +72,20 @@ Index:
 - `idx_submissions_time` — danh sách toàn bộ theo thời gian.
 - `sqlite_autoindex_submissions_1` — do `UNIQUE(submission_id)`.
 
+## 0003_create_rate_limits.sql
+
+Bảng `rate_limits` — bộ đếm giới hạn tần suất nộp bài:
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `bucket_key` | TEXT PRIMARY KEY | `<scope>:<SHA-256(IP)>:<window_start>`, không có IP thô |
+| `count` | INTEGER NOT NULL | Số lượt trong cửa sổ, tăng bằng UPSERT nguyên tử |
+| `window_start` | INTEGER NOT NULL | Đầu cửa sổ (epoch ms) |
+| `expires_at` | INTEGER NOT NULL | Thời điểm có thể dọn bucket |
+
+Index `idx_rate_limits_expires` phục vụ việc dọn bucket hết hạn. Bảng không
+chứa dữ liệu học sinh và không ảnh hưởng bảng `submissions`.
+
 ## Ghi chú thiết kế
 
 - `score`, `total_score`, `exam_title`, `answers_json` do server tạo; không
