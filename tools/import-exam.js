@@ -1030,7 +1030,7 @@ async function main() {
     console.log('Không tìm thấy đề mới nào ở thư mục gốc.');
     console.log('Hãy chép file .html (hoặc thư mục export / .zip) vào:');
     console.log('  ' + ROOT);
-    console.log('rồi chạy lại START.bat.');
+    console.log('rồi chạy lại START.bat hoặc START-CLOUDFLARE.bat.');
     return 0;
   }
 
@@ -1164,7 +1164,7 @@ async function main() {
   });
   console.log('');
   console.log('Bản gốc đã được chuyển tới: ' + path.join(os.tmpdir(), 'opencode', 'imported-sources', stamp));
-  console.log('Chạy tiếp: git add -A && git commit && git push origin main (START.bat làm tự động).');
+  console.log('Chạy tiếp: START-CLOUDFLARE.bat (Cloudflare) hoặc START.bat (GitHub Pages).');
   return 0;
 }
 

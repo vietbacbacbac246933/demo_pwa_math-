@@ -86,6 +86,44 @@ Nếu muốn nối GitHub để tự deploy:
 Cloudflare tự nhận thư mục `functions/` ở gốc làm Pages Functions. Phần tĩnh
 phải được tạo bằng script deploy ở dưới (không deploy thẳng thư mục gốc).
 
+### Cập nhật đề rồi deploy
+
+Cách nhanh nhất — giống `START.bat`:
+
+1. Chép file `.html` / thư mục export / `.zip` đề mới vào thư mục project.
+2. Nhấp đúp `START-CLOUDFLARE.bat`.
+
+Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
+`patch-exams` → `build-exam-data` → `check-library` → `test-scoring` → tăng
+`CACHE_VERSION` → deploy. Không commit/push GitHub, không deploy thư mục gốc.
+
+Chỉ sửa đề đã có thì cứ nhấp đúp; script báo "Không tìm thấy đề mới nào" rồi
+vẫn cập nhật và deploy.
+
+Hoặc chạy dòng lệnh:
+
+```powershell
+# Tự quét file mới trong thư mục project
+powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1
+
+# Chỉ định rõ file
+powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
+```
+
+Truyền tham số `import-exam` qua BAT:
+
+```bat
+START-CLOUDFLARE.bat --subject toan --number 3 --title "Đề Toán số 3"
+START-CLOUDFLARE.bat --check-only
+START-CLOUDFLARE.bat --no-deploy
+```
+
+Tùy chọn PowerShell: `-CheckOnly`, `-NoDeploy`, `-Yes`.
+
+> `START.bat` là quy trình cũ cho GitHub Pages: bắt buộc nhánh `main`, không
+> chạy `build-exam-data` và không deploy Cloudflare. Không dùng cho
+> `de-toan-thpt.pages.dev`.
+
 ### Deploy thủ công (khuyến nghị cho project này)
 
 > **Cảnh báo:** `wrangler pages deploy .` upload **toàn bộ** thư mục hiện tại.
@@ -181,5 +219,5 @@ Kiểm tra thêm:
 | Login đúng nhưng vẫn 401 | Cookie bị chặn, domain/HTTPS sai, hoặc secret vừa đổi |
 | Nộp bài trả 404 | `exam_id` không khớp `functions/_lib/exam-data.js`; chạy `node tools/build-exam-data.js` |
 | Điểm khác client | Chạy `node tools/test-scoring.js` để đối chiếu engine |
-| Trang cũ vẫn hiện sau deploy | Tăng `CACHE_VERSION` trong `sw.js` rồi mở online một lần |
+| Trang cũ vẫn hiện sau deploy | Chạy `node tools/bump-cache-version.js` (hoặc dùng `tools/update-and-deploy.ps1`) rồi mở online một lần |
 | File nội bộ (`.dev.vars`, `backups/`) truy cập được | Đã deploy nhầm thư mục gốc. Dùng `tools/deploy-pages.ps1`, xoá deployment cũ; nếu file chứa secret thì đổi mật khẩu và `SESSION_SECRET` ngay |

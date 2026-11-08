@@ -20,7 +20,7 @@
    ================================================================== */
 'use strict';
 
-var CACHE_VERSION = 'v17';
+var CACHE_VERSION = 'v20';
 var CACHE_PREFIX = 'exam-library-';
 var CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 var LEGACY_CACHE_PREFIX = 'de-toan-thpt-pwa-';

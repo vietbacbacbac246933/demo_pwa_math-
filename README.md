@@ -74,6 +74,9 @@ repository/
     ├── check-migrations.js         # Kiểm tra migration trên SQLite in-memory
     ├── build-exam-data.js          # Sinh exam-data.js từ các file đề
     ├── patch-exams.js              # Tích hợp ô lớp + hàng đợi vào đề
+    ├── bump-cache-version.js       # Tăng CACHE_VERSION trong sw.js
+    ├── update-and-deploy.ps1       # Cập nhật đề + deploy một lần
+    ├── deploy-pages.ps1            # Chỉ deploy file tĩnh đã whitelist
     ├── hash-password.js            # Sinh TEACHER_PASSWORD_HASH
     ├── test-scoring.js             # Đối chiếu chấm điểm client/server
     └── test-api.js                 # Kiểm thử API trên Wrangler local
@@ -235,7 +238,47 @@ Xem chi tiết tại [`docs/BACKUP.md`](docs/BACKUP.md). Tóm tắt:
 
 ---
 
-## 6. Thêm đề mới
+## 6. Thêm / cập nhật đề
+
+### Cách nhanh (Cloudflare) — giống `START.bat`
+
+1. Chép file `.html` (hoặc thư mục export / `.zip`) đề mới vào thư mục project.
+2. Nhấp đúp `START-CLOUDFLARE.bat`.
+
+Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
+`patch-exams` → `build-exam-data` → `check-library` → `test-scoring` →
+tăng `CACHE_VERSION` → `deploy-pages.ps1`. Không commit/push GitHub, không
+deploy thư mục gốc.
+
+Nếu chỉ sửa đề đã có, cứ nhấp đúp: script báo "Không tìm thấy đề mới nào"
+rồi vẫn cập nhật và deploy bình thường.
+
+Chạy bằng dòng lệnh:
+
+```powershell
+# Tự quét file mới trong thư mục project
+powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1
+
+# Chỉ định rõ file
+powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
+```
+
+Truyền tham số của `import-exam` qua `START-CLOUDFLARE.bat`:
+
+```bat
+START-CLOUDFLARE.bat --subject toan --number 3 --title "Đề Toán số 3"
+START-CLOUDFLARE.bat --check-only
+START-CLOUDFLARE.bat --no-deploy
+```
+
+Tùy chọn của script PowerShell: `-CheckOnly` (chỉ kiểm tra), `-NoDeploy`
+(chuẩn bị, chưa deploy), `-Yes` (không hỏi lại).
+
+> `START.bat` là quy trình cũ cho GitHub Pages: nó yêu cầu nhánh `main`,
+> không chạy `build-exam-data` và không deploy Cloudflare. Không dùng
+> `START.bat` cho `de-toan-thpt.pages.dev`.
+
+### Cách thủ công
 
 1. Đặt file vào `exams/<môn>/de_<môn>_<số>.html`, giữ khối
    `<script id="quiz-data" type="application/json">` và đúng `id`.
@@ -244,7 +287,7 @@ Xem chi tiết tại [`docs/BACKUP.md`](docs/BACKUP.md). Tóm tắt:
 4. Chạy `node tools/build-exam-data.js` để cập nhật bộ đáp án máy chủ.
 5. Chạy `node tools/check-library.js`, `node tools/test-scoring.js`,
    `node tools/patch-exams.js --check`.
-6. Tăng `CACHE_VERSION` trong `sw.js`, commit và push.
+6. Chạy `node tools/bump-cache-version.js`.
 
 > Mỗi thay đổi cấu trúc database phải là một file mới trong `migrations/`.
 > Không sửa migration đã chạy trên môi trường thật.
