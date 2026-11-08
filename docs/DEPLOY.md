@@ -27,7 +27,7 @@ Lệnh trả về `database_id`. Mở `wrangler.jsonc` và thay giá trị place
 
 ```jsonc
 {
-  "name": "de-toan-thpt",
+  "name": "openexam",
   "pages_build_output_dir": ".",
   "compatibility_date": "2026-11-01",
   "d1_databases": [
@@ -94,8 +94,9 @@ Cách nhanh nhất — giống `START.bat`:
 2. Nhấp đúp `START-CLOUDFLARE.bat`.
 
 Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
-`patch-exams` → `build-exam-data` → `check-library` → `test-scoring` → tăng
-`CACHE_VERSION` → deploy. Không commit/push GitHub, không deploy thư mục gốc.
+`patch-exams` → `build-exam-data` → `build-cache-manifest` → `check-library`
+→ `test-scoring` → tăng `CACHE_VERSION` → deploy. Không commit/push GitHub,
+không deploy thư mục gốc.
 
 Chỉ sửa đề đã có thì cứ nhấp đúp; script báo "Không tìm thấy đề mới nào" rồi
 vẫn cập nhật và deploy.
@@ -125,6 +126,15 @@ Tùy chọn PowerShell: `-CheckOnly`, `-NoDeploy`, `-Yes`.
 > `de-toan-thpt.pages.dev`.
 
 ### Deploy thủ công (khuyến nghị cho project này)
+
+> **Chỉ dùng Direct Upload.** Project Pages tên `openexam` (domain
+> `de-toan-thpt.pages.dev`) phải **tắt Git integration**. Nhánh `main` chứa
+> bản GitHub Pages cũ, **không có `functions/`**; nếu Cloudflare build từ
+> `main`, production sẽ mất API, D1 và trang giáo viên.
+>
+> Vào **Pages project → Settings → Builds & deployments** và Disconnect Git
+> nếu mục này đang bật. Sau đó chỉ deploy bằng `START-CLOUDFLARE.bat` hoặc
+> `tools/deploy-pages.ps1`.
 
 > **Cảnh báo:** `wrangler pages deploy .` upload **toàn bộ** thư mục hiện tại.
 > `.assetsignore` **không** có tác dụng với Pages, nên `.dev.vars`, `backups/`,

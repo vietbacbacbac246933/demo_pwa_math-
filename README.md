@@ -73,6 +73,7 @@ repository/
     ├── check-library.js            # Kiểm tra danh mục/file đề
     ├── check-migrations.js         # Kiểm tra migration trên SQLite in-memory
     ├── build-exam-data.js          # Sinh exam-data.js từ các file đề
+    ├── build-cache-manifest.js     # Sinh hash đề cho Service Worker
     ├── patch-exams.js              # Tích hợp ô lớp + hàng đợi vào đề
     ├── bump-cache-version.js       # Tăng CACHE_VERSION trong sw.js
     ├── update-and-deploy.ps1       # Cập nhật đề + deploy một lần
@@ -176,6 +177,7 @@ Mở `http://127.0.0.1:8788/`. `.dev.vars` và `.wrangler/` đã nằm trong
 
 ```powershell
 node tools/build-exam-data.js --check
+node tools/build-cache-manifest.js --check
 node tools/check-migrations.js
 node tools/check-library.js
 node tools/patch-exams.js --check
@@ -246,9 +248,9 @@ Xem chi tiết tại [`docs/BACKUP.md`](docs/BACKUP.md). Tóm tắt:
 2. Nhấp đúp `START-CLOUDFLARE.bat`.
 
 Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
-`patch-exams` → `build-exam-data` → `check-library` → `test-scoring` →
-tăng `CACHE_VERSION` → `deploy-pages.ps1`. Không commit/push GitHub, không
-deploy thư mục gốc.
+`patch-exams` → `build-exam-data` → `build-cache-manifest` → `check-library`
+→ `test-scoring` → tăng `CACHE_VERSION` → `deploy-pages.ps1`. Không
+commit/push GitHub, không deploy thư mục gốc.
 
 Nếu chỉ sửa đề đã có, cứ nhấp đúp: script báo "Không tìm thấy đề mới nào"
 rồi vẫn cập nhật và deploy bình thường.
@@ -285,9 +287,10 @@ Tùy chọn của script PowerShell: `-CheckOnly` (chỉ kiểm tra), `-NoDeploy
 2. Thêm mục vào `assets/js/catalog.js`.
 3. Chạy `node tools/patch-exams.js` để thêm ô lớp + hàng đợi nộp bài.
 4. Chạy `node tools/build-exam-data.js` để cập nhật bộ đáp án máy chủ.
-5. Chạy `node tools/check-library.js`, `node tools/test-scoring.js`,
+5. Chạy `node tools/build-cache-manifest.js` để cập nhật hash đề.
+6. Chạy `node tools/check-library.js`, `node tools/test-scoring.js`,
    `node tools/patch-exams.js --check`.
-6. Chạy `node tools/bump-cache-version.js`.
+7. Chạy `node tools/bump-cache-version.js`.
 
 > Mỗi thay đổi cấu trúc database phải là một file mới trong `migrations/`.
 > Không sửa migration đã chạy trên môi trường thật.

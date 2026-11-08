@@ -15,7 +15,9 @@
 
 [CmdletBinding()]
 param(
-  [string]$ProjectName = 'de-toan-thpt',
+  # Ten project tren Cloudflare Pages (da doi tu "de-toan-thpt" thanh
+  # "openexam"; domain van la de-toan-thpt.pages.dev).
+  [string]$ProjectName = 'openexam',
   [string]$Branch = 'main'
 )
 
@@ -28,6 +30,20 @@ if (Test-Path $stage) {
   Remove-Item $stage -Recurse -Force
 }
 New-Item -ItemType Directory -Path $stage | Out-Null
+
+# Sinh lai manifest hash ngay truoc khi deploy. Buoc nay bao dam du chay
+# deploy-pages.ps1 mot minh (khong qua update-and-deploy.ps1), Service Worker
+# van thay dung hash cua tung de.
+Push-Location $root
+try {
+  & node tools/build-cache-manifest.js
+  if ($LASTEXITCODE -ne 0) {
+    throw 'Khong sinh duoc assets/js/exam-revs.js.'
+  }
+}
+finally {
+  Pop-Location
+}
 
 # Chỉ những file/thư mục này được phép lên phần tĩnh.
 $publicFiles = @(

@@ -69,7 +69,7 @@ echo.
 rem ---------- 1. Nhap de moi (tu quet thu muc goc) ----------
 if "%CHECK_ONLY%"=="1" goto after_import
 
-echo [1/7] Nhap de moi vao thu vien...
+echo [1/8] Nhap de moi vao thu vien...
 echo.
 if "%WANT_YES%"=="1" (
   node tools\import-exam.js %IMPORT_ARGS% --yes

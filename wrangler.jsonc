@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "de-toan-thpt",
+  "name": "openexam",
   "pages_build_output_dir": ".",
   "compatibility_date": "2026-11-01",
   "d1_databases": [

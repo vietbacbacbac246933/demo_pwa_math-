@@ -9,11 +9,12 @@
 #   1. (tuy chon) Nhap de moi bang tools/import-exam.js
 #   2. tools/patch-exams.js       - o lop + hang doi nop bai
 #   3. tools/build-exam-data.js   - dap an chuan phia server
-#   4. tools/check-library.js     - kiem tra danh muc/file de
-#   5. tools/test-scoring.js      - doi chieu cham diem client/server
-#   6. tools/patch-exams.js --check
-#   7. tools/bump-cache-version.js - tang CACHE_VERSION
-#   8. tools/deploy-pages.ps1     - chi deploy file tinh da whitelist
+#   4. tools/build-cache-manifest.js - hash de de chi tai de thay doi
+#   5. tools/check-library.js     - kiem tra danh muc/file de
+#   6. tools/test-scoring.js      - doi chieu cham diem client/server
+#   7. tools/patch-exams.js --check
+#   8. tools/bump-cache-version.js - tang CACHE_VERSION
+#   9. tools/deploy-pages.ps1     - chi deploy file tinh da whitelist
 #
 # Khong commit, khong push GitHub, khong dung `wrangler pages deploy .`.
 # =====================================================================
@@ -69,7 +70,7 @@ if ($CheckOnly) {
 }
 
 # 2 + 6. patch-exams
-Write-Section '2/7 Tich hop o lop + hang doi nop bai'
+Write-Section '2/8 Tich hop o lop + hang doi nop bai'
 if ($CheckOnly) {
   Invoke-Node @('tools/patch-exams.js', '--check')
 } else {
@@ -77,23 +78,31 @@ if ($CheckOnly) {
 }
 
 # 3. build-exam-data
-Write-Section '3/7 Cap nhat dap an chuan phia server'
+Write-Section '3/8 Cap nhat dap an chuan phia server'
 if ($CheckOnly) {
   Invoke-Node @('tools/build-exam-data.js', '--check')
 } else {
   Invoke-Node @('tools/build-exam-data.js')
 }
 
-# 4. check-library
-Write-Section '4/7 Kiem tra thu vien de'
+# 4. build-cache-manifest
+Write-Section '4/8 Cap nhat hash de cho Service Worker'
+if ($CheckOnly) {
+  Invoke-Node @('tools/build-cache-manifest.js', '--check')
+} else {
+  Invoke-Node @('tools/build-cache-manifest.js')
+}
+
+# 5. check-library
+Write-Section '5/8 Kiem tra thu vien de'
 Invoke-Node @('tools/check-library.js')
 
-# 5. test-scoring
-Write-Section '5/7 Doi chieu cham diem client/server'
+# 6. test-scoring
+Write-Section '6/8 Doi chieu cham diem client/server'
 Invoke-Node @('tools/test-scoring.js')
 
-# 6. patch-exams --check
-Write-Section '6/7 Xac nhan de da duoc tich hop day du'
+# 7. patch-exams --check
+Write-Section '7/8 Xac nhan de da duoc tich hop day du'
 Invoke-Node @('tools/patch-exams.js', '--check')
 
 if ($CheckOnly) {
@@ -103,7 +112,7 @@ if ($CheckOnly) {
 }
 
 # 7. Tang cache version
-Write-Section '7/7 Tang CACHE_VERSION de trinh duyet nhan ban moi'
+Write-Section '8/8 Tang CACHE_VERSION de trinh duyet nhan ban moi'
 Invoke-Node @('tools/bump-cache-version.js')
 
 if ($NoDeploy) {

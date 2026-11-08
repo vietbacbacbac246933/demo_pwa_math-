@@ -1,4 +1,5 @@
-# File này do tools/build-exam-data.js sinh tự động bằng Node (ghi LF).
-# Giữ LF khi checkout để `build-exam-data.js --check` không báo lệch
-# chỉ vì Git đổi sang CRLF.
+# Các file này do tool Node sinh tự động và ghi LF.
+# Giữ LF khi checkout để các lệnh `--check` không báo lệch chỉ vì Git đổi
+# sang CRLF.
 functions/_lib/exam-data.js text eol=lf
+assets/js/exam-revs.js text eol=lf

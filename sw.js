@@ -20,7 +20,7 @@
    ================================================================== */
 'use strict';
 
-var CACHE_VERSION = 'v20';
+var CACHE_VERSION = 'v21';
 var CACHE_PREFIX = 'exam-library-';
 var CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 var LEGACY_CACHE_PREFIX = 'de-toan-thpt-pwa-';
@@ -61,6 +61,16 @@ try {
   // Nếu catalog lỗi, website vẫn cài được với các file lõi.
 }
 
+// Nạp manifest hash nội dung từng đề (do tools/build-cache-manifest.js sinh).
+// Nhờ đó khi tăng CACHE_VERSION, đề không đổi được chép từ cache cũ sang
+// thay vì tải lại toàn bộ thư viện.
+try {
+  importScripts(new URL('./assets/js/exam-revs.js?v=' + CACHE_VERSION, self.location.href).href);
+} catch (error) {
+  // Không có manifest: vẫn chạy, nhưng sẽ tải lại đề như trước.
+}
+var EXAM_REVS = self.EXAM_REVS || {};
+
 var EXAM_PATHS = [];
 try {
   var subjects = (self.EXAM_LIBRARY && self.EXAM_LIBRARY.subjects) || [];
@@ -81,9 +91,23 @@ function pathOf(url) {
   try { return new URL(url).pathname; } catch (error) { return ''; }
 }
 
+// Lấy hash nội dung của một đề từ manifest, chấp nhận cả URL có .html
+// (catalog) và URL không .html (Cloudflare Pages chuyển hướng).
+function revForKey(href) {
+  var pathname = pathOf(href);
+  if (SCOPE_PATH !== '/' && pathname.indexOf(SCOPE_PATH) === 0) {
+    pathname = pathname.slice(SCOPE_PATH.length);
+  }
+  pathname = pathname.replace(/^\/+/, '');
+  if (EXAM_REVS[pathname]) return EXAM_REVS[pathname];
+  if (/\.html$/i.test(pathname)) {
+    return EXAM_REVS[pathname.replace(/\.html$/i, '')] || '';
+  }
+  return EXAM_REVS[pathname + '.html'] || '';
+}
+
 var CORE_URLS = CORE_PATHS.map(absolute);
 var CRITICAL_URLS = CRITICAL_PATHS.map(absolute);
-var EXAM_URLS = EXAM_PATHS.map(absolute);
 
 /* ------------------------------------------------------------------
    Tiện ích cache
@@ -97,10 +121,19 @@ function escapeHtml(value) {
 
 // Tạo response "sạch": không còn cờ redirected, URL rỗng. Nhờ vậy có thể
 // dùng làm kết quả navigation từ Cache Storage trên mọi trình duyệt.
-function makeCleanResponse(response, body) {
+// Giữ lại ETag/Last-Modified (nếu có) và header đánh dấu phiên bản đề.
+var KEEP_HEADERS = ['Content-Type', 'ETag', 'Last-Modified'];
+function makeCleanResponse(response, body, extraHeaders) {
   var headers = new Headers();
-  var contentType = response.headers.get('Content-Type');
-  if (contentType) headers.set('Content-Type', contentType);
+  KEEP_HEADERS.forEach(function (name) {
+    var value = response.headers.get(name);
+    if (value) headers.set(name, value);
+  });
+  if (extraHeaders) {
+    Object.keys(extraHeaders).forEach(function (name) {
+      if (extraHeaders[name]) headers.set(name, extraHeaders[name]);
+    });
+  }
   var status = response.status && response.status >= 200 && response.status <= 599 ? response.status : 200;
   return new Response(body, {
     status: status,
@@ -111,17 +144,17 @@ function makeCleanResponse(response, body) {
 
 // Đọc response và trả về bản sạch. Tham số asText dùng để kiểm tra nội dung
 // đề trước khi cache (tránh cache nhầm trang thư viện do SPA fallback).
-function cleanResponse(response, asText) {
+function cleanResponse(response, asText, rev) {
   var body = asText ? response.text() : response.blob();
   return body.then(function (value) {
-    return makeCleanResponse(response, value);
+    return makeCleanResponse(response, value, rev ? { 'X-Exam-Rev': rev } : null);
   });
 }
 
-function putInCache(cache, key, response) {
+function putInCache(cache, key, response, rev) {
   if (!response || !response.ok) return Promise.resolve(false);
   if (response.type === 'opaque') return Promise.resolve(false);
-  return cleanResponse(response, false).then(function (clean) {
+  return cleanResponse(response, false, rev).then(function (clean) {
     return cache.put(key, clean).then(function () { return true; });
   }).catch(function () {
     return false;
@@ -131,8 +164,9 @@ function putInCache(cache, key, response) {
 // Cache một response lấy từ mạng; lỗi cache không được làm hỏng việc hiển thị.
 function storeResponse(key, response) {
   if (!response || !response.ok || response.type === 'opaque') return Promise.resolve(false);
+  var rev = revForKey(key);
   return caches.open(CACHE_NAME).then(function (cache) {
-    return putInCache(cache, key, response.clone());
+    return putInCache(cache, key, response.clone(), rev);
   }).catch(function () {
     return false;
   });
@@ -227,6 +261,44 @@ function findCached(requestUrl, includeOlder) {
   });
 }
 
+// Tìm bản đề đã cache ở bất kỳ phiên bản trước nào (không gồm cache hiện tại).
+// Dùng để tái sử dụng nội dung khi hash trong manifest không đổi.
+function findOldCopy(href) {
+  var urls = urlVariants(href);
+  return caches.keys().then(function (keys) {
+    var older = keys.filter(function (key) {
+      return key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME;
+    }).sort(compareVersionDesc);
+
+    var index = 0;
+    function next() {
+      if (index >= older.length) return null;
+      var name = older[index];
+      index += 1;
+      return caches.open(name).then(function (oldCache) {
+        return matchIn(oldCache, urls);
+      }).then(function (hit) {
+        return hit || next();
+      });
+    }
+    return next();
+  }).catch(function () {
+    return null;
+  });
+}
+
+// Hash SHA-256 (16 ký tự đầu) của nội dung đã cache. Dùng cho cache cũ
+// chưa có header X-Exam-Rev: so nội dung thay vì tải lại mù quáng.
+function hashBody(response) {
+  return response.arrayBuffer().then(function (buffer) {
+    return crypto.subtle.digest('SHA-256', buffer);
+  }).then(function (digest) {
+    return Array.prototype.map.call(new Uint8Array(digest), function (byte) {
+      return byte.toString(16).padStart(2, '0');
+    }).join('').slice(0, 16);
+  });
+}
+
 // Cache cũ có thể chứa response có cờ redirected (do bản Service Worker
 // trước lưu nguyên response của Cloudflare). Navigation không được dùng
 // trực tiếp response đó, nên tạo lại một bản sạch trước khi trả về.
@@ -288,6 +360,61 @@ function criticalFor(url) {
   return CRITICAL_URLS.indexOf(url) >= 0;
 }
 
+// Precache một đề, tận dụng bản đã có nếu hash nội dung không đổi.
+// rev rỗng (manifest thiếu) -> luôn tải mới để tránh phục vụ đề cũ.
+function precacheExam(cache, url, rev) {
+  return findOldCopy(url).then(function (old) {
+    function copyOld() {
+      // Nội dung không đổi: chép nguyên bản cũ sang cache mới, không tải mạng.
+      return cache.put(url, old).then(function () { return true; });
+    }
+
+    function fetchAndStore() {
+      return fetchFresh(url).then(function (response) {
+        if (!response || !response.ok) {
+          throw new Error('HTTP ' + (response ? response.status : '?') + ' cho ' + url);
+        }
+        if (isSpaFallback(url, response.url)) {
+          throw new Error('SPA fallback cho ' + url);
+        }
+
+        var contentType = response.headers.get('Content-Type') || '';
+        var isHtml = /text\/html/i.test(contentType);
+        var bodyPromise = isHtml ? response.text() : response.blob();
+
+        return bodyPromise.then(function (body) {
+          if (isHtml && String(body).indexOf('id="quiz-data"') < 0) {
+            throw new Error('Nội dung không phải file đề: ' + url);
+          }
+          var clean = makeCleanResponse(response, body, rev ? { 'X-Exam-Rev': rev } : null);
+          return cache.put(url, clean).then(function () { return true; });
+        });
+      }).catch(function (error) {
+        // Mạng lỗi khi cập nhật: dùng bản cũ nếu có để không mất khả năng offline.
+        if (old) {
+          return cache.put(url, old).then(function () { return true; }).catch(function () {
+            throw error;
+          });
+        }
+        throw error;
+      });
+    }
+
+    if (old && rev) {
+      var oldRev = old.headers.get('X-Exam-Rev');
+      if (oldRev === rev) return copyOld();
+      if (!oldRev) {
+        // Cache của bản cũ chưa có header: so hash nội dung đã lưu.
+        return hashBody(old.clone()).then(function (bodyHash) {
+          return bodyHash === rev ? copyOld() : fetchAndStore();
+        }).catch(fetchAndStore);
+      }
+    }
+
+    return fetchAndStore();
+  });
+}
+
 function aliasIndexCache(cache) {
   var root = absolute('./');
   var index = absolute('./index.html');
@@ -332,8 +459,12 @@ self.addEventListener('install', function (event) {
         return aliasIndexCache(cache);
       }).then(function () {
         // Đề lỗi không chặn cài đặt; các đề khác vẫn dùng offline được.
-        return Promise.all(EXAM_URLS.map(function (url) {
-          return precacheUrl(cache, url, true).catch(function () { return false; });
+        // Đề không đổi (hash trùng) được chép từ cache cũ, không tải lại.
+        return Promise.all(EXAM_PATHS.map(function (rel) {
+          var url = absolute(rel);
+          return precacheExam(cache, url, EXAM_REVS[rel] || revForKey(url)).catch(function () {
+            return false;
+          });
         }));
       });
     }).then(function () {
