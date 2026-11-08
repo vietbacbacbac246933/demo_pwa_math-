@@ -1,0 +1,15 @@
+/api/*
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
+
+/teacher
+  Cache-Control: no-store
+  X-Robots-Tag: noindex
+
+/teacher.html
+  Cache-Control: no-store
+  X-Robots-Tag: noindex
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

@@ -1,0 +1,12 @@
+# Sao chép file này thành .dev.vars khi chạy local.
+# KHÔNG commit .dev.vars.
+#
+# Sinh hash mật khẩu:
+#   node tools/hash-password.js
+#
+# Sinh SESSION_SECRET (ví dụ bằng Node):
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+TEACHER_PASSWORD_HASH=pbkdf2_sha256$210000$THAY_SALT_HEX$THAY_HASH_HEX
+SESSION_SECRET=THAY_BANG_CHUOI_NGAU_NHIEN_DAI_IT_NHAT_32_KY_TU
+TEACHER_SESSION_HOURS=12

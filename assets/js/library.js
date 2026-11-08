@@ -7,8 +7,10 @@
 (function () {
   'use strict';
 
-  var LIB = window.EXAM_LIBRARY || { subjects: [] };
-  var SUBJECTS = Array.isArray(LIB.subjects) ? LIB.subjects : [];
+  var LIB = window.EXAM_LIBRARY;
+  var CATALOG_MISSING = !LIB || !Array.isArray(LIB.subjects);
+  if (CATALOG_MISSING) LIB = { subjects: [] };
+  var SUBJECTS = LIB.subjects;
   var ACCENTS = {
     toan: { color: '#4338ca', soft: '#eef0ff' },
     sinh: { color: '#15803d', soft: '#e8f7ee' },
@@ -232,6 +234,15 @@
   if (LIB.updatedAt) {
     els.footerUpdated.textContent = 'Cập nhật ' + formatDate(LIB.updatedAt);
   }
+  if (CATALOG_MISSING) {
+    els.resultCount.textContent = navigator.onLine === false
+      ? 'Không tải được danh mục đề khi đang ngoại tuyến. Hãy kết nối Internet và mở lại trang một lần.'
+      : 'Không tải được danh mục đề. Hãy tải lại trang để thử lại.';
+    if (els.offline) {
+      els.offline.textContent = 'Chưa có danh mục đề trên thiết bị. Cần Internet ở lần mở đầu tiên để lưu thư viện dùng ngoại tuyến.';
+      els.offline.setAttribute('data-state', 'limited');
+    }
+  }
   renderStats();
   renderFilters();
   render();
@@ -280,6 +291,9 @@
 
     navigator.serviceWorker.register('sw.js').then(function (registration) {
       setOfflineStatus('Đang lưu bản dùng ngoại tuyến. Giữ trang mở thêm vài giây rồi tải lại một lần.', 'limited');
+      if (navigator.onLine !== false) {
+        try { registration.update().catch(function () {}); } catch (error) {}
+      }
       if (registration.waiting && navigator.serviceWorker.controller) offerUpdate(registration);
 
       registration.addEventListener('updatefound', function () {
@@ -305,6 +319,9 @@
 
     window.addEventListener('online', function () {
       setOfflineStatus('Đã có kết nối mạng. Lịch sử làm bài vẫn được lưu trên thiết bị này.', 'ready');
+      navigator.serviceWorker.getRegistration().then(function (registration) {
+        if (registration) registration.update().catch(function () {});
+      }).catch(function () {});
     });
     window.addEventListener('offline', function () {
       setOfflineStatus('Bạn đang ngoại tuyến. Các đề đã lưu trước đó vẫn mở được.', 'ready');

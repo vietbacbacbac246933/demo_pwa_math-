@@ -31,7 +31,7 @@
       <dl class="hero-stats" id="stats" aria-label="Thống kê thư viện"></dl>
     </div>
 
-    <p class="lede" id="library-subtitle">Chọn một đề để bắt đầu làm bài. Kết quả và lịch sử được lưu riêng cho từng đề trên thiết bị của bạn.</p>
+    <p class="lede" id="library-subtitle">Chọn một đề để bắt đầu làm bài. Lịch sử được lưu trên thiết bị; kết quả tự đồng bộ tới giáo viên khi có mạng.</p>
 
     <div class="searchbar" role="search">
       <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
@@ -71,8 +71,8 @@
         <p>Sau lần mở đầu tiên bằng HTTPS, trang chủ và các đề đã có sẽ được lưu để mở lại khi ngoại tuyến.</p>
       </div>
       <div>
-        <h3>Dữ liệu riêng trên thiết bị</h3>
-        <p>Lịch sử làm bài nằm trong bộ nhớ trình duyệt của từng máy. Đổi trình duyệt hoặc xóa dữ liệu website sẽ mất lịch sử.</p>
+        <h3>Lịch sử trên thiết bị</h3>
+        <p>Lịch sử làm bài nằm trong bộ nhớ trình duyệt của từng máy. Khi có mạng, mỗi lượt nộp còn được gửi tới giáo viên và tự thử lại nếu mất kết nối.</p>
       </div>
     </div>
     <p class="offline-note" id="offline-note" role="status" aria-live="polite">Đang kiểm tra khả năng dùng ngoại tuyến…</p>
@@ -82,7 +82,8 @@
 <footer class="footer">
   <div class="wrap">
     <p><strong id="footer-title">Thư viện đề thi THPT</strong> · <span id="footer-updated"></span></p>
-    <p>Không cần tài khoản · Không gửi dữ liệu lên máy chủ · Chạy trên GitHub Pages</p>
+    <p>Không cần tài khoản · Kết quả tự đồng bộ khi có mạng · Dùng được ngoại tuyến</p>
+    <p><a href="teacher.html">Khu vực giáo viên</a></p>
   </div>
 </footer>
 
@@ -96,6 +97,7 @@
 </noscript>
 
 <script src="assets/js/catalog.js"></script>
+<script src="assets/js/result-queue.js"></script>
 <script src="assets/js/library.js"></script>
 </body>
 </html>

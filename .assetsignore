@@ -1,0 +1,16 @@
+# Không upload mã nguồn backend / migration / tool lên phần static assets.
+.git
+.github
+.wrangler
+.dev.vars
+node_modules
+functions
+migrations
+tools
+backups
+wrangler.jsonc
+
+# Tài liệu nội bộ / script tiện ích không cần phục vụ như tài nguyên tĩnh.
+docs
+README.md
+START.bat

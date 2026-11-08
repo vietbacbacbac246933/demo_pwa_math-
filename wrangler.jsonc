@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "de-toan-thpt",
+  "pages_build_output_dir": ".",
+  "compatibility_date": "2026-11-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "results-db",
+      // TODO: thay bằng database_id thật của results-db (wrangler d1 list).
+      // Giá trị 0 bên dưới chỉ dùng cho D1 local khi phát triển.
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+}

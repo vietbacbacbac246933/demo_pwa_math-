@@ -4,7 +4,7 @@
   "short_name": "Đề thi THPT",
   "description": "Thư viện đề thi trắc nghiệm THPT theo môn, làm bài và chấm điểm trên trình duyệt, dùng được ngoại tuyến.",
   "lang": "vi-VN",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#eef2f8",
