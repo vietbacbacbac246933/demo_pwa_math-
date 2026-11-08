@@ -53,14 +53,22 @@ export async function onRequestPost(context) {
     }
 
     const body = await readJson(request, MAX_LOGIN_BODY);
-    const password = body && typeof body.password === 'string' ? body.password : '';
+    // Bàn phím điện thoại hay tự thêm dấu cách ở cuối; bỏ khoảng trắng thừa
+    // ở hai đầu để không báo sai mật khẩu oan.
+    const password = body && typeof body.password === 'string'
+      ? body.password.trim()
+      : '';
     if (!password || password.length > 200) {
       throw new HttpError(400, 'INVALID_PASSWORD', 'Mật khẩu không hợp lệ.');
     }
 
     const ok = await verifyPassword(password, env.TEACHER_PASSWORD_HASH);
     if (!ok) {
-      throw new HttpError(401, 'INVALID_CREDENTIALS', 'Mật khẩu không đúng.');
+      throw new HttpError(
+        401,
+        'INVALID_CREDENTIALS',
+        'Mật khẩu không đúng. Kiểm tra dấu cách thừa hoặc chữ in hoa ở đầu.'
+      );
     }
 
     clearRateLimit(request);

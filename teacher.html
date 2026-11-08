@@ -31,7 +31,11 @@
     <p class="muted">Khu vực này chỉ dành cho giáo viên quản lý kết quả.</p>
     <form id="loginForm" autocomplete="on">
       <label class="field">Mật khẩu
-        <input id="password" class="input" type="password" name="password" maxlength="200" autocomplete="current-password" required>
+        <input id="password" class="input" type="password" name="password" maxlength="200" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" required>
+      </label>
+      <label class="check">
+        <input id="showPassword" type="checkbox">
+        Hiện mật khẩu
       </label>
       <p id="loginError" class="error" role="alert" hidden></p>
       <button class="btn primary block" type="submit">Đăng nhập</button>

@@ -266,6 +266,13 @@
     } catch (error) {
       els.loginError.textContent = error.message || 'Đăng nhập không thành công.';
       els.loginError.hidden = false;
+      // Chọn sẵn nội dung để lần sau gõ là thay hết, tránh dính ký tự thừa.
+      try {
+        els.password.select();
+        els.password.focus();
+      } catch (selectError) {
+        // Một số trình duyệt di động không cho select(); bỏ qua.
+      }
     }
   }
 
@@ -522,6 +529,7 @@
     els.dashboard = $('dashboard');
     els.loginForm = $('loginForm');
     els.password = $('password');
+    els.showPassword = $('showPassword');
     els.loginError = $('loginError');
     els.examFilter = $('examFilter');
     els.classFilter = $('classFilter');
@@ -550,6 +558,9 @@
     els.loginForm.addEventListener('submit', onLogin);
     els.logoutBtn.addEventListener('click', onLogout);
     els.exportBtn.addEventListener('click', onExport);
+    els.showPassword.addEventListener('change', function () {
+      els.password.type = els.showPassword.checked ? 'text' : 'password';
+    });
     els.resetFilters.addEventListener('click', resetFilters);
     els.previewDeleteBtn.addEventListener('click', previewDelete);
     els.deleteFilterBtn.addEventListener('click', deleteByScope);
