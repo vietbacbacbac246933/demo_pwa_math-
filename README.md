@@ -9,6 +9,8 @@ một file HTML độc lập, giữ nguyên câu hỏi, cách chấm và giao di
   khi có mạng; mất mạng thì xếp hàng trong IndexedDB và tự thử lại.
 - Giáo viên đăng nhập bằng mật khẩu dùng chung để xem, lọc và xuất CSV toàn bộ
   kết quả.
+- Giáo viên có thể xóa kết quả ngay trên trang quản trị; bản ghi được chép
+  sang `submissions_archive` trước khi xóa nên hoàn tác được.
 - Không dùng R2, Supabase, Firebase, VPS, database ngoài hay Worker riêng.
 - Điểm do **máy chủ chấm lại** từ bộ đáp án chuẩn; điểm do trình duyệt gửi lên
   bị bỏ qua.
@@ -59,10 +61,12 @@ repository/
 │       ├── submit.js
 │       ├── results.js              # GET danh sách (giáo viên)
 │       ├── results/export.js       # GET CSV (giáo viên)
+│       ├── results/delete.js       # POST xóa/hoàn tác (giáo viên)
 │       └── auth/{login,logout}.js
 │
 ├── migrations/
 │   ├── 0001_create_submissions.sql
+│   ├── 0002_create_submissions_archive.sql
 │   └── README.md
 │
 ├── docs/
@@ -96,6 +100,7 @@ Tất cả phản hồi là JSON (trừ CSV) và có `Cache-Control: no-store`.
 | `POST` | `/api/submit` | công khai | Nhận bài, chấm lại, chống trùng |
 | `GET` | `/api/results` | giáo viên | Danh sách có lọc/sắp xếp/phân trang |
 | `GET` | `/api/results/export` | giáo viên | Xuất CSV toàn bộ kết quả khớp bộ lọc |
+| `POST` | `/api/results/delete` | giáo viên | Xóa / hoàn tác kết quả (có lưu trữ) |
 | `POST` | `/api/auth/login` | công khai | Đăng nhập, đặt cookie phiên |
 | `POST` | `/api/auth/logout` | công khai | Xóa cookie phiên |
 
@@ -143,6 +148,23 @@ Tham số dùng chung:
 - Export dùng cùng bộ lọc nhưng **không phân trang**, tối đa 50.000 dòng/lần.
 - CSV có BOM UTF-8 để Excel hiện đúng tiếng Việt, và chống formula injection
   bằng cách thêm `'` trước ô bắt đầu bằng `= + - @`.
+
+### `POST /api/results/delete`
+
+Chỉ giáo viên đã đăng nhập. Body tối đa 8 KB:
+
+| `mode` | Trường gửi kèm | Tác dụng |
+|---|---|---|
+| `one` | `submission_id` | Xóa 1 bài |
+| `filter` | `exam_id` và/hoặc `student_class`, `confirm: "XOA"` | Xóa theo đề/lớp |
+| `all` | `confirm: "XOA TAT CA"` | Xóa toàn bộ |
+| `restore` | `batch_token` | Hoàn tác một lần xóa |
+
+- Thêm `preview: true` để chỉ đếm số dòng sẽ xóa, không thay đổi dữ liệu.
+- Mỗi lần tối đa 5.000 dòng; vượt giới hạn thì phải lọc theo đề hoặc lớp.
+- Trước khi xóa, bản ghi được chép sang `submissions_archive` trong cùng một
+  transaction. `restore` chèn lại các bản ghi và **giữ** bản lưu trữ để làm
+  lịch sử, nên gọi lại nhiều lần không bị nhân bản.
 
 ---
 

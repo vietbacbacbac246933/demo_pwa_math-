@@ -242,6 +242,58 @@ tbody tr:last-child td { border-bottom: 0; }
   border: 0;
 }
 
+.danger-card {
+  margin: 26px 0 34px;
+  border-color: #f0c4c4;
+  background: #fffafa;
+}
+
+.danger-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  color: var(--bad);
+}
+
+.cleanup-scope { margin: 10px 0 14px; font-weight: 700; }
+
+.cleanup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.cleanup-confirm { flex: 1 1 240px; margin-bottom: 0; }
+
+.cleanup-confirm code {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f4f6fb;
+}
+
+.btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn.danger:hover { filter: brightness(0.94); }
+.btn.small { min-height: 34px; padding: 4px 10px; font-size: 0.82rem; }
+.danger-text { color: var(--bad); }
+.row-actions { text-align: right; white-space: nowrap; }
+
+.undo-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: #f0fdf4;
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.undo-bar[hidden] { display: none; }
+
 @media (max-width: 640px) {
   .teacher-hero { padding: 20px 0; }
   .card { padding: 14px; }

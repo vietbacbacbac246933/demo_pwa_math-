@@ -87,6 +87,7 @@
             <th scope="col" class="num">Thời gian</th>
             <th scope="col">Nộp lúc</th>
             <th scope="col">Hình thức</th>
+            <th scope="col"><span class="sr-only">Thao tác</span></th>
           </tr>
         </thead>
         <tbody id="resultsBody"></tbody>
@@ -99,6 +100,30 @@
       <span id="pageInfo" class="page-info"></span>
       <button id="nextPage" class="btn ghost" type="button">Trang sau →</button>
     </nav>
+
+    <section class="card danger-card" aria-labelledby="cleanup-title">
+      <h2 id="cleanup-title">Xóa dữ liệu</h2>
+      <p class="muted">
+        Kết quả bị xóa được chép vào bảng lưu trữ trước, nên có thể hoàn tác
+        ngay sau đó. Từ khóa tìm theo tên không được dùng khi xóa.
+      </p>
+      <p class="cleanup-scope">Phạm vi hiện tại: <strong id="deleteScopeLabel">Tất cả kết quả</strong></p>
+
+      <div class="cleanup-actions">
+        <label class="field cleanup-confirm">Gõ <code id="deletePhraseHint">XOA TAT CA</code> để xác nhận
+          <input id="deleteConfirm" class="input" type="text" maxlength="20" autocomplete="off" spellcheck="false">
+        </label>
+        <button id="previewDeleteBtn" class="btn ghost" type="button">Xem trước số bài sẽ xóa</button>
+        <button id="deleteFilterBtn" class="btn danger" type="button">Xóa theo phạm vi</button>
+      </div>
+
+      <p id="deletePreview" class="status" role="status" aria-live="polite"></p>
+
+      <div id="undoBar" class="undo-bar" hidden>
+        <span id="undoText"></span>
+        <button id="undoBtn" class="btn ghost" type="button">Hoàn tác</button>
+      </div>
+    </section>
   </section>
 </main>
 

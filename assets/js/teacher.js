@@ -6,7 +6,8 @@
     pageSize: 50,
     total: 0,
     totalPages: 0,
-    exams: []
+    exams: [],
+    lastBatch: null
   };
 
   var els = {};
@@ -155,6 +156,19 @@
       cell(formatDate(item.submitted_at));
       cell((item.exam_mode === 'exam' ? 'Thi' : 'Ôn tập') + (item.timed_out ? ' · hết giờ' : ''));
 
+      var actions = document.createElement('td');
+      actions.className = 'row-actions';
+      var remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'btn ghost small danger-text';
+      remove.textContent = 'Xóa';
+      remove.setAttribute('aria-label', 'Xóa kết quả của ' + (item.student_name || 'học sinh'));
+      remove.addEventListener('click', function () {
+        deleteOne(item);
+      });
+      actions.appendChild(remove);
+      tr.appendChild(actions);
+
       body.appendChild(tr);
     });
   }
@@ -218,6 +232,7 @@
   async function loadAllAfterLogin() {
     try {
       await loadExams();
+      updateDeleteScope();
       showDashboard();
       await loadResults();
     } catch (error) {
@@ -264,6 +279,10 @@
     els.emptyResults.hidden = false;
     state.total = 0;
     state.totalPages = 0;
+    state.lastBatch = null;
+    els.undoBar.hidden = true;
+    els.deleteConfirm.value = '';
+    els.deletePreview.textContent = '';
     renderPager();
     showLogin();
   }
@@ -310,6 +329,158 @@
     }
   }
 
+  function deleteScope() {
+    return {
+      exam_id: els.examFilter.value,
+      student_class: els.classFilter.value.trim()
+    };
+  }
+
+  function deletePhrase(scope) {
+    return scope.exam_id || scope.student_class ? 'XOA' : 'XOA TAT CA';
+  }
+
+  function updateDeleteScope() {
+    if (!els.deleteScopeLabel) return;
+    var scope = deleteScope();
+    var parts = [];
+
+    if (scope.exam_id) {
+      var exam = state.exams.filter(function (item) {
+        return item.id === scope.exam_id;
+      })[0];
+      parts.push(exam ? exam.title : 'đề ' + scope.exam_id);
+    }
+    if (scope.student_class) parts.push('lớp ' + scope.student_class);
+
+    els.deleteScopeLabel.textContent = parts.length ? parts.join(' · ') : 'Tất cả kết quả';
+    els.deletePhraseHint.textContent = deletePhrase(scope);
+  }
+
+  function deleteRequest(mode, extra) {
+    var body = Object.assign({ mode: mode }, extra || {});
+    return api('/api/results/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+  }
+
+  function showUndo(count, token) {
+    state.lastBatch = token;
+    els.undoText.textContent = 'Đã xóa ' + count + ' kết quả (có thể hoàn tác).';
+    els.undoBtn.disabled = false;
+    els.undoBar.hidden = false;
+  }
+
+  function deleteFailed(error, target) {
+    if (error.status === 401) {
+      showLogin();
+      return;
+    }
+    target.style.color = '#b91c1c';
+    target.textContent = error.message || 'Không xóa được dữ liệu.';
+  }
+
+  async function deleteOne(item) {
+    var label = item.student_name || 'học sinh';
+    if (!window.confirm('Xóa kết quả của "' + label + '"?\nDữ liệu sẽ được lưu vào bảng lưu trữ.')) {
+      return;
+    }
+
+    try {
+      setStatus('Đang xóa…');
+      var result = await deleteRequest('one', { submission_id: item.submission_id });
+      setStatus('Đã xóa 1 kết quả.');
+      if (result.batch_token) showUndo(result.deleted, result.batch_token);
+      await loadResults();
+    } catch (error) {
+      if (error.status === 401) {
+        showLogin();
+        return;
+      }
+      setStatus(error.message || 'Không xóa được kết quả.', true);
+    }
+  }
+
+  async function previewDelete() {
+    var scope = deleteScope();
+    var mode = scope.exam_id || scope.student_class ? 'filter' : 'all';
+
+    els.deletePreview.style.color = '';
+    els.deletePreview.textContent = 'Đang kiểm tra…';
+    try {
+      var data = await deleteRequest(mode, Object.assign({ preview: true }, scope));
+      var count = Number(data.count) || 0;
+      if (!count) {
+        els.deletePreview.textContent = 'Không có kết quả nào trong phạm vi này.';
+      } else if (data.too_many) {
+        els.deletePreview.textContent = 'Có ' + count + ' kết quả, vượt giới hạn ' +
+          data.limit + ' mỗi lần. Hãy chọn đề hoặc lớp cụ thể.';
+      } else {
+        els.deletePreview.textContent = 'Sẽ xóa ' + count + ' kết quả.';
+      }
+    } catch (error) {
+      deleteFailed(error, els.deletePreview);
+    }
+  }
+
+  async function deleteByScope() {
+    var scope = deleteScope();
+    var phrase = deletePhrase(scope);
+    var mode = scope.exam_id || scope.student_class ? 'filter' : 'all';
+
+    if (els.deleteConfirm.value.trim() !== phrase) {
+      els.deletePreview.style.color = '#b91c1c';
+      els.deletePreview.textContent = 'Gõ đúng "' + phrase + '" để xác nhận.';
+      return;
+    }
+
+    els.deletePreview.style.color = '';
+    els.deletePreview.textContent = 'Đang kiểm tra…';
+    try {
+      var preview = await deleteRequest(mode, Object.assign({ preview: true }, scope));
+      var count = Number(preview.count) || 0;
+      if (!count) {
+        els.deletePreview.textContent = 'Không có kết quả nào trong phạm vi này.';
+        return;
+      }
+      if (preview.too_many) {
+        els.deletePreview.textContent = 'Có ' + count + ' kết quả, vượt giới hạn ' +
+          preview.limit + ' mỗi lần. Hãy chọn đề hoặc lớp cụ thể.';
+        return;
+      }
+      if (!window.confirm('Xóa ' + count + ' kết quả? Dữ liệu sẽ được lưu vào bảng lưu trữ.')) {
+        return;
+      }
+
+      els.deletePreview.textContent = 'Đang xóa…';
+      var result = await deleteRequest(mode, Object.assign({ confirm: phrase }, scope));
+      els.deletePreview.textContent = 'Đã xóa ' + result.deleted + ' kết quả.';
+      if (result.batch_token) showUndo(result.deleted, result.batch_token);
+      els.deleteConfirm.value = '';
+      state.page = 1;
+      await loadResults();
+    } catch (error) {
+      deleteFailed(error, els.deletePreview);
+    }
+  }
+
+  async function undoDelete() {
+    if (!state.lastBatch) return;
+    try {
+      els.undoText.textContent = 'Đang khôi phục…';
+      var result = await deleteRequest('restore', { batch_token: state.lastBatch });
+      els.undoText.textContent = 'Đã khôi phục ' + result.restored + ' kết quả.';
+      els.undoBtn.disabled = true;
+      state.lastBatch = null;
+      state.page = 1;
+      await loadResults();
+    } catch (error) {
+      els.undoText.textContent = error.message || 'Không khôi phục được.';
+    }
+  }
+
   function resetFilters() {
     els.examFilter.value = '';
     els.classFilter.value = '';
@@ -317,11 +488,13 @@
     els.sortFilter.value = 'submitted_at';
     els.orderFilter.value = 'desc';
     state.page = 1;
+    updateDeleteScope();
     loadResults();
   }
 
   function onFilterChange() {
     state.page = 1;
+    updateDeleteScope();
     loadResults();
   }
 
@@ -330,6 +503,7 @@
       // Kiểm tra phiên đăng nhập trước khi hiện bảng điều khiển.
       await api('/api/results?page=1&page_size=1');
       await loadExams();
+      updateDeleteScope();
       showDashboard();
       await loadResults();
     } catch (error) {
@@ -363,11 +537,23 @@
     els.prevPage = $('prevPage');
     els.nextPage = $('nextPage');
     els.pageInfo = $('pageInfo');
+    els.deleteScopeLabel = $('deleteScopeLabel');
+    els.deletePhraseHint = $('deletePhraseHint');
+    els.deleteConfirm = $('deleteConfirm');
+    els.previewDeleteBtn = $('previewDeleteBtn');
+    els.deleteFilterBtn = $('deleteFilterBtn');
+    els.deletePreview = $('deletePreview');
+    els.undoBar = $('undoBar');
+    els.undoText = $('undoText');
+    els.undoBtn = $('undoBtn');
 
     els.loginForm.addEventListener('submit', onLogin);
     els.logoutBtn.addEventListener('click', onLogout);
     els.exportBtn.addEventListener('click', onExport);
     els.resetFilters.addEventListener('click', resetFilters);
+    els.previewDeleteBtn.addEventListener('click', previewDelete);
+    els.deleteFilterBtn.addEventListener('click', deleteByScope);
+    els.undoBtn.addEventListener('click', undoDelete);
 
     els.examFilter.addEventListener('change', onFilterChange);
     els.sortFilter.addEventListener('change', onFilterChange);

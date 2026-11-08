@@ -19,6 +19,11 @@ chủ động.
 CSV **không** chứa `answers_json`, `payload_hash`, `client_submitted_at` hay
 toàn bộ lịch sử cấu trúc, nên không thể dùng để dựng lại database.
 
+> Xóa trên trang giáo viên không xóa vĩnh viễn ngay: bản ghi được chép sang
+> bảng `submissions_archive` trong cùng database trước khi xóa, và có thể hoàn
+> tác bằng nút **Hoàn tác**. Bảng lưu trữ nằm trong `results-db` nên file xuất
+> SQL có cả hai bảng. Đây chỉ là lưới an toàn ngắn hạn — vẫn cần sao lưu định kỳ.
+
 ## 2. D1 Time Travel
 
 Cloudflare giữ các mốc khôi phục của D1 trong một khoảng thời gian giới hạn

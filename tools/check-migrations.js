@@ -157,11 +157,89 @@ try {
       check(detail.indexOf(item[3]) >= 0, 'Query ' + item[0] + ' chưa dùng ' + item[3] + ': ' + detail);
     });
 
+    // 8. Bảng lưu trữ + vòng lặp xóa/hoàn tác.
+    const archiveColumns = db.prepare('PRAGMA table_info(submissions_archive)').all().map(function (row) {
+      return row.name;
+    });
+    [
+      'archive_id', 'batch_token', 'original_id', 'submission_id', 'exam_id',
+      'exam_title', 'student_name', 'student_class', 'score', 'total_score',
+      'answers_json', 'duration_seconds', 'submitted_at', 'exam_mode',
+      'exam_version', 'payload_hash', 'timed_out', 'client_submitted_at',
+      'archived_at', 'archived_reason'
+    ].forEach(function (name) {
+      check(archiveColumns.indexOf(name) >= 0, 'Thiếu cột submissions_archive.' + name);
+    });
+
+    const archiveIndexes = db.prepare('PRAGMA index_list(submissions_archive)').all().map(function (row) {
+      return row.name;
+    });
+    [
+      'idx_archive_batch',
+      'idx_archive_submission',
+      'idx_archive_time'
+    ].forEach(function (name) {
+      check(archiveIndexes.indexOf(name) >= 0, 'Thiếu index ' + name);
+    });
+
+    const batchToken = '11111111-2222-3333-4444-555555555555';
+    const archiveColumnsSql =
+      'batch_token, original_id, submission_id, exam_id, exam_title, ' +
+      'student_name, student_class, score, total_score, answers_json, ' +
+      'duration_seconds, submitted_at, exam_mode, exam_version, payload_hash, ' +
+      'timed_out, client_submitted_at, archived_reason';
+    const archiveSelectSql =
+      '?, id, submission_id, exam_id, exam_title, ' +
+      'student_name, student_class, score, total_score, answers_json, ' +
+      'duration_seconds, submitted_at, exam_mode, exam_version, payload_hash, ' +
+      'timed_out, client_submitted_at, ?';
+
+    db.exec('BEGIN');
+    db.prepare(
+      'INSERT INTO submissions_archive (' + archiveColumnsSql + ') ' +
+      'SELECT ' + archiveSelectSql + ' FROM submissions WHERE submission_id = ? LIMIT ?'
+    ).run(batchToken, 'check-migrations', 'sub-0001', 1);
+    db.prepare(
+      'DELETE FROM submissions WHERE id IN ' +
+      '(SELECT original_id FROM submissions_archive WHERE batch_token = ?)'
+    ).run(batchToken);
+    db.exec('COMMIT');
+
+    const afterDelete = db.prepare(
+      'SELECT COUNT(*) AS total FROM submissions WHERE submission_id = ?'
+    ).get('sub-0001');
+    check(afterDelete.total === 0, 'Xóa theo batch_token không xóa đúng bản ghi.');
+
+    db.prepare(
+      'INSERT OR IGNORE INTO submissions (' +
+      'submission_id, exam_id, exam_title, student_name, student_class, ' +
+      'score, total_score, answers_json, duration_seconds, submitted_at, ' +
+      'exam_mode, exam_version, payload_hash, timed_out, client_submitted_at' +
+      ') SELECT ' +
+      'submission_id, exam_id, exam_title, student_name, student_class, ' +
+      'score, total_score, answers_json, duration_seconds, submitted_at, ' +
+      'exam_mode, exam_version, payload_hash, timed_out, client_submitted_at ' +
+      'FROM submissions_archive WHERE batch_token = ? ORDER BY archive_id'
+    ).run(batchToken);
+
+    const restored = db.prepare(
+      'SELECT student_name, score FROM submissions WHERE submission_id = ?'
+    ).get('sub-0001');
+    check(restored && restored.student_name === 'Nguyễn Văn A',
+      'Hoàn tác không khôi phục đúng bản ghi.');
+    check(restored && restored.score === 8.5, 'Hoàn tác làm sai điểm.');
+
+    const stillArchived = db.prepare(
+      'SELECT COUNT(*) AS total FROM submissions_archive WHERE batch_token = ?'
+    ).get(batchToken);
+    check(stillArchived.total === 1, 'Archive phải giữ lại bản ghi sau khi hoàn tác.');
+
     if (!errors.length) {
       console.log('Đã nạp: ' + files.join(', '));
       console.log('Cột (' + columns.length + '): ' + columns.join(', '));
       console.log('Index: ' + indexes.join(', '));
       console.log('submitted_at mặc định: ' + inserted.submitted_at);
+      console.log('Archive: ' + archiveColumns.length + ' cột, xóa/hoàn tác OK');
       console.log('KẾT QUẢ: OK');
     }
   }
