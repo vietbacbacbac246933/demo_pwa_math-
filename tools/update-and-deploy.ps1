@@ -11,10 +11,11 @@
 #   3. tools/build-exam-data.js   - dap an chuan phia server
 #   4. tools/build-cache-manifest.js - hash de de chi tai de thay doi
 #   5. tools/check-library.js     - kiem tra danh muc/file de
-#   6. tools/test-scoring.js      - doi chieu cham diem client/server
-#   7. tools/patch-exams.js --check
-#   8. tools/bump-cache-version.js - tang CACHE_VERSION
-#   9. tools/deploy-pages.ps1     - chi deploy file tinh da whitelist
+#   6. tools/test-sw-lazy.js      - chac chan khong tai truoc toan bo de
+#   7. tools/test-scoring.js      - doi chieu cham diem client/server
+#   8. tools/patch-exams.js --check
+#   9. tools/bump-cache-version.js - tang CACHE_VERSION
+#  10. tools/deploy-pages.ps1     - chi deploy file tinh da whitelist
 #
 # Khong commit, khong push GitHub, khong dung `wrangler pages deploy .`.
 # =====================================================================
@@ -94,15 +95,19 @@ if ($CheckOnly) {
 }
 
 # 5. check-library
-Write-Section '5/8 Kiem tra thu vien de'
+Write-Section '5/9 Kiem tra thu vien de'
 Invoke-Node @('tools/check-library.js')
 
-# 6. test-scoring
-Write-Section '6/8 Doi chieu cham diem client/server'
+# 6. test-sw-lazy
+Write-Section '6/9 Kiem tra cache luoi (khong tai truoc de)'
+Invoke-Node @('tools/test-sw-lazy.js')
+
+# 7. test-scoring
+Write-Section '7/9 Doi chieu cham diem client/server'
 Invoke-Node @('tools/test-scoring.js')
 
-# 7. patch-exams --check
-Write-Section '7/8 Xac nhan de da duoc tich hop day du'
+# 8. patch-exams --check
+Write-Section '8/9 Xac nhan de da duoc tich hop day du'
 Invoke-Node @('tools/patch-exams.js', '--check')
 
 if ($CheckOnly) {
@@ -111,8 +116,8 @@ if ($CheckOnly) {
   exit 0
 }
 
-# 7. Tang cache version
-Write-Section '8/8 Tang CACHE_VERSION de trinh duyet nhan ban moi'
+# 9. Tang cache version
+Write-Section '9/9 Tang CACHE_VERSION de trinh duyet nhan ban moi'
 Invoke-Node @('tools/bump-cache-version.js')
 
 if ($NoDeploy) {

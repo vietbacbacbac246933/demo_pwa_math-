@@ -290,7 +290,7 @@
     });
 
     navigator.serviceWorker.register('sw.js').then(function (registration) {
-      setOfflineStatus('Đang lưu bản dùng ngoại tuyến. Giữ trang mở thêm vài giây rồi tải lại một lần.', 'limited');
+      setOfflineStatus('Đang lưu thư viện để dùng ngoại tuyến. Đề sẽ được lưu khi bạn mở đề đó.', 'limited');
       if (navigator.onLine !== false) {
         try { registration.update().catch(function () {}); } catch (error) {}
       }
@@ -308,7 +308,7 @@
 
       window.setTimeout(function () {
         if (navigator.serviceWorker.controller) {
-          setOfflineStatus('Chế độ ngoại tuyến đã sẵn sàng. Bạn có thể mở lại thư viện và các đề đã tải khi mất mạng.', 'ready');
+          setOfflineStatus('Thư viện đã sẵn sàng ngoại tuyến. Mỗi đề sẽ được lưu khi bạn mở đề đó.', 'ready');
         } else {
           setOfflineStatus('Đang lưu bản dùng ngoại tuyến. Hãy mở lại trang một lần khi còn mạng để hoàn tất.', 'limited');
         }

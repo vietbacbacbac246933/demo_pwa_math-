@@ -95,7 +95,7 @@ Cách nhanh nhất — giống `START.bat`:
 
 Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
 `patch-exams` → `build-exam-data` → `build-cache-manifest` → `check-library`
-→ `test-scoring` → tăng `CACHE_VERSION` → deploy. Không commit/push GitHub,
+→ `test-sw-lazy` → `test-scoring` → tăng `CACHE_VERSION` → deploy. Không commit/push GitHub,
 không deploy thư mục gốc.
 
 Chỉ sửa đề đã có thì cứ nhấp đúp; script báo "Không tìm thấy đề mới nào" rồi

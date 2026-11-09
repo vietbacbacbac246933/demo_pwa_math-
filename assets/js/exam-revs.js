@@ -1,7 +1,7 @@
 /*
  * File này do tools/build-cache-manifest.js sinh tự động.
- * Không sửa tay. Mục đích: cho Service Worker biết đề nào đã thay đổi
- * để chỉ tải lại đề mới/đã sửa khi tăng CACHE_VERSION.
+ * Không sửa tay. Mục đích: gắn nhãn hash nội dung cho đề đã cache.
+ * Đề chỉ được tải khi học sinh mở (cache lười), không tải trước.
  */
 self.EXAM_REVS = {
   "exams/hoa/de_hoa_01.html": "0524e7d76098f907",

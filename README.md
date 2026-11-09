@@ -5,6 +5,9 @@ tĩnh, phần nhận và quản lý kết quả dùng **Pages Functions + D1**. 
 một file HTML độc lập, giữ nguyên câu hỏi, cách chấm và giao diện gốc.
 
 - Học sinh làm bài **không cần tài khoản**, vẫn dùng được **ngoại tuyến**.
+- **Cache lười**: Service Worker chỉ tải trước phần lõi (trang chủ, CSS/JS,
+  icon). Mỗi đề chỉ được tải và lưu khi học sinh mở đề đó; các đề khác không
+  bị tải theo, tránh nghẽn Wi-Fi khi cả lớp cùng vào.
 - Kết quả được lưu trong `localStorage` trên thiết bị **và** tự đồng bộ lên D1
   khi có mạng; mất mạng thì xếp hàng trong IndexedDB và tự thử lại.
 - Giáo viên đăng nhập bằng mật khẩu dùng chung để xem, lọc và xuất CSV toàn bộ
@@ -87,6 +90,7 @@ repository/
     ├── update-and-deploy.ps1       # Cập nhật đề + deploy một lần
     ├── deploy-pages.ps1            # Chỉ deploy file tĩnh đã whitelist
     ├── hash-password.js            # Sinh TEACHER_PASSWORD_HASH
+    ├── test-sw-lazy.js             # Kiểm tra cache lười (không tải trước đề)
     ├── test-scoring.js             # Đối chiếu chấm điểm client/server
     └── test-api.js                 # Kiểm thử API trên Wrangler local
 ```
@@ -212,6 +216,7 @@ node tools/build-cache-manifest.js --check
 node tools/check-migrations.js
 node tools/check-library.js
 node tools/patch-exams.js --check
+node tools/test-sw-lazy.js
 node tools/test-scoring.js
 
 # Cần dev server đang chạy và mật khẩu giáo viên local
@@ -284,7 +289,7 @@ Xem chi tiết tại [`docs/BACKUP.md`](docs/BACKUP.md). Tóm tắt:
 
 Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
 `patch-exams` → `build-exam-data` → `build-cache-manifest` → `check-library`
-→ `test-scoring` → tăng `CACHE_VERSION` → `deploy-pages.ps1`. Không
+→ `test-sw-lazy` → `test-scoring` → tăng `CACHE_VERSION` → `deploy-pages.ps1`. Không
 commit/push GitHub, không deploy thư mục gốc.
 
 Nếu chỉ sửa đề đã có, cứ nhấp đúp: script báo "Không tìm thấy đề mới nào"
@@ -339,8 +344,9 @@ Kiểm tra `assets/js/catalog.js`, chạy `node tools/check-library.js`. Nếu �
 offline, tăng `CACHE_VERSION` rồi mở online một lần.
 
 **Đề mới mở được nhưng không dùng offline?**
-Tăng `CACHE_VERSION` trong `sw.js`, mở trang chủ online một lần để Service
-Worker cài lại và cache đề.
+Mở đề đó một lần khi còn mạng; Service Worker tự lưu đúng đề vừa mở. Không cần
+tải trước cả thư viện. Chỉ tăng `CACHE_VERSION` sau khi deploy thay đổi file
+tĩnh để trình duyệt cài lại bản mới.
 
 **Kết quả không lên trang giáo viên?**
 - Kiểm tra `/api/health`.

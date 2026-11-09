@@ -159,7 +159,12 @@ try {
 // 4. Service Worker
 const sw = exists('sw.js') ? read('sw.js') : '';
 if (sw && !/CACHE_VERSION\s*=\s*'[^']+'/.test(sw)) fail('sw.js thiếu CACHE_VERSION.');
-if (sw && !sw.includes('assets/js/catalog.js')) fail('sw.js chưa đọc catalog để cache đề.');
+if (sw && (sw.includes('EXAM_PATHS') || sw.includes('precacheExam'))) {
+  fail('sw.js vẫn tải trước toàn bộ đề; hãy dùng cache lười (chỉ lõi + đề đang mở).');
+}
+if (sw && !/function isExamPath\b/.test(sw)) {
+  fail('sw.js chưa có xử lý cache lười cho đề thi (isExamPath).');
+}
 
 // 5. Kết quả
 console.log('\n== THƯ VIỆN ĐỀ THI: KIỂM TRA ==');

@@ -3,8 +3,9 @@
    ------------------------------------------------------------------
    - Phạm vi mặc định là toàn bộ repository, nên kiểm soát được cả
      index.html và exams/<môn>/<đề>.html.
-   - Danh sách đề được đọc từ assets/js/catalog.js, vì vậy khi thêm đề
-     chỉ cần cập nhật catalog (và tăng CACHE_VERSION bên dưới).
+   - CACHE LAZY: lần cài đặt chỉ tải trước phần lõi (trang chủ, CSS, JS,
+     icon). Đề chỉ được tải và lưu khi học sinh thực sự mở đề đó; các đề
+     khác không bị tải theo, tránh nghẽn Wi-Fi khi lớp học mở cùng lúc.
    - Mỗi lần deploy phiên bản mới: tăng CACHE_VERSION, ví dụ v16 -> v17.
 
    LƯU Ý QUAN TRỌNG (Cloudflare Pages):
@@ -20,7 +21,7 @@
    ================================================================== */
 'use strict';
 
-var CACHE_VERSION = 'v23';
+var CACHE_VERSION = 'v24';
 var CACHE_PREFIX = 'exam-library-';
 var CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 var LEGACY_CACHE_PREFIX = 'de-toan-thpt-pwa-';
@@ -30,6 +31,9 @@ var SCOPE_PATH = new URL(SCOPE_URL).pathname;
 var SW_PATH = new URL('./sw.js', self.location.href).pathname;
 
 var OFFLINE_TIMEOUT_MS = 5000;
+// Trang chưa từng mở: chờ mạng lâu hơn trước khi báo "chưa lưu", vì Wi-Fi
+// lớp học có thể chậm. Trang đã có cache vẫn quay về cache sau 5 giây.
+var FIRST_NAVIGATION_TIMEOUT_MS = 20000;
 
 var CORE_PATHS = [
   './',
@@ -54,34 +58,14 @@ var CRITICAL_PATHS = [
   './assets/js/library.js'
 ];
 
-// Nạp danh mục đề để tự động cache mọi file đề đang có.
-try {
-  importScripts(new URL('./assets/js/catalog.js', self.location.href).href);
-} catch (error) {
-  // Nếu catalog lỗi, website vẫn cài được với các file lõi.
-}
-
 // Nạp manifest hash nội dung từng đề (do tools/build-cache-manifest.js sinh).
-// Nhờ đó khi tăng CACHE_VERSION, đề không đổi được chép từ cache cũ sang
-// thay vì tải lại toàn bộ thư viện.
+// Chỉ dùng để gắn nhãn phiên bản nội dung cho đề đã cache; KHÔNG tải trước đề.
 try {
   importScripts(new URL('./assets/js/exam-revs.js?v=' + CACHE_VERSION, self.location.href).href);
 } catch (error) {
-  // Không có manifest: vẫn chạy, nhưng sẽ tải lại đề như trước.
+  // Không có manifest: vẫn chạy bình thường.
 }
 var EXAM_REVS = self.EXAM_REVS || {};
-
-var EXAM_PATHS = [];
-try {
-  var subjects = (self.EXAM_LIBRARY && self.EXAM_LIBRARY.subjects) || [];
-  subjects.forEach(function (subject) {
-    (subject.exams || []).forEach(function (exam) {
-      if (!exam || !exam.file) return;
-      var file = String(exam.file).replace(/^\.?\//, '');
-      if (EXAM_PATHS.indexOf(file) < 0) EXAM_PATHS.push(file);
-    });
-  });
-} catch (error) {}
 
 function absolute(path) {
   return new URL(path, self.location.href).href;
@@ -261,44 +245,6 @@ function findCached(requestUrl, includeOlder) {
   });
 }
 
-// Tìm bản đề đã cache ở bất kỳ phiên bản trước nào (không gồm cache hiện tại).
-// Dùng để tái sử dụng nội dung khi hash trong manifest không đổi.
-function findOldCopy(href) {
-  var urls = urlVariants(href);
-  return caches.keys().then(function (keys) {
-    var older = keys.filter(function (key) {
-      return key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME;
-    }).sort(compareVersionDesc);
-
-    var index = 0;
-    function next() {
-      if (index >= older.length) return null;
-      var name = older[index];
-      index += 1;
-      return caches.open(name).then(function (oldCache) {
-        return matchIn(oldCache, urls);
-      }).then(function (hit) {
-        return hit || next();
-      });
-    }
-    return next();
-  }).catch(function () {
-    return null;
-  });
-}
-
-// Hash SHA-256 (16 ký tự đầu) của nội dung đã cache. Dùng cho cache cũ
-// chưa có header X-Exam-Rev: so nội dung thay vì tải lại mù quáng.
-function hashBody(response) {
-  return response.arrayBuffer().then(function (buffer) {
-    return crypto.subtle.digest('SHA-256', buffer);
-  }).then(function (digest) {
-    return Array.prototype.map.call(new Uint8Array(digest), function (byte) {
-      return byte.toString(16).padStart(2, '0');
-    }).join('').slice(0, 16);
-  });
-}
-
 // Cache cũ có thể chứa response có cờ redirected (do bản Service Worker
 // trước lưu nguyên response của Cloudflare). Navigation không được dùng
 // trực tiếp response đó, nên tạo lại một bản sạch trước khi trả về.
@@ -330,7 +276,7 @@ function fetchFresh(url) {
     });
 }
 
-function precacheUrl(cache, url, isExam) {
+function precacheUrl(cache, url) {
   return fetchFresh(url).then(function (response) {
     if (!response || !response.ok) {
       throw new Error('HTTP ' + (response ? response.status : '?') + ' cho ' + url);
@@ -338,18 +284,7 @@ function precacheUrl(cache, url, isExam) {
     if (isSpaFallback(url, response.url)) {
       throw new Error('SPA fallback cho ' + url);
     }
-
-    var contentType = response.headers.get('Content-Type') || '';
-    var isHtml = /text\/html/i.test(contentType);
-    var asText = Boolean(isExam && isHtml);
-
-    // Đề phải chứa khối quiz-data. Nếu không, rất có thể Cloudflare đã trả
-    // về trang chủ thay cho file đề không tồn tại -> không cache nhầm.
-    var bodyPromise = asText ? response.text() : response.blob();
-    return bodyPromise.then(function (body) {
-      if (asText && String(body).indexOf('id="quiz-data"') < 0) {
-        throw new Error('Nội dung không phải file đề: ' + url);
-      }
+    return response.blob().then(function (body) {
       var clean = makeCleanResponse(response, body);
       return cache.put(url, clean).then(function () { return true; });
     });
@@ -358,61 +293,6 @@ function precacheUrl(cache, url, isExam) {
 
 function criticalFor(url) {
   return CRITICAL_URLS.indexOf(url) >= 0;
-}
-
-// Precache một đề, tận dụng bản đã có nếu hash nội dung không đổi.
-// rev rỗng (manifest thiếu) -> luôn tải mới để tránh phục vụ đề cũ.
-function precacheExam(cache, url, rev) {
-  return findOldCopy(url).then(function (old) {
-    function copyOld() {
-      // Nội dung không đổi: chép nguyên bản cũ sang cache mới, không tải mạng.
-      return cache.put(url, old).then(function () { return true; });
-    }
-
-    function fetchAndStore() {
-      return fetchFresh(url).then(function (response) {
-        if (!response || !response.ok) {
-          throw new Error('HTTP ' + (response ? response.status : '?') + ' cho ' + url);
-        }
-        if (isSpaFallback(url, response.url)) {
-          throw new Error('SPA fallback cho ' + url);
-        }
-
-        var contentType = response.headers.get('Content-Type') || '';
-        var isHtml = /text\/html/i.test(contentType);
-        var bodyPromise = isHtml ? response.text() : response.blob();
-
-        return bodyPromise.then(function (body) {
-          if (isHtml && String(body).indexOf('id="quiz-data"') < 0) {
-            throw new Error('Nội dung không phải file đề: ' + url);
-          }
-          var clean = makeCleanResponse(response, body, rev ? { 'X-Exam-Rev': rev } : null);
-          return cache.put(url, clean).then(function () { return true; });
-        });
-      }).catch(function (error) {
-        // Mạng lỗi khi cập nhật: dùng bản cũ nếu có để không mất khả năng offline.
-        if (old) {
-          return cache.put(url, old).then(function () { return true; }).catch(function () {
-            throw error;
-          });
-        }
-        throw error;
-      });
-    }
-
-    if (old && rev) {
-      var oldRev = old.headers.get('X-Exam-Rev');
-      if (oldRev === rev) return copyOld();
-      if (!oldRev) {
-        // Cache của bản cũ chưa có header: so hash nội dung đã lưu.
-        return hashBody(old.clone()).then(function (bodyHash) {
-          return bodyHash === rev ? copyOld() : fetchAndStore();
-        }).catch(fetchAndStore);
-      }
-    }
-
-    return fetchAndStore();
-  });
 }
 
 function aliasIndexCache(cache) {
@@ -437,7 +317,7 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       var coreResults = CORE_URLS.map(function (url) {
-        return precacheUrl(cache, url, false).then(function () {
+        return precacheUrl(cache, url).then(function () {
           return { url: url, ok: true };
         }).catch(function () {
           return { url: url, ok: false };
@@ -456,16 +336,8 @@ self.addEventListener('install', function (event) {
         }
 
         // Bảo đảm cả '/' và '/index.html' đều có trong cache.
+        // KHÔNG tải trước đề: đề nào học sinh mở sẽ được lưu ở fetch handler.
         return aliasIndexCache(cache);
-      }).then(function () {
-        // Đề lỗi không chặn cài đặt; các đề khác vẫn dùng offline được.
-        // Đề không đổi (hash trùng) được chép từ cache cũ, không tải lại.
-        return Promise.all(EXAM_PATHS.map(function (rel) {
-          var url = absolute(rel);
-          return precacheExam(cache, url, EXAM_REVS[rel] || revForKey(url)).catch(function () {
-            return false;
-          });
-        }));
       });
     }).then(function () {
       return self.skipWaiting();
@@ -574,6 +446,8 @@ function offlineNavigation(request) {
 function navigationTimeout(event, request) {
   return new Promise(function (resolve) {
     var settled = false;
+    var timer = null;
+    var extraTimer = null;
 
     // Ghi cache chạy nền nhưng vẫn được Service Worker chờ hoàn tất. Phải gọi
     // waitUntil() ngay lúc event còn hoạt động; gọi trong .then() có thể bị bỏ qua.
@@ -595,19 +469,38 @@ function navigationTimeout(event, request) {
       }
     }
 
-    var timer = setTimeout(function () {
-      if (settled) return;
-      settled = true;
-      doneCaching();
-      resolve(offlineNavigation(request));
-    }, OFFLINE_TIMEOUT_MS);
-
     function finish(value) {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
+      if (extraTimer) clearTimeout(extraTimer);
       resolve(value);
     }
+
+    // Hết 5 giây: dùng cache nếu có. Trang chưa từng mở thì chờ mạng thêm
+    // (Wi-Fi lớp học có thể chậm) trước khi hiện trang "chưa lưu".
+    function fallbackToCache() {
+      if (settled) return;
+      findCached(request.url, false).then(function (hit) {
+        if (settled) return;
+        if (hit) {
+          doneCaching();
+          finish(navigationSafe(hit));
+          return;
+        }
+        extraTimer = setTimeout(function () {
+          if (settled) return;
+          doneCaching();
+          finish(offlinePage(request));
+        }, FIRST_NAVIGATION_TIMEOUT_MS - OFFLINE_TIMEOUT_MS);
+      }).catch(function () {
+        if (settled) return;
+        doneCaching();
+        finish(offlinePage(request));
+      });
+    }
+
+    timer = setTimeout(fallbackToCache, OFFLINE_TIMEOUT_MS);
 
     fetch(request).then(function (response) {
       if (!response) {
@@ -642,6 +535,64 @@ function navigationTimeout(event, request) {
 }
 
 /* ------------------------------------------------------------------
+   Đề thi: cache lười (chỉ tải đề học sinh thực sự mở)
+   ------------------------------------------------------------------ */
+
+function isExamPath(pathname) {
+  return /\/exams\//.test(pathname);
+}
+
+// Đề đã mở trước đó: trả bản cache ngay để không tốn Wi-Fi, đồng thời cập
+// nhật ngầm cho lần sau. Đề chưa mở: tải đúng một đề rồi lưu; không kéo theo
+// bất kỳ đề nào khác.
+function examNavigation(event, request) {
+  return findCached(request.url, false).then(function (hit) {
+    if (hit) {
+      try {
+        var refresh = fetch(request).then(function (response) {
+          if (!response || !response.ok) return;
+          if (isSpaFallback(request.url, response.url)) return;
+          var copy = null;
+          try { copy = response.clone(); } catch (error) {}
+          if (copy) return storeResponse(request.url, copy);
+        }).catch(function () {});
+        event.waitUntil(refresh);
+      } catch (error) {}
+      return navigationSafe(hit);
+    }
+
+    return fetch(request).then(function (response) {
+      if (!response) return offlineNavigation(request);
+      if (response.status >= 500) return offlineNavigation(request);
+      if (!response.ok) return response;
+      if (isSpaFallback(request.url, response.url)) return offlineNavigation(request);
+
+      var copy = null;
+      try { copy = response.clone(); } catch (error) {}
+      if (!copy) return response;
+
+      var storing = storeResponse(request.url, copy).then(function () {
+        return response;
+      }, function () {
+        return response;
+      });
+
+      // Giữ Service Worker sống đủ lâu để lưu đề, kể cả khi người dùng đóng tab.
+      try {
+        event.waitUntil(storing);
+        return response;
+      } catch (error) {
+        return storing;
+      }
+    }).catch(function () {
+      return offlineNavigation(request);
+    });
+  }).catch(function () {
+    return offlineNavigation(request);
+  });
+}
+
+/* ------------------------------------------------------------------
    Fetch
    ------------------------------------------------------------------ */
 
@@ -660,10 +611,16 @@ self.addEventListener('fetch', function (event) {
   // Không can thiệp vào file Service Worker; trình duyệt tự kiểm tra bản mới.
   if (url.pathname === SW_PATH) return;
 
-  // Điều hướng trang: ưu tiên mạng, mất mạng thì dùng cache, cuối cùng là
-  // trang thông báo "chưa lưu để dùng ngoại tuyến".
+  // Điều hướng trang. Đề thi dùng cache lười: đề đã mở thì trả cache ngay và
+  // cập nhật ngầm; đề chưa mở thì mới tải đúng đề đó. Các trang khác ưu tiên
+  // mạng, mất mạng thì dùng cache, cuối cùng là trang "chưa lưu để dùng
+  // ngoại tuyến".
   if (request.mode === 'navigate') {
-    event.respondWith(navigationTimeout(event, request));
+    if (isExamPath(url.pathname)) {
+      event.respondWith(examNavigation(event, request));
+    } else {
+      event.respondWith(navigationTimeout(event, request));
+    }
     return;
   }
 

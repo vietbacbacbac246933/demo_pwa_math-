@@ -4,12 +4,12 @@
  * Sinh assets/js/exam-revs.js: bản đồ "đường dẫn đề -> hash nội dung".
  *
  * Vì sao cần:
- *   Cloudflare Pages trả file .html KHÔNG có ETag/Last-Modified, nên Service
- *   Worker không thể hỏi máy chủ "file này có đổi không?". Thay vào đó, mỗi
- *   lần deploy ta tính hash nội dung từng đề. Khi tăng CACHE_VERSION, SW so
- *   hash trong manifest với hash đã lưu trong cache:
- *     - trùng  -> chép nguyên bản cũ sang cache mới, KHÔNG tải lại
- *     - khác   -> tải lại đúng đề đó
+ *   Cloudflare Pages trả file .html KHÔNG có ETag/Last-Modified. Manifest này
+ *   giúp Service Worker gắn nhãn X-Exam-Rev cho đề khi lưu vào cache, tức là
+ *   biết bản đang lưu thuộc nội dung nào.
+ *
+ *   Việc tải đề là CACHE LƯỜI: chỉ đề học sinh thực sự mở mới được tải và
+ *   lưu; không tải trước toàn bộ thư viện.
  *
  * Cách dùng:
  *   node tools/build-cache-manifest.js           # sinh / cập nhật
@@ -54,8 +54,8 @@ function render(map) {
   return [
     '/*',
     ' * File này do tools/build-cache-manifest.js sinh tự động.',
-    ' * Không sửa tay. Mục đích: cho Service Worker biết đề nào đã thay đổi',
-    ' * để chỉ tải lại đề mới/đã sửa khi tăng CACHE_VERSION.',
+    ' * Không sửa tay. Mục đích: gắn nhãn hash nội dung cho đề đã cache.',
+    ' * Đề chỉ được tải khi học sinh mở (cache lười), không tải trước.',
     ' */',
     'self.EXAM_REVS = {',
     lines.join(',\n'),
