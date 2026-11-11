@@ -3,6 +3,9 @@ chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0.."
 
+rem Giu cac file web o goc o trang thai an cho gon (chi doi thuoc tinh Windows).
+powershell -NoProfile -ExecutionPolicy Bypass -File "_system\tools\hide-runtime.ps1" >nul 2>nul
+
 rem ==================================================================
 rem  START.bat - Nhap de moi + kiem tra + commit + push len GitHub Pages
 rem

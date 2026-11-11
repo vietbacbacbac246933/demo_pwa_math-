@@ -182,6 +182,23 @@ function copyFileIfExists(source, target) {
   return true;
 }
 
+// Một số thao tác ghi/xóa trong thư mục gốc (đặc biệt khi OneDrive đồng bộ)
+// làm mất thuộc tính Hidden của các mục runtime, khiến thư mục dự án hiện lại
+// hàng chục file. Đặt lại sau mỗi job để gốc luôn chỉ còn Start/ và _system/.
+function restoreHiddenAttributes() {
+  try {
+    const script = path.join(ROOT, '_system', 'tools', 'hide-runtime.ps1');
+    if (!fs.existsSync(script)) return;
+    spawnSync('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy', 'Bypass',
+      '-File', script
+    ], { windowsHide: true, timeout: 30000, stdio: 'ignore' });
+  } catch (error) {
+    // Best effort: không ảnh hưởng kết quả job.
+  }
+}
+
 function createSnapshot(job) {
   const dir = path.join(BACKUP_DIR, 'job-' + job.id);
   fs.mkdirSync(dir, { recursive: true });
@@ -507,6 +524,7 @@ async function runJob(job) {
     job.finishedAt = new Date().toISOString();
     job.canCancel = false;
     cleanupWork(job);
+    restoreHiddenAttributes();
     saveJob(job);
     if (activeJob === job) activeJob = null;
     lastJob = job;
@@ -616,6 +634,7 @@ async function runMaintenanceJob(job) {
   } finally {
     job.finishedAt = new Date().toISOString();
     job.canCancel = false;
+    restoreHiddenAttributes();
     saveJob(job);
     if (activeJob === job) activeJob = null;
     lastJob = job;

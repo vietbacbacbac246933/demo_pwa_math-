@@ -108,6 +108,10 @@ if "%CODE%"=="0" (
   echo ============================================================
 )
 
+rem OneDrive co the lam mat thuoc tinh Hidden cua cac muc runtime sau khi ghi/xoa.
+rem Dat lai de thu muc goc van chi hien Start\ va _system\.
+powershell -NoProfile -ExecutionPolicy Bypass -File "_system\tools\hide-runtime.ps1" >nul 2>nul
+
 rem Chi pause khi chay bang cach nhap dup, khong pause khi goi tu script khac.
 if "%HAS_ARGS%"=="0" pause
 exit /b %CODE%
