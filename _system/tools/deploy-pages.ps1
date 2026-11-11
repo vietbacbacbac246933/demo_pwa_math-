@@ -73,9 +73,18 @@ foreach ($name in $publicDirs) {
   Copy-Item $src (Join-Path $stage $name) -Recurse
 }
 
+# File web ở gốc đang mang thuộc tính Hidden (để thư mục gọn). Copy-Item giữ
+# nguyên thuộc tính đó, nên phải bỏ đi trong thư mục tạm: nếu không, các bước
+# kiểm tra bên dưới và Wrangler có thể bỏ qua file ẩn.
+Get-ChildItem $stage -Recurse -Force | ForEach-Object {
+  if ($_.Attributes -band [System.IO.FileAttributes]::Hidden) {
+    $_.Attributes = $_.Attributes -band (-bnot [System.IO.FileAttributes]::Hidden)
+  }
+}
+
 # Kiểm tra an toàn: không cho file lạ, file ẩn hoặc đuôi file không mong muốn.
 $allowedExtensions = @('', '.html', '.css', '.js', '.json', '.webmanifest', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.webp')
-$files = @(Get-ChildItem $stage -Recurse -File)
+$files = @(Get-ChildItem $stage -Recurse -File -Force)
 
 $unexpected = @($files | Where-Object {
   if ($_.Name -eq '.nojekyll') { return $false }
