@@ -36,10 +36,15 @@ powershell -ExecutionPolicy Bypass -File _system/tools/hide-runtime.ps1
 ```text
 _system/
 ├── tools/         # Script Node.js / PowerShell của hệ thống
+│   └── node_modules/  # (tuỳ chọn) thư viện sharp để tối ưu ảnh WebP
 ├── ui/            # Giao diện Local Helper (add-exam.html)
 ├── docs/          # Tài liệu triển khai, sao lưu, hướng dẫn
 └── migrations/    # Migration D1 (wrangler.jsonc trỏ tới thư mục này)
 ```
+
+`tools/node_modules/` chỉ xuất hiện nếu bạn chạy `npm install` trong
+`_system/tools` để dùng bước tối ưu ảnh (`optimize-exam-images.js`). Thư mục này
+đã nằm trong `.gitignore` và không bao giờ được deploy lên Cloudflare.
 
 ## Quy tắc
 

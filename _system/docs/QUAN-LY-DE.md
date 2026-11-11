@@ -80,8 +80,8 @@ Nếu pipeline kiểm tra/deploy lỗi hoặc bạn dừng trước khi tải l�
 
 ## 5. Theo dõi và thử lại
 
-- Thanh tiến trình hiển thị từng bước: nhập đề, patch, đáp án, cache, kiểm tra,
-  deploy.
+- Thanh tiến trình hiển thị từng bước: nhập đề, tối ưu ảnh, patch, đáp án, cache,
+  kiểm tra, deploy.
 - Nhật ký chi tiết có nút **Sao chép log** để gửi khi cần hỗ trợ.
 - Nếu lỗi, bấm **Thử lại**; danh sách đề vẫn được giữ và dữ liệu cũ đã được
   khôi phục.
@@ -90,6 +90,21 @@ Nếu pipeline kiểm tra/deploy lỗi hoặc bạn dừng trước khi tải l�
 
 Đóng trình duyệt không dừng tiến trình. Mở lại giao diện để xem tiếp; nếu trợ
 lý đã tắt, chạy lại `Start\START.bat`.
+
+### Ảnh trong đề (tự động chuyển WebP)
+
+Đề thường nhúng ảnh PNG base64 nên file rất nặng. Bước **tối ưu ảnh** tự chuyển
+sang WebP, giảm khoảng 86% dung lượng ảnh; ảnh vẫn nằm trong đề nên dùng ngoại
+tuyến bình thường. Bạn không cần làm gì thêm.
+
+Lần đầu cần cài thư viện xử lý ảnh (một lần, có Internet):
+
+```powershell
+cd _system\tools
+npm install
+```
+
+Nếu chưa cài, bước này chỉ in cảnh báo rồi bỏ qua — việc đăng đề vẫn thành công.
 
 ## 6. Xử lý sự cố
 

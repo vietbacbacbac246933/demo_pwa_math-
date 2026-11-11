@@ -99,6 +99,7 @@ repository/                        # mở thư mục chỉ thấy 2 mục: Start
         ├── build-exam-data.js      # Sinh exam-data.js từ các file đề
         ├── build-cache-manifest.js # Sinh hash đề cho Service Worker
         ├── patch-exams.js          # Tích hợp ô lớp + hàng đợi vào đề
+        ├── optimize-exam-images.js # Ảnh trong đề: PNG/JPEG -> WebP (tuỳ chọn)
         ├── bump-cache-version.js   # Tăng CACHE_VERSION trong sw.js
         ├── update-and-deploy.ps1   # Cập nhật đề + deploy một lần
         ├── deploy-pages.ps1        # Chỉ deploy file tĩnh đã whitelist
@@ -384,12 +385,38 @@ gọi lại đúng quy trình cũ (`import-exam.js` → `update-and-deploy.ps1` 
 2. Mở thư mục `Start\` rồi nhấp đúp `START-CLOUDFLARE.bat`.
 
 Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
-`patch-exams` → `build-exam-data` → `build-cache-manifest` → `check-library`
-→ `test-sw-lazy` → `test-scoring` → tăng `CACHE_VERSION` → `deploy-pages.ps1`. Không
-commit/push GitHub, không deploy thư mục gốc.
+`optimize-exam-images` → `patch-exams` → `build-exam-data` → `build-cache-manifest`
+→ `check-library` → `test-sw-lazy` → `test-scoring` → tăng `CACHE_VERSION`
+→ `deploy-pages.ps1`. Không commit/push GitHub, không deploy thư mục gốc.
 
 Nếu chỉ sửa đề đã có, cứ nhấp đúp: script báo "Không tìm thấy đề mới nào"
 rồi vẫn cập nhật và deploy bình thường.
+
+### Tối ưu ảnh trong đề (WebP)
+
+Đề do hệ thống tạo thường nhúng ảnh PNG base64, rất nặng (một đề có thể 2,4 MB).
+Bước `optimize-exam-images` tự chuyển ảnh sang **WebP q90**, giảm khoảng 86%
+dung lượng ảnh mà mắt thường không phân biệt được. Ảnh vẫn nằm trong đề nên
+chế độ ngoại tuyến hoạt động y như cũ.
+
+Bước này cần thư viện `sharp`, cài một lần trên máy giáo viên:
+
+```powershell
+cd _system\tools
+npm install
+```
+
+Nếu chưa cài, pipeline chỉ in cảnh báo và bỏ qua bước này (không làm hỏng việc
+đăng đề). Chạy tay:
+
+```powershell
+node _system/tools/optimize-exam-images.js --dry-run    # xem trước
+node _system/tools/optimize-exam-images.js              # tối ưu
+node _system/tools/optimize-exam-images.js --check      # kiểm tra còn ảnh nặng
+node _system/tools/optimize-exam-images.js --revert=<mốc>  # hoàn tác
+```
+
+Bản gốc của mỗi đề được sao lưu trong `backups/exam-images/<mốc>/` trước khi ghi.
 
 Chạy bằng dòng lệnh:
 
