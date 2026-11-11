@@ -1,5 +1,5 @@
 /*
- * File này do tools/build-cache-manifest.js sinh tự động.
+ * File này do _system/tools/build-cache-manifest.js sinh tự động.
  * Không sửa tay. Mục đích: gắn nhãn hash nội dung cho đề đã cache.
  * Đề chỉ được tải khi học sinh mở (cache lười), không tải trước.
  */
@@ -12,6 +12,7 @@ self.EXAM_REVS = {
   "exams/sinh/de_sinh_03.html": "aef0a70a81692c25",
   "exams/sinh/de_sinh_05.html": "d68988566e40d688",
   "exams/su/de_su_01.html": "9184f61448a5b3a1",
+  "exams/su/de_su_02.html": "25f570ddc7192db1",
   "exams/toan/de_toan_01.html": "4a3d601d3c082726",
   "exams/toan/de_toan_02.html": "3c6463fc2a5ac772"
 };

@@ -21,7 +21,7 @@
     version: 1,
     title: 'Thư viện đề thi THPT',
     subtitle: 'Ôn tập và kiểm tra trực tuyến, dùng được ngoại tuyến trên điện thoại và máy tính.',
-    updatedAt: '2026-11-08',
+    updatedAt: '2026-11-10',
 
     subjects: [
       {
@@ -161,7 +161,7 @@
             mode: 'practice',
             tags: [],
             addedAt: '2026-11-06'
-          }
+          },
         ]
       },
       {
@@ -181,6 +181,18 @@
             mode: 'practice',
             tags: [],
             addedAt: '2026-11-08'
+          },
+          {
+            id: 'su_02',
+            title: 'Trắc nghiệm sử (GK1)',
+            file: 'exams/su/de_su_02.html',
+            description: 'Đề trắc nghiệm Lịch sử: 120 câu, 120 điểm.',
+            questions: 120,
+            points: 120,
+            minutes: 0,
+            mode: 'practice',
+            tags: [],
+            addedAt: '2026-11-10'
           }
         ]
       },

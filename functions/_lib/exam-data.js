@@ -1,6 +1,6 @@
 /*
  * AUTO-GENERATED — không sửa tay.
- * Sinh bởi tools/build-exam-data.js từ các file trong exams/.
+ * Sinh bởi _system/tools/build-exam-data.js từ các file trong exams/.
  * File này chỉ dùng phía server (Pages Functions), không được trả ra API.
  */
 export const EXAMS = {
@@ -2715,6 +2715,859 @@ export const EXAMS = {
         "tfScoring": "partial"
       }
     ]
+  },
+  "su_02": {
+    "id": "su_02",
+    "title": "Trắc nghiệm sử (GK1)",
+    "subjectId": "su",
+    "subjectName": "Lịch sử",
+    "mode": "practice",
+    "minutes": 0,
+    "questionCount": 120,
+    "totalScore": 120,
+    "version": "ee130699a303",
+    "questions": [
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 1,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 3,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 2,
+        "tfScoring": "partial"
+      },
+      {
+        "type": "single",
+        "points": 1,
+        "options": 4,
+        "correct": 0,
+        "tfScoring": "partial"
+      }
+    ]
   }
 };
 
@@ -2816,6 +3669,16 @@ export const EXAM_LIST = [
     "subject_name": "Lịch sử",
     "question_count": 140,
     "total_score": 140,
+    "mode": "practice",
+    "minutes": 0
+  },
+  {
+    "id": "su_02",
+    "title": "Trắc nghiệm sử (GK1)",
+    "subject_id": "su",
+    "subject_name": "Lịch sử",
+    "question_count": 120,
+    "total_score": 120,
     "mode": "practice",
     "minutes": 0
   }
