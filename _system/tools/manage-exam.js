@@ -32,6 +32,7 @@ const path = require('path');
 const os = require('os');
 const vm = require('vm');
 const { spawnSync } = require('child_process');
+const winFile = require('./helper/win-file');
 
 // Có thể trỏ về bản sao project (dùng khi kiểm thử như local-helper).
 const ROOT = process.env.EXAM_HELPER_ROOT
@@ -63,7 +64,8 @@ function readText(rel) {
 function writeText(rel, text) {
   const abs = path.join(ROOT, rel);
   fs.mkdirSync(path.dirname(abs), { recursive: true });
-  fs.writeFileSync(abs, text, 'utf8');
+  // sw.js đang được ẩn (thuộc tính Hidden) nên phải ghi qua wrapper.
+  winFile.writeFileSync(abs, text, 'utf8');
 }
 
 function detectNl(text) {
@@ -322,7 +324,7 @@ function rollback(store, movedBackups) {
       if (content === null) {
         if (fs.existsSync(abs)) fs.unlinkSync(abs);
       } else {
-        fs.writeFileSync(abs, content);
+        winFile.writeFileSync(abs, content);
       }
     } catch (error) {
       console.error('Không hoàn tác được ' + abs + ': ' + error.message);

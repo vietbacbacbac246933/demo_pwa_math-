@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { spawn, spawnSync } = require('child_process');
+const winFile = require('./win-file');
 const {
   ROOT,
   BACKUP_DIR,
@@ -235,7 +236,7 @@ function restoreSnapshot(job) {
       const target = path.join(ROOT, rel);
       if (fs.existsSync(source)) {
         fs.mkdirSync(path.dirname(target), { recursive: true });
-        fs.copyFileSync(source, target);
+        winFile.copyFileSync(source, target);
       } else if (!manifest.files.includes(rel)) {
         try { fs.rmSync(target, { force: true }); } catch (error) {}
       }

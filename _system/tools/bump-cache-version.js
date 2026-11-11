@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const winFile = require('./helper/win-file');
 
 const SW_PATH = path.join(__dirname, '..', '..', 'sw.js');
 const dryRun = process.argv.indexOf('--dry-run') >= 0;
@@ -38,5 +39,7 @@ if (updated === text) {
   process.exit(0);
 }
 
-fs.writeFileSync(SW_PATH, updated, 'utf8');
+// sw.js được ẩn cho gọn thư mục, nên ghi qua wrapper (Windows/OneDrive trả EPERM
+// khi mở file ẩn để ghi).
+winFile.writeFileSync(SW_PATH, updated, 'utf8');
 console.log('Đã tăng CACHE_VERSION: v' + current + ' -> v' + next);

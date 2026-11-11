@@ -41,6 +41,8 @@ const os = require('os');
 const vm = require('vm');
 const readline = require('readline');
 const { spawnSync } = require('child_process');
+// sw.js ở gốc đang mang thuộc tính Hidden (thư mục gọn) nên phải ghi qua wrapper.
+const winFile = require('./helper/win-file');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const CATALOG_REL = 'assets/js/catalog.js';
@@ -100,7 +102,7 @@ function readText(rel) {
 
 function writeText(abs, text) {
   fs.mkdirSync(path.dirname(abs), { recursive: true });
-  fs.writeFileSync(abs, text, 'utf8');
+  winFile.writeFileSync(abs, text, 'utf8');
 }
 
 function detectNl(text) {
@@ -1111,7 +1113,7 @@ function rollback(store) {
       if (content === null) {
         if (fs.existsSync(abs)) fs.unlinkSync(abs);
       } else {
-        fs.writeFileSync(abs, content);
+        winFile.writeFileSync(abs, content);
       }
     } catch (error) {
       console.error('Không hoàn tác được ' + abs + ': ' + error.message);
