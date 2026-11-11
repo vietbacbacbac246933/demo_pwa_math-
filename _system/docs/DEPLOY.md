@@ -90,7 +90,7 @@ phải được tạo bằng script deploy ở dưới (không deploy thẳng th
 
 Cách nhanh nhất — giao diện Local Helper:
 
-1. Nhấp đúp `START.bat`.
+1. Mở thư mục `Start\` và nhấp đúp `START.bat`.
 2. Kéo thả file `.html` / thư mục export / `.zip` vào giao diện.
 3. Kiểm tra kế hoạch rồi bấm **Đăng lên thư viện**.
 
@@ -107,7 +107,7 @@ theo phiên. Giao diện dùng lại đúng pipeline cũ: `import-exam.js` →
 ### Deploy bằng terminal (dự phòng)
 
 1. Chép file `.html` / thư mục export / `.zip` đề mới vào thư mục project.
-2. Nhấp đúp `START-CLOUDFLARE.bat`.
+2. Nhấp đúp `Start\START-CLOUDFLARE.bat`.
 
 Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
 `patch-exams` → `build-exam-data` → `build-cache-manifest` → `check-library`
@@ -130,14 +130,14 @@ powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1 -Ex
 Truyền tham số `import-exam` qua BAT:
 
 ```bat
-START-CLOUDFLARE.bat --subject toan --number 3 --title "Đề Toán số 3"
-START-CLOUDFLARE.bat --check-only
-START-CLOUDFLARE.bat --no-deploy
+Start\START-CLOUDFLARE.bat --subject toan --number 3 --title "Đề Toán số 3"
+Start\START-CLOUDFLARE.bat --check-only
+Start\START-CLOUDFLARE.bat --no-deploy
 ```
 
 Tùy chọn PowerShell: `-CheckOnly`, `-NoDeploy`, `-Yes`.
 
-> `START-GITHUB.bat` (hoặc `START.bat --github`) là quy trình cũ cho GitHub
+> `Start\START-GITHUB.bat` (hoặc `Start\START.bat --github`) là quy trình cũ cho GitHub
 > Pages: bắt buộc nhánh `main`, không chạy `build-exam-data` và không deploy
 > Cloudflare. Không dùng cho `de-toan-thpt.pages.dev`.
 
@@ -149,7 +149,7 @@ Tùy chọn PowerShell: `-CheckOnly`, `-NoDeploy`, `-Yes`.
 > `main`, production sẽ mất API, D1 và trang giáo viên.
 >
 > Vào **Pages project → Settings → Builds & deployments** và Disconnect Git
-> nếu mục này đang bật. Sau đó chỉ deploy bằng `START-CLOUDFLARE.bat` hoặc
+> nếu mục này đang bật. Sau đó chỉ deploy bằng `Start\START-CLOUDFLARE.bat` hoặc
 > `_system/tools/deploy-pages.ps1`.
 
 > **Cảnh báo:** `wrangler pages deploy .` upload **toàn bộ** thư mục hiện tại.

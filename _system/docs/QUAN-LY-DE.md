@@ -4,10 +4,10 @@ Tài liệu dành cho giáo viên: mở giao diện, thêm đề, cập nhật, 
 
 ## 1. Mở giao diện
 
-1. Nhấp đúp `START.bat` trong thư mục dự án.
+1. Mở thư mục `Start\` và nhấp đúp `START.bat`.
 2. Cửa sổ kiểm tra môi trường chạy vài giây, sau đó trình duyệt tự mở
    `http://127.0.0.1:47821/add-exam.html`.
-3. Nếu trình duyệt không tự mở, nhấp đúp `START.bat` lần nữa. Trợ lý đã chạy
+3. Nếu trình duyệt không tự mở, nhấp đúp `Start\START.bat` lần nữa. Trợ lý đã chạy
    sẵn sẽ được mở lại, không tạo thêm tiến trình.
 
 Trợ lý chỉ lắng nghe trên `127.0.0.1` (máy của bạn). Không có đề nào được gửi
@@ -89,19 +89,19 @@ Nếu pipeline kiểm tra/deploy lỗi hoặc bạn dừng trước khi tải l�
 - Nút **Dừng tiến trình** chỉ hoạt động trước khi bắt đầu tải lên Cloudflare.
 
 Đóng trình duyệt không dừng tiến trình. Mở lại giao diện để xem tiếp; nếu trợ
-lý đã tắt, chạy lại `START.bat`.
+lý đã tắt, chạy lại `Start\START.bat`.
 
 ## 6. Xử lý sự cố
 
 | Hiện tượng | Cách xử lý |
 | --- | --- |
-| “Không kết nối được Local Helper” | Chạy `START.bat`. Kiểm tra cổng `47821` có bị ứng dụng khác dùng. |
-| “Phiên đã hết hạn” | Đóng tab, chạy lại `START.bat` để nhận token mới. |
+| “Không kết nối được Local Helper” | Chạy `Start\START.bat`. Kiểm tra cổng `47821` có bị ứng dụng khác dùng. |
+| “Phiên đã hết hạn” | Đóng tab, chạy lại `Start\START.bat` để nhận token mới. |
 | “Chưa đăng nhập Cloudflare” | Chạy `npx wrangler login` một lần, rồi bấm **Kiểm tra lại**. |
 | Deploy lỗi ở bước kiểm tra | Đọc log, sửa đề lỗi, bấm **Thử lại**. Dữ liệu cũ đã được khôi phục. |
-| Trợ lý tự tắt | Trợ lý tắt sau 60 phút không hoạt động. Chạy lại `START.bat`. |
-| Cần deploy bằng terminal | Dùng `START-CLOUDFLARE.bat` (dự phòng, giữ nguyên quy trình cũ). |
-| Cần quy trình GitHub Pages cũ | Dùng `START-GITHUB.bat` hoặc `START.bat --github`. |
+| Trợ lý tự tắt | Trợ lý tắt sau 60 phút không hoạt động. Chạy lại `Start\START.bat`. |
+| Cần deploy bằng terminal | Dùng `Start\START-CLOUDFLARE.bat` (dự phòng, giữ nguyên quy trình cũ). |
+| Cần quy trình GitHub Pages cũ | Dùng `Start\START-GITHUB.bat` hoặc `Start\START.bat --github`. |
 
 ## 7. Kiểm thử
 
@@ -129,7 +129,7 @@ rollback khi pipeline lỗi, chặn deploy song song, log không lộ token và 
 ## 8. Kiến trúc ngắn gọn
 
 ```text
-START.bat
+Start\START.bat
   └─ node _system/tools/local-helper.js        (HTTP 127.0.0.1, token mỗi phiên)
        ├─ _system/ui/add-exam.html     (giao diện tự chứa)
        ├─ POST /api/files              (đọc HTML/ZIP vào thư mục tạm)

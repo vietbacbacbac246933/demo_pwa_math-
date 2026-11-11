@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
-cd /d "%~dp0"
+cd /d "%~dp0.."
 
 rem ==================================================================
 rem  START.bat - Nhap de moi + kiem tra + commit + push len GitHub Pages

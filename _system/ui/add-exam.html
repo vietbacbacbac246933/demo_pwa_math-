@@ -1251,8 +1251,8 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
     if (error && error.status === 401) {
       state.connected = false;
       setConnected('bad', 'Phiên đã hết hạn');
-      showBanner('Phiên kết nối đã hết hạn hoặc không hợp lệ. Hãy đóng cửa sổ này và mở lại bằng START.bat.', 'Mở lại hướng dẫn', () => {
-        toast('Đóng cửa sổ này rồi nhấp đúp START.bat trong thư mục đề thi.', 'err');
+      showBanner('Phiên kết nối đã hết hạn hoặc không hợp lệ. Hãy đóng cửa sổ này và mở lại bằng Start/START.bat.', 'Mở lại hướng dẫn', () => {
+        toast('Đóng cửa sổ này rồi nhấp đúp Start/START.bat trong thư mục đề thi.', 'err');
       });
       return;
     }
@@ -1483,7 +1483,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
 
   async function startMaintenance(action, payload) {
     if (state.shutdown || !state.connected) {
-      toast('Trợ lý chưa kết nối. Hãy chạy lại START.bat.', 'err');
+      toast('Trợ lý chưa kết nối. Hãy chạy lại Start/START.bat.', 'err');
       return;
     }
     if (state.deploying || state.manageBusy) {
@@ -1614,7 +1614,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
 
   async function addFiles(collected) {
     if (state.uploadBusy) return;
-    if (state.shutdown) { toast('Trợ lý đã tắt. Hãy chạy lại START.bat.', 'err'); return; }
+    if (state.shutdown) { toast('Trợ lý đã tắt. Hãy chạy lại Start/START.bat.', 'err'); return; }
     if (!state.connected) { toast('Chưa kết nối được Local Helper.', 'err'); return; }
 
     const remaining = MAX_FILES - state.files.length;
@@ -2351,7 +2351,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
       toast('Không thể tắt khi đang đăng đề. Hãy chờ hoàn tất hoặc dừng trước khi tải lên.', 'err');
       return;
     }
-    if (!window.confirm('Tắt Local Helper?\n\nGiao diện sẽ ngừng hoạt động. Chạy lại START.bat khi cần đăng đề.')) return;
+    if (!window.confirm('Tắt Local Helper?\n\nGiao diện sẽ ngừng hoạt động. Chạy lại Start/START.bat khi cần đăng đề.')) return;
     try {
       await api('/api/shutdown', { method: 'POST', body: {} });
     } catch (error) {
@@ -2366,7 +2366,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
     els.pickFilesBtn.disabled = true;
     els.pickFolderBtn.disabled = true;
     renderManageList();
-    showBanner('Local Helper đã tắt. Nhấp đúp START.bat trong thư mục đề thi để mở lại.', null, null);
+    showBanner('Local Helper đã tắt. Nhấp đúp Start/START.bat trong thư mục đề thi để mở lại.', null, null);
     toast('Đã tắt Local Helper.', 'ok');
   }
 
@@ -2492,7 +2492,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
 
     if (!TOKEN) {
       setConnected('bad', 'Thiếu mã phiên');
-      showBanner('Không tìm thấy mã phiên trong đường dẫn. Hãy đóng tab này và mở lại bằng START.bat (không mở trực tiếp add-exam.html).', null, null);
+      showBanner('Không tìm thấy mã phiên trong đường dẫn. Hãy đóng tab này và mở lại bằng Start/START.bat (không mở trực tiếp add-exam.html).', null, null);
       return;
     }
 
@@ -2504,7 +2504,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
       hideBanner();
     } catch (error) {
       setConnected('bad', 'Không kết nối');
-      showBanner('Không kết nối được Local Helper. Hãy chạy START.bat trong thư mục đề thi, sau đó thử lại.', 'Thử lại', () => location.reload());
+      showBanner('Không kết nối được Local Helper. Hãy chạy Start/START.bat trong thư mục đề thi, sau đó thử lại.', 'Thử lại', () => location.reload());
       els.deployBtn.disabled = true;
       return;
     }

@@ -29,7 +29,7 @@
  *                           Luôn sao lưu bản cũ vào backups/exam-updates/.
  *   --dry-run               Chỉ in kế hoạch, không sửa file
  *   --include-legacy        Quét cả thư mục mẫu cũ (de-kt-15p, de-toan-thpt)
- *   --no-push               Được START.bat truyền vào; importer bỏ qua
+ *   --no-push               Được Start/START.bat truyền vào; importer bỏ qua
  *
  * Chỉ dùng thư viện có sẵn của Node, không cần npm install.
  */
@@ -232,7 +232,7 @@ const sourceArgs = [];
       case '--dry-run': opts.dryRun = true; break;
       case '--update-existing': opts.updateExisting = true; break;
       case '--include-legacy': opts.includeLegacy = true; break;
-      case '--no-push': break; // do START.bat dùng, importer không cần
+      case '--no-push': break; // do Start/START.bat dùng, importer không cần
       case '--help': case '-h': opts.help = true; break;
       default:
         if (arg.indexOf('-') === 0) die('Tham số không hợp lệ: ' + arg + ' (xem --help)');
@@ -1173,7 +1173,7 @@ async function main() {
     console.log('Không tìm thấy đề mới nào ở thư mục gốc.');
     console.log('Hãy chép file .html (hoặc thư mục export / .zip) vào:');
     console.log('  ' + ROOT);
-    console.log('rồi chạy lại START.bat hoặc START-CLOUDFLARE.bat.');
+    console.log('rồi chạy lại Start/START.bat hoặc Start/START-CLOUDFLARE.bat.');
     return 0;
   }
 
@@ -1318,7 +1318,7 @@ async function main() {
   });
   console.log('');
   console.log('Bản gốc đã được chuyển tới: ' + path.join(os.tmpdir(), 'opencode', 'imported-sources', stamp));
-  console.log('Chạy tiếp: START-CLOUDFLARE.bat (Cloudflare) hoặc START.bat (GitHub Pages).');
+  console.log('Chạy tiếp: Start/START-CLOUDFLARE.bat (Cloudflare) hoặc Start/START.bat (GitHub Pages).');
   return 0;
 }
 

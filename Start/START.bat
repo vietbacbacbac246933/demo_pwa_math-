@@ -1,14 +1,20 @@
 @echo off
 chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
-cd /d "%~dp0"
+cd /d "%~dp0.."
 title Quan ly thu vien de - Local Helper
+
+rem Giu cac file web o goc o trang thai an cho gon (chi doi thuoc tinh Windows,
+rem khong anh huong GitHub Pages / Cloudflare / Service Worker).
+powershell -NoProfile -ExecutionPolicy Bypass -File "_system\tools\hide-runtime.ps1" >nul 2>nul
 
 rem ==================================================================
 rem  START.bat - Mo giao dien quan ly de tren may giao vien.
 rem
+rem  File nay nam trong thu muc Start\ cua du an.
+rem
 rem  Cach dung:
-rem    - Nhap dup START.bat.
+rem    - Nhap dup Start\START.bat.
 rem    - Giao dien se tu mo trong trinh duyet.
 rem    - Chon de, kiem tra, roi bam "DANG LEN THU VIEN".
 rem
@@ -96,6 +102,8 @@ echo START.bat --github      Chay quy trinh GitHub Pages cu
 echo START.bat --dry-run     Chuyen tiep tuy chon cho START-GITHUB.bat
 echo START-CLOUDFLARE.bat    Deploy truc tiep bang terminal neu giao dien loi
 echo.
+echo (Cac file .bat nay nam trong thu muc Start\ cua du an.)
+echo.
 exit /b 0
 
 :no_node
@@ -110,7 +118,7 @@ exit /b 1
 :missing_files
 echo.
 echo [LOI] Thieu file cua he thong trong thu muc nay.
-echo       Hay mo dung thu muc chua START.bat va kiem tra lai.
+echo       Hay mo dung thu muc du an (thu muc chua Start\ va _system\) va kiem tra lai.
 echo.
 pause
 exit /b 1

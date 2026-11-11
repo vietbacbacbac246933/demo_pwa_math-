@@ -28,10 +28,13 @@ một file HTML độc lập, giữ nguyên câu hỏi, cách chấm và giao di
 ## 1. Cấu trúc thư mục
 
 ```text
-repository/
-├── START.bat                      # Mở giao diện quản lý đề (giáo viên)
-├── START-CLOUDFLARE.bat           # Deploy trực tiếp bằng terminal (dự phòng)
-├── START-GITHUB.bat               # Quy trình GitHub Pages cũ
+repository/                        # mở thư mục chỉ thấy 2 mục: Start/ và _system/
+├── Start/                         # Giáo viên mở thư mục này để chạy
+│   ├── START.bat                  # Mở giao diện quản lý đề (giáo viên)
+│   ├── START-CLOUDFLARE.bat       # Deploy trực tiếp bằng terminal (dự phòng)
+│   └── START-GITHUB.bat           # Quy trình GitHub Pages cũ
+│
+│   --- các file web dưới đây vẫn ở gốc repo nhưng bị ẨN (xem ghi chú cuối) ---
 ├── index.html                     # Trang chủ thư viện
 ├── teacher.html                   # Trang kết quả cho giáo viên
 ├── manifest.webmanifest           # Manifest PWA dùng chung
@@ -105,10 +108,24 @@ repository/
         └── test-api.js             # Kiểm thử API trên Wrangler local
 ```
 
-> `index.html`, `assets/`, `exams/`, `functions/`, `sw.js` và `wrangler.jsonc`
-> **phải nằm ở gốc repo** vì GitHub Pages phục vụ từ gốc và Cloudflare đọc
-> `functions/` + `wrangler.jsonc` tại gốc. Chỉ các công cụ, tài liệu và migration
-> được gom vào `_system/` để giáo viên không sửa nhầm.
+> **Vì sao file web vẫn nằm ở gốc?** `index.html`, `assets/`, `exams/`, `functions/`,
+> `sw.js` và `wrangler.jsonc` **phải** ở gốc repo: GitHub Pages phục vụ từ gốc,
+> Cloudflare đọc `functions/` + `wrangler.jsonc` tại gốc, và Service Worker cần
+> scope `/`. Vì vậy **không xóa/di chuyển** các file này.
+>
+> Để thư mục gọn, chúng được đặt thuộc tính **Hidden** của Windows (chỉ ẩn khi
+> xem, không ảnh hưởng web/PWA/deploy). `Start\START.bat` tự đặt lại thuộc tính
+> này mỗi lần chạy. Muốn xem lại để sửa file:
+>
+> ```powershell
+> # Hiện lại toàn bộ file web ở gốc
+> powershell -ExecutionPolicy Bypass -File _system/tools/hide-runtime.ps1 -Show
+>
+> # Ẩn lại cho gọn
+> powershell -ExecutionPolicy Bypass -File _system/tools/hide-runtime.ps1
+> ```
+>
+> Chỉ các công cụ, tài liệu, migration và giao diện trợ lý được gom vào `_system/`.
 
 
 ---
@@ -337,7 +354,7 @@ Xem chi tiết tại [`_system/docs/BACKUP.md`](_system/docs/BACKUP.md). Tóm t�
 
 ### Cách nhanh (khuyến nghị) — giao diện Local Helper
 
-1. Nhấp đúp `START.bat`.
+1. Mở thư mục `Start\` rồi nhấp đúp `START.bat`.
 2. Kéo thả file `.html`, cả thư mục export hoặc `.zip` vào giao diện.
 3. Kiểm tra môn, kế hoạch thêm/cập nhật rồi bấm **Đăng lên thư viện**.
 
@@ -364,7 +381,7 @@ gọi lại đúng quy trình cũ (`import-exam.js` → `update-and-deploy.ps1` 
 ### Deploy bằng terminal (dự phòng)
 
 1. Chép file `.html` (hoặc thư mục export / `.zip`) đề mới vào thư mục project.
-2. Nhấp đúp `START-CLOUDFLARE.bat`.
+2. Mở thư mục `Start\` rồi nhấp đúp `START-CLOUDFLARE.bat`.
 
 Script tự quét file mới ở thư mục gốc, nhập vào `exams/`, rồi chạy
 `patch-exams` → `build-exam-data` → `build-cache-manifest` → `check-library`
@@ -384,12 +401,12 @@ powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1
 powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
 ```
 
-Truyền tham số của `import-exam` qua `START-CLOUDFLARE.bat`:
+Truyền tham số của `import-exam` qua `Start\START-CLOUDFLARE.bat`:
 
 ```bat
-START-CLOUDFLARE.bat --subject toan --number 3 --title "Đề Toán số 3"
-START-CLOUDFLARE.bat --check-only
-START-CLOUDFLARE.bat --no-deploy
+Start\START-CLOUDFLARE.bat --subject toan --number 3 --title "Đề Toán số 3"
+Start\START-CLOUDFLARE.bat --check-only
+Start\START-CLOUDFLARE.bat --no-deploy
 ```
 
 Tùy chọn của script PowerShell: `-CheckOnly` (chỉ kiểm tra), `-NoDeploy`
@@ -397,9 +414,9 @@ Tùy chọn của script PowerShell: `-CheckOnly` (chỉ kiểm tra), `-NoDeploy
 
 ### Quy trình GitHub Pages cũ
 
-`START-GITHUB.bat` giữ nguyên luồng cũ (yêu cầu nhánh `main`, không chạy
-`build-exam-data`, không deploy Cloudflare). `START.bat --github` hoặc
-`START.bat --dry-run`/`--no-push` sẽ chuyển tiếp sang script này. Không dùng
+`Start\START-GITHUB.bat` giữ nguyên luồng cũ (yêu cầu nhánh `main`, không chạy
+`build-exam-data`, không deploy Cloudflare). `Start\START.bat --github` hoặc
+`Start\START.bat --dry-run`/`--no-push` sẽ chuyển tiếp sang script này. Không dùng
 luồng GitHub cho `de-toan-thpt.pages.dev`.
 
 ### Cách thủ công

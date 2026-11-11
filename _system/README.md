@@ -2,9 +2,36 @@
 
 Thư mục này gom các **công cụ, tài liệu và migration** của dự án để giáo viên
 không sửa nhầm khi thao tác hằng ngày. Bạn **không cần mở** thư mục này để thêm,
-đổi tên hay xóa đề — hãy dùng giao diện Local Helper qua `START.bat` ở thư mục gốc.
+đổi tên hay xóa đề — hãy mở `Start\START.bat` ở thư mục gốc.
 
-## Cấu trúc
+## Cấu trúc thư mục dự án
+
+```text
+de_toan_thpt_pwa_scrollfix/     # khi mở chỉ thấy 2 mục
+├── Start/                      # Giáo viên mở thư mục này để chạy
+│   ├── START.bat
+│   ├── START-CLOUDFLARE.bat
+│   └── START-GITHUB.bat
+└── _system/                    # Thư mục này
+```
+
+Các file web (`index.html`, `teacher.html`, `assets/`, `exams/`, `functions/`,
+`sw.js`, `wrangler.jsonc`, ...) **vẫn nằm ở gốc** nhưng được đặt thuộc tính
+**Hidden** của Windows để thư mục gọn. Chúng không bị xóa và không thể di chuyển
+(xem mục Quy tắc). Muốn xem lại:
+
+```powershell
+# Hiện các file web ở gốc
+powershell -ExecutionPolicy Bypass -File _system/tools/hide-runtime.ps1 -Show
+
+# Ẩn lại
+powershell -ExecutionPolicy Bypass -File _system/tools/hide-runtime.ps1
+```
+
+`Start\START.bat` tự gọi script này mỗi lần chạy nên thuộc tính Hidden luôn được
+đặt lại (kể cả sau khi copy/sync thư mục).
+
+## Cấu trúc `_system/`
 
 ```text
 _system/
