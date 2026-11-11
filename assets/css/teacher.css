@@ -191,6 +191,40 @@ h2 {
   align-items: center;
 }
 
+.live-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 14px 0 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.submission-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.submission-count strong {
+  color: var(--brand);
+  font-size: 1.55rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  vertical-align: -0.08em;
+}
+
+.refresh-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
 .table-wrap {
   margin-top: 16px;
   padding: 0;

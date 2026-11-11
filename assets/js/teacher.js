@@ -1,13 +1,19 @@
 'use strict';
 
 (function () {
+  var AUTO_REFRESH_MS = 10000;
+
   var state = {
     page: 1,
     pageSize: 50,
     total: 0,
     totalPages: 0,
     exams: [],
-    lastBatch: null
+    lastBatch: null,
+    loading: false,
+    requestSeq: 0,
+    lastSignature: '',
+    autoTimer: null
   };
 
   var els = {};
@@ -23,6 +29,7 @@
   }
 
   function showLogin() {
+    stopAutoRefresh();
     els.bootStatus.hidden = true;
     els.dashboard.hidden = true;
     els.loginPanel.hidden = false;
@@ -103,6 +110,64 @@
     var date = new Date(value);
     if (!value || isNaN(date.getTime())) return value || '';
     return date.toLocaleString('vi-VN', { hour12: false });
+  }
+
+  function hasActiveFilters() {
+    return Boolean(
+      els.examFilter.value ||
+      els.classFilter.value.trim() ||
+      els.nameFilter.value.trim()
+    );
+  }
+
+  function renderCount() {
+    if (els.countLabel) {
+      var label = hasActiveFilters()
+        ? 'Kết quả theo bộ lọc:'
+        : 'Đã nộp:';
+      if (els.countLabel.textContent !== label) {
+        els.countLabel.textContent = label;
+      }
+    }
+    if (els.submissionTotal) {
+      var total = String(state.total);
+      if (els.submissionTotal.textContent !== total) {
+        els.submissionTotal.textContent = total;
+      }
+    }
+  }
+
+  function markUpdated() {
+    if (!els.refreshNote) return;
+    els.refreshNote.textContent = 'Cập nhật lúc ' +
+      new Date().toLocaleTimeString('vi-VN', { hour12: false }) +
+      ' · tự động mỗi 10 giây';
+  }
+
+  function resultsSignature(data) {
+    try {
+      return JSON.stringify([state.page, data.total, data.items || []]);
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function startAutoRefresh() {
+    stopAutoRefresh();
+    state.autoTimer = setInterval(function () {
+      // Không tải khi tab bị ẩn hoặc đang có request khác.
+      if (document.hidden) return;
+      if (!els.dashboard || els.dashboard.hidden) return;
+      if (state.loading) return;
+      loadResults({ silent: true });
+    }, AUTO_REFRESH_MS);
+  }
+
+  function stopAutoRefresh() {
+    if (state.autoTimer) {
+      clearInterval(state.autoTimer);
+      state.autoTimer = null;
+    }
   }
 
   function currentFilters() {
@@ -205,27 +270,52 @@
     select.value = exists ? current : '';
   }
 
-  async function loadResults() {
-    setStatus('Đang tải kết quả…');
+  async function loadResults(options) {
+    var silent = Boolean(options && options.silent);
+    var seq = state.requestSeq + 1;
+    state.requestSeq = seq;
+    state.loading = true;
+
+    if (!silent) setStatus('Đang tải kết quả…');
+
     try {
       var data = await api('/api/results?' + buildQuery(true));
+      if (seq !== state.requestSeq) return;
+
       state.total = Number(data.total) || 0;
       state.totalPages = Number(data.total_pages) || 0;
 
       if (state.totalPages && state.page > state.totalPages) {
         state.page = state.totalPages;
-        return loadResults();
+        return loadResults(options);
       }
 
-      renderRows(data.items || []);
-      renderPager();
-      setStatus('');
+      // Lần tự cập nhật không đổi dữ liệu: chỉ cập nhật đồng hồ, không dựng
+      // lại bảng để tránh nhấp nháy và tránh xô dòng khi giáo viên đang xem.
+      var signature = resultsSignature(data);
+      if (!silent || signature !== state.lastSignature) {
+        renderRows(data.items || []);
+        renderPager();
+        state.lastSignature = signature;
+      }
+      renderCount();
+      markUpdated();
+      if (!silent) setStatus('');
     } catch (error) {
+      if (seq !== state.requestSeq) return;
       if (error.status === 401) {
         showLogin();
         return;
       }
-      setStatus(error.message || 'Không tải được kết quả.', true);
+      if (silent) {
+        if (els.refreshNote) {
+          els.refreshNote.textContent = 'Chưa cập nhật được · thử lại sau 10 giây';
+        }
+      } else {
+        setStatus(error.message || 'Không tải được kết quả.', true);
+      }
+    } finally {
+      if (seq === state.requestSeq) state.loading = false;
     }
   }
 
@@ -234,12 +324,14 @@
       await loadExams();
       updateDeleteScope();
       showDashboard();
+      startAutoRefresh();
       await loadResults();
     } catch (error) {
       if (error.status === 401) {
         showLogin();
       } else {
         showDashboard();
+        startAutoRefresh();
         setStatus(error.message || 'Không tải được dữ liệu.', true);
       }
     }
@@ -277,6 +369,7 @@
   }
 
   async function onLogout() {
+    stopAutoRefresh();
     try {
       await api('/api/auth/logout', { method: 'POST' });
     } catch (error) {
@@ -287,10 +380,12 @@
     state.total = 0;
     state.totalPages = 0;
     state.lastBatch = null;
+    state.lastSignature = '';
     els.undoBar.hidden = true;
     els.deleteConfirm.value = '';
     els.deletePreview.textContent = '';
     renderPager();
+    renderCount();
     showLogin();
   }
 
@@ -512,12 +607,14 @@
       await loadExams();
       updateDeleteScope();
       showDashboard();
+      startAutoRefresh();
       await loadResults();
     } catch (error) {
       if (error.status === 401) {
         showLogin();
       } else {
         showDashboard();
+        startAutoRefresh();
         setStatus(error.message || 'Không tải được dữ liệu.', true);
       }
     }
@@ -583,6 +680,14 @@
         state.page += 1;
         loadResults();
       }
+    });
+
+    // Quay lại tab sau khi bị ẩn: cập nhật ngay thay vì chờ hết chu kỳ 10 giây.
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) return;
+      if (!els.dashboard || els.dashboard.hidden) return;
+      if (state.loading) return;
+      loadResults({ silent: true });
     });
 
     boot();

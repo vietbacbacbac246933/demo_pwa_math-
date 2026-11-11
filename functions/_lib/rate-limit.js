@@ -14,10 +14,14 @@
 
 import { HttpError } from './http.js';
 
+// Ngưỡng mặc định đặt cao vì một lớp (khoảng 45 học sinh) thường dùng chung
+// một địa chỉ IP NAT/proxy của trường. Ngưỡng thấp sẽ chặn nhầm chính học sinh
+// trong lúc cả lớp cùng nộp bài. Vẫn đủ cao để chặn bơm dữ liệu hàng loạt;
+// muốn chặt hơn thì bật Turnstile thay vì hạ ngưỡng IP.
 const DEFAULT_WINDOW_SECONDS = 600;
-const DEFAULT_MAX = 60;
+const DEFAULT_MAX = 1000;
 const DEFAULT_BURST_WINDOW_SECONDS = 60;
-const DEFAULT_BURST_MAX = 20;
+const DEFAULT_BURST_MAX = 300;
 
 const CLEANUP_PROBABILITY = 0.02;
 const MEMORY_MAX_ENTRIES = 5000;
