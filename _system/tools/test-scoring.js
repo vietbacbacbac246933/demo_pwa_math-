@@ -2,7 +2,7 @@
 /*
  * Kiểm tra chấm điểm phía server khớp engine trong từng file đề.
  *
- *   node tools/test-scoring.js
+ *   node _system/tools/test-scoring.js
  *
  * Với mỗi đề:
  * - Trích hàm chấm điểm từ chính file HTML (nguồn người dùng nhìn thấy).
@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 let passed = 0;
 let failed = 0;
 const failures = [];

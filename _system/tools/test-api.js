@@ -3,7 +3,7 @@
  * Kiểm thử API trên môi trường local (wrangler pages dev + D1 local).
  *
  *   $env:TEST_TEACHER_PASSWORD = "..."    # PowerShell
- *   node tools/test-api.js
+ *   node _system/tools/test-api.js
  *
  * Biến môi trường:
  *   TEST_BASE_URL            mặc định http://127.0.0.1:8788
@@ -20,7 +20,7 @@ const crypto = require('crypto');
 
 const BASE = (process.env.TEST_BASE_URL || 'http://127.0.0.1:8788').replace(/\/+$/, '');
 const PASSWORD = process.env.TEST_TEACHER_PASSWORD || '';
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const IS_LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(new URL(BASE).hostname);
 
 let passed = 0;
@@ -254,7 +254,8 @@ async function main() {
       beforeLimit = 0;
       onlyBadRequests = true;
 
-      for (let i = 0; i < 250; i += 1) {
+      // Ngưỡng burst mặc định là 300 lượt/phút; gửi thêm để chắc chắn chạm 429.
+      for (let i = 0; i < 400; i += 1) {
         const attempt = await request('/api/submit', {
           method: 'POST',
           headers: { 'CF-Connecting-IP': rateIp },

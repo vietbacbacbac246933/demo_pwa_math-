@@ -2,190 +2,143 @@
 chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0"
+title Quan ly thu vien de - Local Helper
 
 rem ==================================================================
-rem  START.bat - Nhap de moi + kiem tra + commit + push len GitHub Pages
+rem  START.bat - Mo giao dien quan ly de tren may giao vien.
 rem
 rem  Cach dung:
-rem    - ChEp file .html / thu muc export / .zip vao thu muc nay
-rem    - Nhap doi START.bat
+rem    - Nhap dup START.bat.
+rem    - Giao dien se tu mo trong trinh duyet.
+rem    - Chon de, kiem tra, roi bam "DANG LEN THU VIEN".
 rem
-rem  Tuy chon:
-rem    START.bat --dry-run     Chi xem ke hoach, khong sua/commit/push
-rem    START.bat --no-push     Import + commit nhung khong push
-rem    START.bat --yes         Khong hoi lai, dung mac dinh
-rem    START.bat --help        Xem huong dan cua importer
+rem  Cac tham so cu van duoc chuyen cho START-GITHUB.bat:
+rem    START.bat --dry-run
+rem    START.bat --no-push
+rem    START.bat --github
+rem
+rem  Deploy truc tiep bang terminal (du phong):
+rem    START-CLOUDFLARE.bat
 rem ==================================================================
 
-set "NO_PUSH=0"
-set "DRY_RUN=0"
-set "NO_CONFIRM=0"
-set "PAUSE_AT_END=0"
-if "%~1"=="" set "PAUSE_AT_END=1"
-
-echo %* | findstr /i /c:"--no-push" >nul && set "NO_PUSH=1"
-echo %* | findstr /i /c:"--dry-run" >nul && set "DRY_RUN=1"
-echo %* | findstr /i /c:"--yes" >nul && set "NO_CONFIRM=1"
-
-echo %* | findstr /i /c:"--help" >nul && (
-  node tools\import-exam.js --help
-  exit /b 0
+if not "%~1"=="" (
+  if /I "%~1"=="--help" goto show_help
+  if /I "%~1"=="-h" goto show_help
+  if /I "%~1"=="--github" (
+    call "%~dp0START-GITHUB.bat"
+    exit /b %ERRORLEVEL%
+  )
+  call "%~dp0START-GITHUB.bat" %*
+  exit /b %ERRORLEVEL%
 )
 
 echo.
 echo ============================================================
-echo  THU VIEN DE THI - NHAP DE MOI VA DEPLOY GITHUB PAGES
+echo  THU VIEN DE THI - QUAN LY VA DANG DE
 echo ============================================================
 echo.
 
-rem ---------- Kiem tra moi truong ----------
+rem ---------- 1. Kiem tra Node.js ----------
 where node >nul 2>nul
 if errorlevel 1 goto no_node
 
-git rev-parse --is-inside-work-tree >nul 2>nul
-if errorlevel 1 goto no_git
+if not exist "_system\tools\local-helper.js" goto missing_files
+if not exist "_system\tools\import-exam.js" goto missing_files
+if not exist "_system\ui\add-exam.html" goto missing_files
 
-if "%DRY_RUN%"=="1" goto run_import
-
-for /f "delims=" %%B in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "BRANCH=%%B"
-if /I not "%BRANCH%"=="main" (
-  echo [LOI] Dang o nhanh "%BRANCH%", khong phai "main".
-  echo       Chuyen ve main roi chay lai:  git checkout main
-  goto failed
+rem ---------- 2. Kiem tra moi truong, Wrangler va dang nhap Cloudflare ----------
+node _system\tools\check-environment.js
+set "ENV_CODE=%ERRORLEVEL%"
+if "%ENV_CODE%"=="1" goto env_failed
+if "%ENV_CODE%"=="2" (
+  echo [CANH BAO] Van co the mo giao dien, nhung hay xu ly cac canh bao ben tren
+  echo             truoc khi bam DANG LEN THU VIEN.
+  echo.
 )
 
-set "DIRTY_BEFORE=%TEMP%\exam-library-status-before.txt"
-rem Chi canh bao thay doi cua file DA theo doi (khong tinh file de moi vua chep vao).
-git status --porcelain --untracked-files=no > "%DIRTY_BEFORE%" 2>nul
-for %%A in ("%DIRTY_BEFORE%") do if %%~zA GTR 0 (
-  echo [CANH BAO] Dang co thay doi chua commit truoc khi import:
-  echo.
-  type "%DIRTY_BEFORE%"
-  echo.
-  echo START.bat se commit TAT CA thay doi bang "git add -A".
-  if "!NO_CONFIRM!"=="1" (
-    echo Tiep tuc vi co --yes.
-  ) else (
-    set /p "CONTINUE=Tiep tuc? [y/N]: "
-    if /I not "!CONTINUE!"=="y" goto cancelled
+rem ---------- 3. Khoi chay Local Helper (an cua so terminal) ----------
+set "HELPER_DIR=%LOCALAPPDATA%\ExamLibraryHelper"
+set "SESSION_FILE=%HELPER_DIR%\session.json"
+if not exist "%HELPER_DIR%" mkdir "%HELPER_DIR%" >nul 2>nul
+
+powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Start-Process -FilePath 'node' -ArgumentList @('_system/tools/local-helper.js','--open') -WorkingDirectory '%CD%' -WindowStyle Hidden -RedirectStandardOutput '%HELPER_DIR%\helper.out.log' -RedirectStandardError '%HELPER_DIR%\helper.err.log'"
+
+rem ---------- 4. Cho Local Helper san sang ----------
+set "READY=0"
+for /l %%I in (1,1,60) do (
+  if exist "%SESSION_FILE%" (
+    node _system\tools\helper\session-ready.js "%SESSION_FILE%" >nul 2>nul
+    if not errorlevel 1 (
+      set "READY=1"
+      goto helper_ready
+    )
   )
-  echo.
+  ping -n 2 127.0.0.1 >nul
 )
+goto startup_failed
 
-rem ---------- 1. Import ----------
-:run_import
-echo [1/5] Nhap de moi vao thu vien...
+:helper_ready
 echo.
-node tools\import-exam.js %*
-if errorlevel 2 goto cancelled
-if errorlevel 1 goto import_failed
-
-rem ---------- 2. Manifest hash cho Service Worker ----------
+echo [OK] Local Helper dang chay.
+echo      Giao dien se tu mo trong trinh duyet.
 echo.
-echo [2/5] Cap nhat hash de cho Service Worker...
-node tools\build-cache-manifest.js
-if errorlevel 1 goto failed
-
-rem ---------- 3. Kiem tra ----------
+echo      Neu trinh duyet khong tu mo, hay nhap lai START.bat.
+echo      Co the dong cua so nay. Local Helper tu tat sau 60 phut
+echo      khong hoat dong, hoac bam "Tat tro ly" trong giao dien.
 echo.
-echo [3/5] Kiem tra thu vien...
-node tools\check-library.js
-if errorlevel 1 goto failed
-
-if "%DRY_RUN%"=="1" (
-  echo.
-  echo DRY RUN: khong commit, khong push.
-  goto success
-)
-
-rem ---------- 4. Commit ----------
-echo.
-echo [4/5] Commit thay doi...
-git add -A
-git diff --cached --quiet
-if not errorlevel 1 (
-  echo Khong co thay doi nao de commit.
-  goto success
-)
-
-set "NEWFILES="
-for /f "delims=" %%F in ('git diff --cached --name-only --diff-filter=AM -- exams/ 2^>nul') do (
-  set "NEWFILES=!NEWFILES! %%~nxF"
-)
-if defined NEWFILES (
-  set "MSG=Them de moi vao thu vien:!NEWFILES!"
-) else (
-  set "MSG=Cap nhat thu vien de thi"
-)
-git commit -m "!MSG!"
-if errorlevel 1 goto failed
-
-rem ---------- 4. Push ----------
-if "%NO_PUSH%"=="1" (
-  echo.
-  echo [5/5] Bo qua push vi co --no-push.
-  goto success
-)
-
-echo.
-echo [5/5] Push len origin main...
-git push origin main
-if errorlevel 1 goto push_failed
-
-echo.
-echo GitHub Pages se tu xuat ban sau 1-2 phut.
-echo Mo lai trang va nhan Ctrl+F5 neu trinh duyet con hien ban cu.
-goto success
-
-rem ==================================================================
-rem  Ket thuc
-rem ==================================================================
-:success
-echo.
-echo ============================================================
-echo  XONG
-echo ============================================================
-if "%PAUSE_AT_END%"=="1" pause
+ping -n 4 127.0.0.1 >nul
 exit /b 0
 
-:cancelled
+:show_help
 echo.
-echo Da huy. Khong commit, khong push.
-if "%PAUSE_AT_END%"=="1" pause
-exit /b 1
-
-:import_failed
+echo START.bat               Mo giao dien quan ly de (khuyen dung)
+echo START.bat --github      Chay quy trinh GitHub Pages cu
+echo START.bat --dry-run     Chuyen tiep tuy chon cho START-GITHUB.bat
+echo START-CLOUDFLARE.bat    Deploy truc tiep bang terminal neu giao dien loi
 echo.
-echo [LOI] Import that bai. Importer da tu dong hoan tac.
-echo       Khong commit, khong push.
-if "%PAUSE_AT_END%"=="1" pause
-exit /b 1
-
-:push_failed
-echo.
-echo [LOI] Push that bai. Commit da tao tren may nhung chua len GitHub.
-echo.
-echo Goi y:
-echo   git pull --rebase origin main
-echo   git push origin main
-if "%PAUSE_AT_END%"=="1" pause
-exit /b 1
+exit /b 0
 
 :no_node
+echo.
 echo [LOI] Khong tim thay Node.js.
 echo       Tai va cai dat tai: https://nodejs.org/
-if "%PAUSE_AT_END%"=="1" pause
-exit /b 1
-
-:no_git
-echo [LOI] Thu muc nay khong phai git repository.
-echo       Hay mo dung thu muc chua file START.bat.
-if "%PAUSE_AT_END%"=="1" pause
-exit /b 1
-
-:failed
+echo       Sau do mo lai START.bat.
 echo.
-echo [LOI] Da dung vi buoc kiem tra that bai.
-echo       Chua commit, chua push.
-if "%PAUSE_AT_END%"=="1" pause
+pause
+exit /b 1
+
+:missing_files
+echo.
+echo [LOI] Thieu file cua he thong trong thu muc nay.
+echo       Hay mo dung thu muc chua START.bat va kiem tra lai.
+echo.
+pause
+exit /b 1
+
+:env_failed
+echo.
+echo [LOI] Moi truong chua san sang de deploy.
+echo       Hay xu ly cac loi ben tren roi chay lai START.bat.
+echo.
+pause
+exit /b 1
+
+:startup_failed
+echo.
+echo [LOI] Khong khoi dong duoc Local Helper.
+if exist "%HELPER_DIR%\helper.err.log" (
+  echo.
+  echo --- Chi tiet loi ---
+  powershell -NoProfile -Command "Get-Content -LiteralPath '%HELPER_DIR%\helper.err.log' -Tail 20" 2>nul
+)
+if exist "%HELPER_DIR%\helper.log" (
+  echo.
+  echo --- Log gan nhat ---
+  powershell -NoProfile -Command "Get-Content -LiteralPath '%HELPER_DIR%\helper.log' -Tail 20" 2>nul
+)
+echo.
+echo Goi y: chay truc tiep lenh sau de xem loi:
+echo    node _system\tools\local-helper.js --open
+echo.
+pause
 exit /b 1

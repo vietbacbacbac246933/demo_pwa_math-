@@ -2,7 +2,7 @@
 /*
  * Sinh hash PBKDF2-SHA256 cho mật khẩu giáo viên.
  *
- *   node tools/hash-password.js
+ *   node _system/tools/hash-password.js
  *
  * Không truyền mật khẩu qua tham số dòng lệnh (sẽ lộ trong lịch sử shell).
  * Nhập mật khẩu trực tiếp, không hiển thị trên màn hình.

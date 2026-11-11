@@ -12,15 +12,15 @@
  *   lưu; không tải trước toàn bộ thư viện.
  *
  * Cách dùng:
- *   node tools/build-cache-manifest.js           # sinh / cập nhật
- *   node tools/build-cache-manifest.js --check   # chỉ kiểm tra, lệch -> exit 1
+ *   node _system/tools/build-cache-manifest.js           # sinh / cập nhật
+ *   node _system/tools/build-cache-manifest.js --check   # chỉ kiểm tra, lệch -> exit 1
  */
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const EXAMS_DIR = path.join(ROOT, 'exams');
 const OUT_ABS = path.join(ROOT, 'assets', 'js', 'exam-revs.js');
 const OUT_REL = 'assets/js/exam-revs.js';
@@ -53,7 +53,7 @@ function render(map) {
   });
   return [
     '/*',
-    ' * File này do tools/build-cache-manifest.js sinh tự động.',
+    ' * File này do _system/tools/build-cache-manifest.js sinh tự động.',
     ' * Không sửa tay. Mục đích: gắn nhãn hash nội dung cho đề đã cache.',
     ' * Đề chỉ được tải khi học sinh mở (cache lười), không tải trước.',
     ' */',
@@ -82,7 +82,7 @@ function main() {
 
   if (CHECK) {
     if (current !== content) {
-      console.error(OUT_REL + ' chưa đồng bộ. Chạy: node tools/build-cache-manifest.js');
+      console.error(OUT_REL + ' chưa đồng bộ. Chạy: node _system/tools/build-cache-manifest.js');
       return 1;
     }
     console.log(OUT_REL + ' đồng bộ: ' + files.length + ' đề.');

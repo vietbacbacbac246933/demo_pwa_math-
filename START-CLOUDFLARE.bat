@@ -19,7 +19,7 @@ rem    --check-only          Chi kiem tra, khong nhap de, khong deploy
 rem    --no-deploy           Chuan bi xong nhung chua deploy
 rem    --yes                 Khong hoi lai
 rem
-rem  Cac tham so con lai duoc chuyen truc tiep cho tools/import-exam.js:
+rem  Cac tham so con lai duoc chuyen truc tiep cho _system/tools/import-exam.js:
 rem    --subject toan --number 3 --title "De Toan so 3"
 rem
 rem  Script nay KHONG commit/push GitHub va KHONG dung
@@ -72,9 +72,9 @@ if "%CHECK_ONLY%"=="1" goto after_import
 echo [1/8] Nhap de moi vao thu vien...
 echo.
 if "%WANT_YES%"=="1" (
-  node tools\import-exam.js %IMPORT_ARGS% --yes
+  node _system\tools\import-exam.js %IMPORT_ARGS% --yes
 ) else (
-  node tools\import-exam.js %IMPORT_ARGS%
+  node _system\tools\import-exam.js %IMPORT_ARGS%
 )
 if errorlevel 1 goto import_failed
 
@@ -86,7 +86,7 @@ if "%CHECK_ONLY%"=="1" set "PS_ARGS=%PS_ARGS% -CheckOnly"
 if "%NO_DEPLOY%"=="1" set "PS_ARGS=%PS_ARGS% -NoDeploy"
 if "%WANT_YES%"=="1" set "PS_ARGS=%PS_ARGS% -Yes"
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "tools\update-and-deploy.ps1" %PS_ARGS%
+powershell -NoProfile -ExecutionPolicy Bypass -File "_system\tools\update-and-deploy.ps1" %PS_ARGS%
 set "CODE=%ERRORLEVEL%"
 goto done
 

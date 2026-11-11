@@ -48,7 +48,7 @@ Lệnh trả về `database_id`. Mở `wrangler.jsonc` và thay giá trị place
 
 ```powershell
 # Kiểm tra migration trước (không cần Cloudflare)
-node tools/check-migrations.js
+node _system/tools/check-migrations.js
 
 # Áp lên D1 thật — chỉ sau khi đã xem lại migration
 npx wrangler d1 migrations apply results-db --remote
@@ -60,13 +60,13 @@ Kiểm tra:
 npx wrangler d1 migrations list results-db --remote
 ```
 
-> Mỗi thay đổi cấu trúc sau này phải là file mới trong `migrations/`. Không sửa
+> Mỗi thay đổi cấu trúc sau này phải là file mới trong `_system/migrations/`. Không sửa
 > file đã chạy trên môi trường thật.
 
 ## 4. Tạo Pages project
 
 Cách an toàn nhất cho project này: tạo project rồi deploy bằng script ở dưới.
-Lý do: repo còn chứa `tools/`, `migrations/`, `docs/` và các file cấu hình không
+Lý do: repo còn chứa `_system/tools/`, `_system/migrations/`, `_system/docs/` và các file cấu hình không
 nên được phục vụ công khai; deploy thẳng thư mục gốc sẽ đưa tất cả lên web.
 
 Nếu muốn nối GitHub để tự deploy:
@@ -88,7 +88,23 @@ phải được tạo bằng script deploy ở dưới (không deploy thẳng th
 
 ### Cập nhật đề rồi deploy
 
-Cách nhanh nhất — giống `START.bat`:
+Cách nhanh nhất — giao diện Local Helper:
+
+1. Nhấp đúp `START.bat`.
+2. Kéo thả file `.html` / thư mục export / `.zip` vào giao diện.
+3. Kiểm tra kế hoạch rồi bấm **Đăng lên thư viện**.
+
+Trợ lý chỉ chạy trên `127.0.0.1`, mở `add-exam.html` bằng token ngẫu nhiên
+theo phiên. Giao diện dùng lại đúng pipeline cũ: `import-exam.js` →
+`update-and-deploy.ps1` → `deploy-pages.ps1`, không thêm dịch vụ mới.
+
+- Đề trùng mã mặc định được thêm thành đề mới; chỉ ghi đè khi chọn **Cập nhật**.
+  Bản cũ luôn được sao lưu vào `backups/exam-updates/`.
+- Deploy lỗi sẽ khôi phục catalog và `exams/` về trạng thái trước khi đăng.
+- Snapshot/log của trợ lý nằm trong `%LOCALAPPDATA%\ExamLibraryHelper\`.
+- Đóng trình duyệt không dừng tiến trình; mở lại giao diện để xem tiếp.
+
+### Deploy bằng terminal (dự phòng)
 
 1. Chép file `.html` / thư mục export / `.zip` đề mới vào thư mục project.
 2. Nhấp đúp `START-CLOUDFLARE.bat`.
@@ -105,10 +121,10 @@ Hoặc chạy dòng lệnh:
 
 ```powershell
 # Tự quét file mới trong thư mục project
-powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1
+powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1
 
 # Chỉ định rõ file
-powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
+powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
 ```
 
 Truyền tham số `import-exam` qua BAT:
@@ -121,9 +137,9 @@ START-CLOUDFLARE.bat --no-deploy
 
 Tùy chọn PowerShell: `-CheckOnly`, `-NoDeploy`, `-Yes`.
 
-> `START.bat` là quy trình cũ cho GitHub Pages: bắt buộc nhánh `main`, không
-> chạy `build-exam-data` và không deploy Cloudflare. Không dùng cho
-> `de-toan-thpt.pages.dev`.
+> `START-GITHUB.bat` (hoặc `START.bat --github`) là quy trình cũ cho GitHub
+> Pages: bắt buộc nhánh `main`, không chạy `build-exam-data` và không deploy
+> Cloudflare. Không dùng cho `de-toan-thpt.pages.dev`.
 
 ### Deploy thủ công (khuyến nghị cho project này)
 
@@ -134,16 +150,16 @@ Tùy chọn PowerShell: `-CheckOnly`, `-NoDeploy`, `-Yes`.
 >
 > Vào **Pages project → Settings → Builds & deployments** và Disconnect Git
 > nếu mục này đang bật. Sau đó chỉ deploy bằng `START-CLOUDFLARE.bat` hoặc
-> `tools/deploy-pages.ps1`.
+> `_system/tools/deploy-pages.ps1`.
 
 > **Cảnh báo:** `wrangler pages deploy .` upload **toàn bộ** thư mục hiện tại.
 > `.assetsignore` **không** có tác dụng với Pages, nên `.dev.vars`, `backups/`,
-> `tools/`, `migrations/`, `docs/`... sẽ bị đưa lên web công khai.
+> `_system/tools/`, `_system/migrations/`, `_system/docs/`... sẽ bị đưa lên web công khai.
 >
 > Luôn dùng script chỉ copy file tĩnh:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/deploy-pages.ps1
+powershell -ExecutionPolicy Bypass -File _system/tools/deploy-pages.ps1
 ```
 
 Script sẽ tạo thư mục tạm chỉ gồm `index.html`, `teacher.html`, `sw.js`,
@@ -166,19 +182,19 @@ Vào **Pages project → Settings → Environment variables** và thêm cho cả
 | `TEACHER_SESSION_HOURS` | không | Thời hạn phiên, 1–168 giờ, mặc định 12 |
 | `TURNSTILE_SITE_KEY` | không | Site key Turnstile (đặt cùng `TURNSTILE_SECRET_KEY` để bật) |
 | `TURNSTILE_SECRET_KEY` | không | Secret key Turnstile, dùng ở server để xác minh token |
-| `SUBMIT_RATE_LIMIT_MAX` | không | Số lượt nộp tối đa mỗi IP trong một cửa sổ, mặc định 60 |
+| `SUBMIT_RATE_LIMIT_MAX` | không | Số lượt nộp tối đa mỗi IP trong một cửa sổ, mặc định 1000 |
 | `SUBMIT_RATE_LIMIT_WINDOW_SECONDS` | không | Độ dài cửa sổ giới hạn, mặc định 600 giây |
-| `SUBMIT_RATE_BURST_MAX` | không | Số lượt nộp tối đa mỗi IP trong cửa sổ ngắn, mặc định 20 |
+| `SUBMIT_RATE_BURST_MAX` | không | Số lượt nộp tối đa mỗi IP trong cửa sổ ngắn, mặc định 300 |
 | `SUBMIT_RATE_BURST_WINDOW_SECONDS` | không | Độ dài cửa sổ burst, mặc định 60 giây |
 
 Sinh giá trị:
 
 ```powershell
-node tools/hash-password.js
+node _system/tools/hash-password.js
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-> `tools/hash-password.js` dùng **50.000 vòng** PBKDF2-SHA256. Không tăng lên
+> `_system/tools/hash-password.js` dùng **50.000 vòng** PBKDF2-SHA256. Không tăng lên
 > vài trăm nghìn vòng trên gói miễn phí: phép tính có thể vượt giới hạn CPU
 > của request và đăng nhập sẽ luôn trả `401` dù mật khẩu đúng. Mật khẩu dài,
 > ngẫu nhiên (≥ 16 ký tự) quan trọng hơn số vòng.
@@ -198,15 +214,17 @@ Quy tắc an toàn:
 (migration `0003_create_rate_limits.sql`). Nhờ lưu trong D1, giới hạn có hiệu
 lực trên mọi instance Worker, không chỉ một máy.
 
-- Mặc định: **60 lượt / 10 phút / IP**, và tối đa **20 lượt / phút / IP**.
+- Mặc định: **1000 lượt / 10 phút / IP**, và tối đa **300 lượt / phút / IP**.
+  Ngưỡng này được đặt cao có chủ đích vì cả lớp (~45 học sinh) thường dùng
+  chung một IP NAT/proxy của trường. Đặt thấp sẽ chặn nhầm chính các em.
 - Vượt ngưỡng trả `429 SUBMIT_RATE_LIMITED` kèm header `Retry-After`.
 - IP được băm SHA-256 trước khi lưu; bảng không chứa IP thô hay dữ liệu học sinh.
 - IPv6 được gom theo /64 để không lách được giới hạn bằng cách đổi địa chỉ
   trong cùng một mạng.
 - Request từ loopback (chỉ có khi chạy local) được bỏ qua để không cản kiểm thử.
 - Một lớp học dùng chung NAT/proxy của trường có thể có nhiều học sinh cùng IP.
-  Nếu thường xuyên bị `429` vào giờ cao điểm, tăng `SUBMIT_RATE_LIMIT_MAX` và
-  `SUBMIT_RATE_BURST_MAX` thay vì tắt giới hạn.
+  Nếu vẫn thường xuyên bị `429` vào giờ cao điểm (ví dụ nhiều lớp thi cùng lúc),
+  tăng `SUBMIT_RATE_LIMIT_MAX` và `SUBMIT_RATE_BURST_MAX` thay vì tắt giới hạn.
 - Trước lần deploy đầu tiên có tính năng này, chạy migration:
   `npx wrangler d1 migrations apply results-db --remote`.
 
@@ -229,6 +247,16 @@ thử lại, không bị mất.
 
 > Không đặt `TURNSTILE_SECRET_KEY` nếu chưa cấu hình widget: khi đó mọi lượt
 > nộp sẽ bị từ chối. Nếu chỉ đặt một trong hai biến, Turnstile được coi là tắt.
+
+### Không bật thử thách bot cho trang giáo viên
+
+Trang `teacher.html` tự gọi `/api/results` mỗi 10 giây để cập nhật số bài đã
+nộp. Không bật **Bot Fight Mode**, **Managed Challenge** hay Turnstile cho
+`/teacher`, `/teacher.html` và `/api/results*`: các chốt này có thể chặn nhầm
+phiên của giáo viên và làm bảng kết quả ngừng cập nhật. Trang đã được bảo vệ
+bằng cookie phiên `HttpOnly` + `SameSite=Strict`; chỉ dùng Turnstile cho
+`/api/submit` nếu cần chống spam. Nếu đang bật bảo vệ bot cho toàn site, tạo
+WAF skip rule cho các đường dẫn trên.
 
 ## 6. Kiểm tra sau deploy
 
@@ -256,7 +284,7 @@ Kiểm tra thêm:
 - Pages Functions và D1 có hạn mức request/ngày và dung lượng miễn phí; theo dõi
   ở Dashboard → Usage.
 - `/api/results/export` giới hạn 50.000 dòng/lần. Vượt quá nên lọc theo lớp/đề
-  hoặc dùng `wrangler d1 export` (xem `docs/BACKUP.md`).
+  hoặc dùng `wrangler d1 export` (xem `_system/docs/BACKUP.md`).
 - D1 Time Travel có thời hạn khôi phục giới hạn (theo chính sách Cloudflare).
   Vì vậy vẫn cần xuất SQL định kỳ.
 - Trang `teacher.html` công khai phần giao diện nhưng mọi API dữ liệu đều yêu
@@ -269,12 +297,12 @@ Kiểm tra thêm:
 | `/api/health` trả `db: missing` | Thiếu binding `DB` hoặc chưa cấu hình `d1_databases` |
 | `schema: missing` | Chưa chạy migration `--remote` |
 | Login trả 503 | Thiếu `TEACHER_PASSWORD_HASH` hoặc `SESSION_SECRET` |
-| Login luôn 401 dù mật khẩu đúng | Hash tạo bằng quá nhiều vòng PBKDF2 (ví dụ 210.000) vượt giới hạn CPU gói miễn phí — tạo lại bằng `node tools/hash-password.js` (50.000 vòng) |
+| Login luôn 401 dù mật khẩu đúng | Hash tạo bằng quá nhiều vòng PBKDF2 (ví dụ 210.000) vượt giới hạn CPU gói miễn phí — tạo lại bằng `node _system/tools/hash-password.js` (50.000 vòng) |
 | Login đúng nhưng vẫn 401 | Cookie bị chặn, domain/HTTPS sai, hoặc secret vừa đổi |
-| Nộp bài trả 404 | `exam_id` không khớp `functions/_lib/exam-data.js`; chạy `node tools/build-exam-data.js` |
-| Điểm khác client | Chạy `node tools/test-scoring.js` để đối chiếu engine |
+| Nộp bài trả 404 | `exam_id` không khớp `functions/_lib/exam-data.js`; chạy `node _system/tools/build-exam-data.js` |
+| Điểm khác client | Chạy `node _system/tools/test-scoring.js` để đối chiếu engine |
 | Nộp bài trả `429` | Đã chạm rate limit của IP; chờ theo `Retry-After` hoặc tăng `SUBMIT_RATE_LIMIT_MAX` / `SUBMIT_RATE_BURST_MAX` |
 | Nộp bài trả `403 TURNSTILE_*` | Thiếu/sai `TURNSTILE_SITE_KEY`, token hết hạn, hoặc secret không khớp widget |
 | `/api/config` trả `turnstile_site_key: null` | Chưa đặt đủ cả `TURNSTILE_SITE_KEY` và `TURNSTILE_SECRET_KEY` |
-| Trang cũ vẫn hiện sau deploy | Chạy `node tools/bump-cache-version.js` (hoặc dùng `tools/update-and-deploy.ps1`) rồi mở online một lần |
-| File nội bộ (`.dev.vars`, `backups/`) truy cập được | Đã deploy nhầm thư mục gốc. Dùng `tools/deploy-pages.ps1`, xoá deployment cũ; nếu file chứa secret thì đổi mật khẩu và `SESSION_SECRET` ngay |
+| Trang cũ vẫn hiện sau deploy | Chạy `node _system/tools/bump-cache-version.js` (hoặc dùng `_system/tools/update-and-deploy.ps1`) rồi mở online một lần |
+| File nội bộ (`.dev.vars`, `backups/`) truy cập được | Đã deploy nhầm thư mục gốc. Dùng `_system/tools/deploy-pages.ps1`, xoá deployment cũ; nếu file chứa secret thì đổi mật khẩu và `SESSION_SECRET` ngay |

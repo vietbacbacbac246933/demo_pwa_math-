@@ -7,7 +7,8 @@
     {
       "binding": "DB",
       "database_name": "results-db",
-      "database_id": "60728b3e-0a82-4a11-b74e-b8fac2337685"
+      "database_id": "60728b3e-0a82-4a11-b74e-b8fac2337685",
+      "migrations_dir": "_system/migrations"
     }
   ]
 }

@@ -1,11 +1,11 @@
 # =====================================================================
 # Deploy an toàn lên Cloudflare Pages.
 #
-#   powershell -ExecutionPolicy Bypass -File tools/deploy-pages.ps1
+#   powershell -ExecutionPolicy Bypass -File _system/tools/deploy-pages.ps1
 #
 # Vì sao cần script này:
 #   `wrangler pages deploy .` upload TOÀN BỘ thư mục hiện tại và KHÔNG đọc
-#   `.assetsignore`. Làm vậy sẽ đưa `.dev.vars`, `backups/`, `tools/`,
+#   `.assetsignore`. Làm vậy sẽ đưa `.dev.vars`, `backups/`, `_system/tools/`,
 #   `migrations/`, `docs/`... lên web công khai.
 #
 # Script chỉ copy đúng các file tĩnh cần thiết sang một thư mục tạm, kiểm tra
@@ -23,7 +23,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$root = Split-Path -Parent $PSScriptRoot
+$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $stage = Join-Path $env:TEMP 'de-toan-thpt-dist'
 
 if (Test-Path $stage) {
@@ -36,7 +36,7 @@ New-Item -ItemType Directory -Path $stage | Out-Null
 # van thay dung hash cua tung de.
 Push-Location $root
 try {
-  & node tools/build-cache-manifest.js
+  & node _system/tools/build-cache-manifest.js
   if ($LASTEXITCODE -ne 0) {
     throw 'Khong sinh duoc assets/js/exam-revs.js.'
   }
@@ -102,7 +102,12 @@ $files | ForEach-Object {
 
 Push-Location $root
 try {
-  npx wrangler pages deploy $stage --project-name $ProjectName --branch $Branch --commit-dirty=true
+  # Dùng Wrangler đã có trên máy (project, PATH hoặc cache npx) thay vì
+  # luôn gọi `npx wrangler` để tránh tự tải/nâng cấp ngoài ý muốn.
+  & node _system/tools/helper/wrangler-exec.js pages deploy $stage --project-name $ProjectName --branch $Branch --commit-dirty=true
+  if ($LASTEXITCODE -ne 0) {
+    throw "Wrangler deploy thất bại (mã $LASTEXITCODE)."
+  }
 }
 finally {
   Pop-Location

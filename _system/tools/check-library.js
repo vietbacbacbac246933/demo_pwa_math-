@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
  * Kiểm tra nhanh thư viện trước khi deploy:
- *   node tools/check-library.js
+ *   node _system/tools/check-library.js
  *
  * - Danh mục có bị trùng id / thiếu file không?
  * - Số câu, số điểm, id trong catalog có khớp file đề không?
@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const errors = [];
 const warnings = [];
 
@@ -110,6 +110,7 @@ if (!library || !Array.isArray(library.subjects)) {
 // 1b. Đề có file trên đĩa nhưng quên khai báo trong catalog => không hiện ở trang chủ.
 // Đây là lỗi hay gặp nhất khi thêm đề mới, nên chặn ngay trước khi deploy.
 const IGNORED_ORPHAN_DIRS = new Set([
+  'backups',     // bản sao lưu (helper, exam-updates) không phải đề trong thư viện
   'de-kt-15p',   // đề mẫu cũ, chỉ để thử
   'de-toan-thpt' // bản gốc một đề, đã chuyển vào exams/toan/
 ]);
@@ -127,7 +128,7 @@ function listHtmlFiles(dir, out) {
 listHtmlFiles(ROOT, []).forEach(function (abs) {
   const rel = path.relative(ROOT, abs).replace(/\\/g, '/');
   if (rel === 'index.html') return;
-  if (rel.indexOf('assets/') === 0 || rel.indexOf('tools/') === 0) return;
+  if (rel.indexOf('assets/') === 0 || rel.indexOf('_system/') === 0) return;
   if (IGNORED_ORPHAN_DIRS.has(rel.split('/')[0])) return;
   if (examFiles.has(rel)) return;
   const html = read(rel);

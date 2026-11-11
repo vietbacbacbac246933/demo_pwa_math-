@@ -1,0 +1,2522 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Quản lý thư viện đề · Local Helper</title>
+<style>
+:root {
+  --bg: #f4f6fb;
+  --bg-glow-1: rgba(99, 102, 241, .18);
+  --bg-glow-2: rgba(14, 165, 233, .14);
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #eef2f7;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-3: #64748b;
+  --accent: #4f46e5;
+  --accent-strong: #4338ca;
+  --accent-soft: #eef2ff;
+  --ok: #047857;
+  --ok-soft: #ecfdf5;
+  --warn: #b45309;
+  --warn-soft: #fffbeb;
+  --danger: #b91c1c;
+  --danger-soft: #fef2f2;
+  --info: #0369a1;
+  --info-soft: #f0f9ff;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, .06);
+  --shadow: 0 10px 30px -12px rgba(15, 23, 42, .18);
+  --shadow-lg: 0 24px 60px -24px rgba(15, 23, 42, .35);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1120;
+    --bg-glow-1: rgba(99, 102, 241, .22);
+    --bg-glow-2: rgba(14, 165, 233, .16);
+    --surface: #111a2e;
+    --surface-2: #0f1729;
+    --surface-3: #1a2438;
+    --border: #253048;
+    --border-strong: #34415c;
+    --text: #e8eefc;
+    --text-2: #b6c2d9;
+    --text-3: #8fa0bd;
+    --accent: #818cf8;
+    --accent-strong: #a5b4fc;
+    --accent-soft: rgba(129, 140, 248, .14);
+    --ok: #34d399;
+    --ok-soft: rgba(52, 211, 153, .12);
+    --warn: #fbbf24;
+    --warn-soft: rgba(251, 191, 36, .12);
+    --danger: #f87171;
+    --danger-soft: rgba(248, 113, 113, .12);
+    --info: #38bdf8;
+    --info-soft: rgba(56, 189, 248, .12);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+    --shadow: 0 10px 30px -12px rgba(0, 0, 0, .55);
+    --shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, .7);
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 60vh;
+  background:
+    radial-gradient(50% 60% at 20% 0%, var(--bg-glow-1), transparent 70%),
+    radial-gradient(45% 55% at 85% 10%, var(--bg-glow-2), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, h3, p { margin: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Top bar ---------- */
+.topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 26px 28px 10px;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #6366f1, #4338ca);
+  color: #fff;
+  box-shadow: 0 10px 22px -10px rgba(79, 70, 229, .8);
+  font-size: 22px;
+}
+.brand h1 { font-size: 20px; letter-spacing: -.02em; }
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+.topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+.pill .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .9; }
+.pill-ok { color: var(--ok); background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 25%, transparent); }
+.pill-warn { color: var(--warn); background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 25%, transparent); }
+.pill-bad { color: var(--danger); background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 25%, transparent); }
+.pill-muted { color: var(--text-3); }
+.pill .dot.pulse { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  transition: transform .12s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.btn-primary {
+  background: linear-gradient(145deg, #6366f1, #4f46e5);
+  color: #fff;
+  box-shadow: 0 10px 24px -10px rgba(79, 70, 229, .75);
+}
+.btn-primary:hover:not(:disabled) { background: linear-gradient(145deg, #4f46e5, #4338ca); }
+.btn-ghost { background: var(--surface); border-color: var(--border); color: var(--text-2); }
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
+.btn-soft { background: var(--accent-soft); color: var(--accent-strong); border-color: transparent; box-shadow: none; }
+.btn-danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; box-shadow: none; }
+.btn-sm { padding: 7px 11px; font-size: 12.5px; border-radius: 9px; }
+.btn-block { width: 100%; }
+.danger-text { color: var(--danger); }
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+.icon-btn:hover { background: var(--surface-3); color: var(--danger); }
+
+/* ---------- Layout ---------- */
+.shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 14px 28px 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 22px;
+  align-items: start;
+}
+.workspace { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.sidebar { display: flex; flex-direction: column; gap: 18px; position: sticky; top: 18px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.step-badge {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.card.is-active .step-badge { background: var(--accent); color: #fff; box-shadow: 0 6px 16px -8px var(--accent); }
+.card-title h2 { font-size: 15.5px; letter-spacing: -.01em; }
+.card-title p { font-size: 12.5px; color: var(--text-3); margin-top: 1px; }
+.card-body { padding: 20px; }
+.card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* ---------- Stepper ---------- */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+.stepper-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.stepper-item .n {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  font-size: 11px;
+  font-weight: 800;
+}
+.stepper-item.is-current { color: var(--accent-strong); background: var(--accent-soft); }
+.stepper-item.is-current .n { background: var(--accent); color: #fff; }
+.stepper-item.is-done { color: var(--ok); }
+.stepper-item.is-done .n { background: var(--ok-soft); color: var(--ok); }
+.stepper-sep { color: var(--border-strong); font-size: 12px; }
+
+/* ---------- Dropzone ---------- */
+.dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 30px 20px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 14px;
+  background:
+    radial-gradient(60% 120% at 50% 0%, var(--accent-soft), transparent 70%),
+    var(--surface-2);
+  text-align: center;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.dropzone.is-dragging {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: scale(1.004);
+}
+.dropzone-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 22px;
+  box-shadow: var(--shadow-sm);
+}
+.dropzone strong { font-size: 15px; }
+.dropzone span { font-size: 13px; color: var(--text-3); max-width: 420px; }
+.dropzone-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.dropzone small { color: var(--text-3); font-size: 11.5px; }
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- File rows ---------- */
+.file-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.file-list:empty { display: none; }
+.file-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface);
+  animation: rise .22s ease;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.file-row.is-error { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); background: color-mix(in srgb, var(--danger-soft) 55%, var(--surface)); }
+.file-row.is-duplicate { border-color: color-mix(in srgb, var(--warn) 40%, var(--border)); }
+.file-status {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+.file-row.is-ok .file-status { background: var(--ok-soft); color: var(--ok); }
+.file-row.is-error .file-status { background: var(--danger-soft); color: var(--danger); }
+.file-row.is-duplicate .file-status { background: var(--warn-soft); color: var(--warn); }
+.file-main { min-width: 0; }
+.file-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-weight: 650;
+  font-size: 13.5px;
+  word-break: break-word;
+}
+.file-meta { font-size: 12px; color: var(--text-3); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.file-msg { font-size: 12.5px; margin-top: 7px; }
+.file-msg.err { color: var(--danger); }
+.file-msg.warn { color: var(--warn); }
+.file-msg.ok { color: var(--ok); }
+.file-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.select-wrap { position: relative; display: inline-flex; align-items: center; }
+select {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 9px;
+  padding: 7px 28px 7px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  max-width: 190px;
+}
+select:hover { border-color: var(--border-strong); }
+.select-wrap::after {
+  content: "▾";
+  position: absolute;
+  right: 9px;
+  pointer-events: none;
+  font-size: 10px;
+  color: var(--text-3);
+}
+.mode-toggle {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+}
+.mode-toggle button {
+  border: 0;
+  background: transparent;
+  padding: 5px 9px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-3);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mode-toggle button.is-on { background: var(--surface); color: var(--accent-strong); box-shadow: var(--shadow-sm); }
+.mode-toggle button[data-mode="update"].is-on { color: var(--warn); }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  background: var(--surface-3);
+  color: var(--text-3);
+}
+.tag.new { background: var(--ok-soft); color: var(--ok); }
+.tag.update { background: var(--warn-soft); color: var(--warn); }
+.tag.skip { background: var(--info-soft); color: var(--info); }
+.tag.error { background: var(--danger-soft); color: var(--danger); }
+.tag.dup { background: var(--warn-soft); color: var(--warn); }
+
+/* ---------- Summary + plan ---------- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.stat .k { font-size: 24px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+.stat .l { font-size: 11.5px; color: var(--text-3); font-weight: 600; margin-top: 3px; }
+.stat.add .k { color: var(--ok); }
+.stat.update .k { color: var(--warn); }
+.stat.skip .k { color: var(--info); }
+.stat.error .k { color: var(--danger); }
+
+.plan-list { display: flex; flex-direction: column; gap: 8px; }
+.plan-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 13px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.plan-row .plan-name { font-weight: 650; font-size: 13px; word-break: break-word; }
+.plan-row .plan-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; word-break: break-word; }
+.plan-row .plan-code { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); background: var(--surface-3); padding: 3px 7px; border-radius: 6px; white-space: nowrap; }
+
+.notice {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 11px;
+  font-size: 12.5px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.notice + .notice { margin-top: 8px; }
+.notice .notice-icon { flex: 0 0 auto; font-size: 15px; line-height: 1.35; }
+.notice.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 30%, transparent); color: var(--warn); }
+.notice.err { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 30%, transparent); color: var(--danger); }
+.notice.ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 30%, transparent); color: var(--ok); }
+.notice.info { background: var(--info-soft); border-color: color-mix(in srgb, var(--info) 30%, transparent); color: var(--info); }
+.notice-stack { margin-top: 12px; }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 26px 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.empty-state .big { font-size: 26px; opacity: .7; }
+
+/* ---------- Progress ---------- */
+.progress-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 12px; }
+.progress-phase { font-size: 15px; font-weight: 750; letter-spacing: -.01em; }
+.progress-msg { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+.progress-pct { font-size: 26px; font-weight: 800; letter-spacing: -.03em; color: var(--accent-strong); }
+.progress-track { position: relative; height: 10px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+.progress-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  transition: width .35s cubic-bezier(.4, 0, .2, 1);
+  position: relative;
+}
+.progress-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .35), transparent);
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.progress-meta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; margin-top: 9px; font-size: 11.5px; color: var(--text-3); }
+
+.log-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 0 8px; }
+.log-head h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3); }
+.log-actions { display: flex; gap: 6px; }
+.log {
+  height: 250px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 12px;
+  background: #0b1220;
+  border: 1px solid #1e293b;
+  color: #cbd5e1;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  scroll-behavior: smooth;
+}
+.log:empty::before { content: "Chưa có log."; color: #64748b; }
+.log .ln { display: block; }
+.log .ln.err { color: #fca5a5; }
+.log .ln.warn { color: #fcd34d; }
+.log .ln.success { color: #6ee7b7; }
+.log .ln.step { color: #a5b4fc; font-weight: 600; }
+.log .ln.raw { color: #94a3b8; }
+
+/* ---------- Result ---------- */
+.result-hero { display: flex; gap: 14px; align-items: flex-start; }
+.result-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 22px;
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.result-hero.is-failed .result-icon { background: var(--danger-soft); color: var(--danger); }
+.result-hero.is-cancelled .result-icon { background: var(--warn-soft); color: var(--warn); }
+.result-hero h3 { font-size: 17px; letter-spacing: -.02em; }
+.result-hero p { font-size: 13px; color: var(--text-2); margin-top: 3px; }
+.result-stats { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.result-stat .k { font-size: 19px; font-weight: 800; }
+.result-stat .l { font-size: 11.5px; color: var(--text-3); }
+
+/* ---------- Sidebar ---------- */
+.side-card { padding: 16px 17px; }
+.side-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.side-head h2 { font-size: 12.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3); }
+.check-list { display: flex; flex-direction: column; gap: 9px; }
+.check-item { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; }
+.check-item .ci {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--surface-3);
+  color: var(--text-3);
+}
+.check-item.ok .ci { background: var(--ok-soft); color: var(--ok); }
+.check-item.warn .ci { background: var(--warn-soft); color: var(--warn); }
+.check-item.bad .ci { background: var(--danger-soft); color: var(--danger); }
+.check-item .ct { font-weight: 650; }
+.check-item .cs { color: var(--text-3); font-size: 11.5px; word-break: break-word; }
+.library-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.library-stat { padding: 10px 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); }
+.library-stat .k { font-size: 20px; font-weight: 800; }
+.library-stat .l { font-size: 11px; color: var(--text-3); }
+.subject-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+
+/* ---------- Quản lý đề đã có ---------- */
+.manage-search {
+  width: 100%;
+  margin-top: 2px;
+  font-size: 13px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+.manage-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  max-height: 380px;
+  overflow: auto;
+  padding-right: 2px;
+}
+.manage-subject {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin: 8px 2px 0;
+}
+.manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+}
+.manage-item .mi { min-width: 0; }
+.manage-item .mi-name {
+  font-weight: 700;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.manage-item .mi-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.manage-item .mi-btns { display: flex; gap: 4px; flex-shrink: 0; }
+.btn-icon { padding: 6px 9px; min-height: 0; border-radius: 8px; font-size: 13px; line-height: 1; }
+.manage-empty { font-size: 12px; color: var(--text-3); margin-top: 10px; }
+.chip-btn { cursor: pointer; }
+.chip-btn:hover { border-color: var(--border-strong); color: var(--text); }
+.chip-btn.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip-btn.is-on b { color: rgba(255, 255, 255, .85); }
+.chip-btn.is-on:hover { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+.manage-filter { display: flex; align-items: center; gap: 8px; margin: 2px 0 2px; }
+.manage-filter-name { font-size: 12px; font-weight: 800; color: var(--text); }
+.manage-count { font-size: 11px; color: var(--text-3); font-weight: 600; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-2);
+}
+.chip b { color: var(--text-3); font-weight: 700; }
+.help-list { margin: 0; padding-left: 17px; display: flex; flex-direction: column; gap: 7px; font-size: 12.5px; color: var(--text-2); }
+.help-list li::marker { color: var(--accent); }
+.mono { font-family: var(--mono); font-size: 11.5px; background: var(--surface-3); padding: 1px 5px; border-radius: 5px; }
+
+/* ---------- Banner / toast / dialog ---------- */
+.banner {
+  position: relative;
+  z-index: 3;
+  max-width: 1320px;
+  margin: 4px auto 0;
+  padding: 0 28px;
+}
+.banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in srgb, var(--danger) 32%, transparent);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+}
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 16px);
+  z-index: 60;
+  max-width: min(520px, calc(100vw - 40px));
+  padding: 12px 16px;
+  border-radius: 11px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 13px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#toast.err { background: #7f1d1d; }
+#toast.ok { background: #064e3b; }
+
+dialog {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0;
+  max-width: min(520px, calc(100vw - 32px));
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+}
+dialog::backdrop { background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px); }
+.dialog-body { padding: 22px; }
+.dialog-title { display: flex; gap: 12px; align-items: flex-start; }
+.dialog-title .di { font-size: 24px; line-height: 1; }
+.dialog-title h2 { font-size: 17px; letter-spacing: -.01em; }
+.dialog-title p { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+.dialog-list { margin: 14px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); max-height: 190px; overflow: auto; font-size: 12.5px; }
+.dialog-list li { margin: 3px 0; }
+.dialog-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 14px 22px; border-top: 1px solid var(--border); background: var(--surface-2); flex-wrap: wrap; }
+.dialog-check { display: flex; gap: 9px; align-items: flex-start; margin-top: 14px; font-size: 12.5px; color: var(--text-2); }
+.dialog-check input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--accent); }
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  vertical-align: -2px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+}
+@media (max-width: 720px) {
+  .topbar { padding: 18px 16px 6px; }
+  .shell { padding: 10px 16px 46px; }
+  .banner { padding: 0 16px; }
+  .brand h1 { font-size: 17px; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .file-row { grid-template-columns: 30px minmax(0, 1fr); }
+  .file-controls { grid-column: 1 / -1; justify-content: flex-start; padding-left: 42px; }
+  .plan-row { grid-template-columns: auto minmax(0, 1fr); }
+  .plan-row .plan-code { grid-column: 2; justify-self: start; }
+  .card-body { padding: 16px; }
+  .card-head { padding: 15px 16px 12px; }
+  .card-foot { padding: 12px 16px; }
+  .log { height: 210px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">▤</div>
+    <div>
+      <p class="eyebrow">Local Helper · Chỉ trên máy này</p>
+      <h1>Quản lý thư viện đề</h1>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <span id="connPill" class="pill pill-muted"><span class="dot pulse"></span><span id="connText">Đang kết nối…</span></span>
+    <button id="refreshBtn" class="btn btn-ghost" type="button" title="Tải lại trạng thái">↻ Tải lại</button>
+    <button id="shutdownBtn" class="btn btn-ghost danger-text" type="button">Tắt trợ lý</button>
+  </div>
+</header>
+
+<div id="banner" class="banner" hidden>
+  <div class="banner-inner">
+    <span id="bannerText"></span>
+    <button id="bannerAction" class="btn btn-sm btn-ghost" type="button" hidden></button>
+  </div>
+</div>
+
+<main class="shell">
+  <div class="workspace">
+    <nav class="stepper" aria-label="Các bước">
+      <span class="stepper-item is-current" data-step="1"><span class="n">1</span> Chọn đề</span>
+      <span class="stepper-sep">›</span>
+      <span class="stepper-item" data-step="2"><span class="n">2</span> Kiểm tra</span>
+      <span class="stepper-sep">›</span>
+      <span class="stepper-item" data-step="3"><span class="n">3</span> Đăng lên thư viện</span>
+    </nav>
+
+    <section class="card is-active" id="uploadCard">
+      <div class="card-head">
+        <div class="card-title">
+          <span class="step-badge">1</span>
+          <div>
+            <h2>Chọn đề cần đăng</h2>
+            <p>Kéo thả file HTML hoặc cả thư mục. Hỗ trợ nhiều file và file ZIP.</p>
+          </div>
+        </div>
+        <button id="clearAllBtn" class="btn btn-sm btn-ghost" type="button" hidden>Xóa tất cả</button>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon" aria-hidden="true">⇪</div>
+          <strong>Kéo thả đề vào đây</strong>
+          <span>Hoặc chọn file từ máy. Đề cần có khối <code class="mono">quiz-data</code> hợp lệ.</span>
+          <div class="dropzone-actions">
+            <button id="pickFilesBtn" class="btn btn-primary btn-sm" type="button">Chọn file đề</button>
+            <button id="pickFolderBtn" class="btn btn-ghost btn-sm" type="button">Chọn thư mục</button>
+          </div>
+          <small>Tối đa 20 file mỗi lần · .html, .htm, .zip · không tải đề lên Internet</small>
+          <input id="fileInput" class="visually-hidden" type="file" accept=".html,.htm,.zip,text/html,application/zip" multiple>
+          <input id="folderInput" class="visually-hidden" type="file" webkitdirectory directory multiple>
+        </div>
+        <div id="fileList" class="file-list" role="list" aria-live="polite"></div>
+        <div id="uploadEmpty" class="empty-state">
+          <span class="big" aria-hidden="true">🗂️</span>
+          <span>Chưa chọn đề nào. Thư viện hiện tại sẽ không bị thay đổi cho đến khi bạn bấm đăng.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="reviewCard">
+      <div class="card-head">
+        <div class="card-title">
+          <span class="step-badge">2</span>
+          <div>
+            <h2>Kiểm tra kế hoạch đăng</h2>
+            <p>Hệ thống tự kiểm tra mã đề, môn học, trùng lặp và tên file an toàn.</p>
+          </div>
+        </div>
+        <span id="planState" class="pill pill-muted">Chưa có đề</span>
+      </div>
+      <div class="card-body">
+        <div class="summary-grid" aria-label="Tóm tắt kế hoạch">
+          <div class="stat add"><div class="k" id="statAdd">0</div><div class="l">Thêm mới</div></div>
+          <div class="stat update"><div class="k" id="statUpdate">0</div><div class="l">Cập nhật</div></div>
+          <div class="stat skip"><div class="k" id="statSkip">0</div><div class="l">Bỏ qua</div></div>
+          <div class="stat error"><div class="k" id="statError">0</div><div class="l">Cần sửa</div></div>
+        </div>
+        <div id="planNotices" class="notice-stack"></div>
+        <div id="planList" class="plan-list"></div>
+        <div id="planEmpty" class="empty-state">
+          <span class="big" aria-hidden="true">🧭</span>
+          <span>Chọn đề ở bước 1 để xem kế hoạch thêm mới hoặc cập nhật.</span>
+        </div>
+      </div>
+      <div class="card-foot">
+        <div id="deployHint" class="file-meta">Chưa sẵn sàng để đăng.</div>
+        <button id="deployBtn" class="btn btn-primary" type="button" disabled>Đăng lên thư viện</button>
+      </div>
+    </section>
+
+    <section class="card" id="progressCard" hidden>
+      <div class="card-head">
+        <div class="card-title">
+          <span class="step-badge">3</span>
+          <div>
+            <h2>Đang đăng đề</h2>
+            <p>Không đóng cửa sổ trình duyệt cho đến khi hoàn tất.</p>
+          </div>
+        </div>
+        <span id="progressState" class="pill pill-warn"><span class="dot pulse"></span>Đang chạy</span>
+      </div>
+      <div class="card-body">
+        <div class="progress-top">
+          <div>
+            <div class="progress-phase" id="progressPhase">Chuẩn bị</div>
+            <div class="progress-msg" id="progressMsg">Đang chuẩn bị…</div>
+          </div>
+          <div class="progress-pct" id="progressPct">0%</div>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progressJob">Mã tiến trình: —</span>
+          <span id="progressSummary">—</span>
+        </div>
+        <div class="log-head">
+          <h3>Nhật ký chi tiết</h3>
+          <div class="log-actions">
+            <button id="copyLogBtn" class="btn btn-sm btn-ghost" type="button">Sao chép log</button>
+          </div>
+        </div>
+        <pre class="log" id="log" aria-live="polite"></pre>
+      </div>
+      <div class="card-foot">
+        <div class="file-meta">Có thể dừng an toàn trước khi bắt đầu tải lên Cloudflare.</div>
+        <button id="cancelBtn" class="btn btn-danger" type="button">Dừng tiến trình</button>
+      </div>
+    </section>
+
+    <section class="card" id="resultCard" hidden>
+      <div class="card-body">
+        <div class="result-hero" id="resultHero">
+          <div class="result-icon" id="resultIcon" aria-hidden="true">✓</div>
+          <div>
+            <h3 id="resultTitle">Hoàn tất</h3>
+            <p id="resultMsg">Đề đã được đăng lên thư viện.</p>
+          </div>
+        </div>
+        <div class="result-stats">
+          <div class="result-stat"><div class="k" id="resultAdded">0</div><div class="l">Đã thêm</div></div>
+          <div class="result-stat"><div class="k" id="resultUpdated">0</div><div class="l">Đã cập nhật</div></div>
+          <div class="result-stat"><div class="k" id="resultSkipped">0</div><div class="l">Bỏ qua</div></div>
+          <div class="result-stat"><div class="k" id="resultDeployed">—</div><div class="l">Cloudflare Pages</div></div>
+        </div>
+      </div>
+      <div class="card-foot">
+        <div class="file-meta" id="resultHint">Bạn có thể mở thư viện để kiểm tra.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="retryBtn" class="btn btn-ghost" type="button">Thử lại</button>
+          <a id="openLibraryBtn" class="btn btn-primary" href="#" target="_blank" rel="noopener">Mở thư viện</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="sidebar">
+    <section class="card side-card">
+      <div class="side-head">
+        <h2>Môi trường</h2>
+        <button id="recheckBtn" class="btn btn-sm btn-ghost" type="button">Kiểm tra lại</button>
+      </div>
+      <div id="envList" class="check-list">
+        <div class="check-item"><span class="ci">…</span><div><div class="ct">Đang kiểm tra</div><div class="cs">Vui lòng chờ.</div></div></div>
+      </div>
+    </section>
+
+    <section class="card side-card">
+      <div class="side-head">
+        <h2>Thư viện hiện tại</h2>
+      </div>
+      <div class="library-stats">
+        <div class="library-stat"><div class="k" id="libExams">—</div><div class="l">Đề đang có</div></div>
+        <div class="library-stat"><div class="k" id="libSubjects">—</div><div class="l">Môn học</div></div>
+      </div>
+      <div id="subjectChips" class="subject-chips"></div>
+      <div id="libUpdated" class="file-meta" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card side-card" id="manageCard">
+      <div class="side-head">
+        <h2>Quản lý đề đã có</h2>
+      </div>
+      <input id="manageSearch" class="input manage-search" type="search"
+             placeholder="Tìm mã hoặc tên đề…" autocomplete="off">
+      <div id="manageList" class="manage-list" aria-live="polite"></div>
+    </section>
+
+    <section class="card side-card">
+      <div class="side-head"><h2>Hướng dẫn nhanh</h2></div>
+      <ol class="help-list">
+        <li>Chọn file đề hoặc kéo cả thư mục vào khung bên trái.</li>
+        <li>Kiểm tra môn học và kế hoạch. Đề trùng mã sẽ được thêm thành <b>đề mới</b> để không ghi đè bản cũ.</li>
+        <li>Bấm <b>Đăng lên thư viện</b> và chờ đến khi báo hoàn tất.</li>
+        <li>Bấm vào một <b>môn</b> ở khung "Thư viện hiện tại" để xem các đề của môn đó, rồi <b>đổi tên</b> (✏️) hoặc <b>xóa</b> (🗑).</li>
+        <li>Nếu lỗi, bấm <b>Thử lại</b>. Hệ thống tự khôi phục dữ liệu cũ khi deploy thất bại.</li>
+      </ol>
+      <div class="notice info" style="margin-top:14px">
+        <span class="notice-icon">🔒</span>
+        <span>Trợ lý chỉ chạy trên <b>127.0.0.1</b>. Đề không được tải lên máy chủ nào ngoài Cloudflare Pages khi bạn bấm đăng.</span>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="confirmDialog">
+  <form method="dialog" id="confirmForm">
+    <div class="dialog-body">
+      <div class="dialog-title">
+        <span class="di" id="confirmIcon" aria-hidden="true">⚠️</span>
+        <div>
+          <h2 id="confirmTitle">Xác nhận đăng đề</h2>
+          <p id="confirmText">Vui lòng kiểm tra lại các thay đổi bên dưới.</p>
+        </div>
+      </div>
+      <ul class="dialog-list" id="confirmList"></ul>
+    </div>
+    <div class="dialog-foot">
+      <button id="confirmCancel" class="btn btn-ghost" type="button">Quay lại kiểm tra</button>
+      <button id="confirmOk" class="btn btn-primary" type="submit">Xác nhận đăng</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+'use strict';
+(function () {
+  const TOKEN_KEY = 'examLibraryHelperToken';
+  const $ = (id) => document.getElementById(id);
+
+  function readToken() {
+    const match = /(?:^|[#&])token=([a-f0-9]{16,128})/i.exec(location.hash || '');
+    if (match) {
+      try { sessionStorage.setItem(TOKEN_KEY, match[1]); } catch (error) {}
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (error) {}
+      return match[1];
+    }
+    try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (error) { return ''; }
+  }
+
+  const TOKEN = readToken();
+
+  const state = {
+    connected: false,
+    shutdown: false,
+    env: null,
+    library: null,
+    subjects: [],
+    files: [],
+    plan: null,
+    planning: false,
+    planTimer: null,
+    uploadBusy: false,
+    deploying: false,
+    job: null,
+    pollSince: 0,
+    pollTimer: null,
+    logRendered: 0,
+    currentJobId: '',
+    localSeq: 0,
+    manageBusy: false,
+    manageSubject: '',
+    jobActionLabel: ''
+  };
+
+  const els = {
+    connPill: $('connPill'),
+    connText: $('connText'),
+    banner: $('banner'),
+    bannerText: $('bannerText'),
+    bannerAction: $('bannerAction'),
+    refreshBtn: $('refreshBtn'),
+    shutdownBtn: $('shutdownBtn'),
+    recheckBtn: $('recheckBtn'),
+    copyLogBtn: $('copyLogBtn'),
+    dropzone: $('dropzone'),
+    fileInput: $('fileInput'),
+    folderInput: $('folderInput'),
+    fileList: $('fileList'),
+    uploadEmpty: $('uploadEmpty'),
+    clearAllBtn: $('clearAllBtn'),
+    pickFilesBtn: $('pickFilesBtn'),
+    pickFolderBtn: $('pickFolderBtn'),
+    planState: $('planState'),
+    statAdd: $('statAdd'),
+    statUpdate: $('statUpdate'),
+    statSkip: $('statSkip'),
+    statError: $('statError'),
+    planList: $('planList'),
+    planEmpty: $('planEmpty'),
+    planNotices: $('planNotices'),
+    deployBtn: $('deployBtn'),
+    deployHint: $('deployHint'),
+    progressCard: $('progressCard'),
+    progressState: $('progressState'),
+    progressPhase: $('progressPhase'),
+    progressMsg: $('progressMsg'),
+    progressPct: $('progressPct'),
+    progressBar: $('progressBar'),
+    progressTrack: $('progressTrack'),
+    progressJob: $('progressJob'),
+    progressSummary: $('progressSummary'),
+    log: $('log'),
+    cancelBtn: $('cancelBtn'),
+    resultCard: $('resultCard'),
+    resultHero: $('resultHero'),
+    resultIcon: $('resultIcon'),
+    resultTitle: $('resultTitle'),
+    resultMsg: $('resultMsg'),
+    resultAdded: $('resultAdded'),
+    resultUpdated: $('resultUpdated'),
+    resultSkipped: $('resultSkipped'),
+    resultDeployed: $('resultDeployed'),
+    resultHint: $('resultHint'),
+    retryBtn: $('retryBtn'),
+    openLibraryBtn: $('openLibraryBtn'),
+    envList: $('envList'),
+    libExams: $('libExams'),
+    libSubjects: $('libSubjects'),
+    subjectChips: $('subjectChips'),
+    libUpdated: $('libUpdated'),
+    manageSearch: $('manageSearch'),
+    manageList: $('manageList'),
+    toast: $('toast'),
+    confirmDialog: $('confirmDialog'),
+    confirmIcon: $('confirmIcon'),
+    confirmTitle: $('confirmTitle'),
+    confirmText: $('confirmText'),
+    confirmList: $('confirmList'),
+    confirmOk: $('confirmOk')
+  };
+
+  /* ---------- DOM helpers ---------- */
+  function el(tag, attrs, ...children) {
+    const node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach((key) => {
+        const value = attrs[key];
+        if (value === null || value === undefined || value === false) return;
+        if (key === 'class') node.className = value;
+        else if (key === 'text') node.textContent = value;
+        else if (key === 'html') node.innerHTML = value;
+        else if (key.slice(0, 2) === 'on' && typeof value === 'function') node.addEventListener(key.slice(2), value);
+        else node.setAttribute(key, value === true ? '' : value);
+      });
+    }
+    children.flat(4).forEach((child) => {
+      if (child === null || child === undefined || child === false) return;
+      node.append(child.nodeType ? child : document.createTextNode(String(child)));
+    });
+    return node;
+  }
+
+  function formatBytes(bytes) {
+    const value = Number(bytes) || 0;
+    if (value < 1024) return value + ' B';
+    if (value < 1024 * 1024) return (value / 1024).toFixed(1).replace('.0', '') + ' KB';
+    return (value / 1024 / 1024).toFixed(1).replace('.0', '') + ' MB';
+  }
+
+  let toastTimer = null;
+  function toast(message, kind) {
+    els.toast.textContent = message;
+    els.toast.className = 'show' + (kind ? ' ' + kind : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { els.toast.className = ''; }, 4200);
+  }
+
+  function showBanner(text, actionLabel, action) {
+    els.banner.hidden = false;
+    els.bannerText.textContent = text;
+    if (actionLabel && action) {
+      els.bannerAction.hidden = false;
+      els.bannerAction.textContent = actionLabel;
+      els.bannerAction.onclick = action;
+    } else {
+      els.bannerAction.hidden = true;
+      els.bannerAction.onclick = null;
+    }
+  }
+
+  function hideBanner() { els.banner.hidden = true; }
+
+  function setConnected(kind, text) {
+    els.connPill.className = 'pill ' + (
+      kind === 'ok' ? 'pill-ok' : kind === 'warn' ? 'pill-warn' : kind === 'bad' ? 'pill-bad' : 'pill-muted'
+    );
+    els.connText.textContent = text;
+    const dot = els.connPill.querySelector('.dot');
+    if (dot) dot.className = 'dot' + (kind === 'ok' || kind === 'warn' ? '' : ' pulse');
+  }
+
+  function setStep(n) {
+    document.querySelectorAll('.stepper-item').forEach((item) => {
+      const step = Number(item.getAttribute('data-step'));
+      item.classList.toggle('is-current', step === n);
+      item.classList.toggle('is-done', step < n);
+    });
+    $('uploadCard').classList.toggle('is-active', n === 1);
+    $('reviewCard').classList.toggle('is-active', n === 2);
+  }
+
+  function setBusy(button, busy, label) {
+    if (!button) return;
+    button.disabled = busy;
+    if (busy) {
+      if (!button.dataset.originalLabel) button.dataset.originalLabel = button.textContent;
+      button.replaceChildren(el('span', { class: 'spinner' }), ' ' + (label || 'Đang xử lý…'));
+    } else if (button.dataset.originalLabel) {
+      button.textContent = button.dataset.originalLabel;
+      delete button.dataset.originalLabel;
+    }
+  }
+
+  /* ---------- API ---------- */
+  const NO_TOKEN_PATHS = { '/api/status': true };
+
+  async function api(path, options) {
+    const opts = options || {};
+    const headers = {};
+    if (!NO_TOKEN_PATHS[path]) headers['X-Helper-Token'] = TOKEN;
+    let body;
+    if (opts.body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(opts.body);
+    }
+    const response = await fetch(path, {
+      method: opts.method || 'GET',
+      headers,
+      body,
+      cache: 'no-store',
+      credentials: 'same-origin'
+    });
+    const type = response.headers.get('content-type') || '';
+    const data = type.indexOf('application/json') >= 0 ? await response.json() : await response.text();
+    if (!response.ok) {
+      const error = new Error((data && data.message) || ('Yêu cầu thất bại (mã ' + response.status + ').'));
+      error.status = response.status;
+      error.code = data && data.error;
+      error.data = data;
+      throw error;
+    }
+    return data;
+  }
+
+  function handleError(error) {
+    if (error && error.status === 401) {
+      state.connected = false;
+      setConnected('bad', 'Phiên đã hết hạn');
+      showBanner('Phiên kết nối đã hết hạn hoặc không hợp lệ. Hãy đóng cửa sổ này và mở lại bằng START.bat.', 'Mở lại hướng dẫn', () => {
+        toast('Đóng cửa sổ này rồi nhấp đúp START.bat trong thư mục đề thi.', 'err');
+      });
+      return;
+    }
+    if (error && error.status === 409 && error.code === 'BUSY') {
+      toast(error.message, 'err');
+      if (error.data && error.data.jobId) resumeJob(error.data.jobId);
+      return;
+    }
+    toast((error && error.message) || 'Có lỗi xảy ra.', 'err');
+  }
+
+  /* ---------- Environment ---------- */
+  function renderEnv() {
+    const list = els.envList;
+    list.replaceChildren();
+    const env = state.env;
+    if (!env) {
+      list.append(el('div', { class: 'check-item' },
+        el('span', { class: 'ci', text: '…' }),
+        el('div', {}, el('div', { class: 'ct', text: 'Đang kiểm tra' }), el('div', { class: 'cs', text: 'Vui lòng chờ.' }))
+      ));
+      return;
+    }
+    const rows = [];
+    rows.push({
+      kind: env.node && env.node.ok ? 'ok' : 'bad',
+      title: 'Node.js',
+      sub: (env.node && env.node.version ? 'Phiên bản ' + env.node.version : 'Không xác định') + (env.node && env.node.ok ? '' : ' · cần ' + (env.node.required || '>= 22.5'))
+    });
+    rows.push({
+      kind: env.wrangler && env.wrangler.found ? 'ok' : 'warn',
+      title: 'Wrangler',
+      sub: env.wrangler
+        ? (env.wrangler.found ? (env.wrangler.version ? 'v' + env.wrangler.version : 'Đã tìm thấy') : 'Chưa cài sẵn · sẽ thử tải khi deploy')
+        : 'Không xác định'
+    });
+    rows.push({
+      kind: env.cloudflare && env.cloudflare.loggedIn === true ? 'ok' : env.cloudflare && env.cloudflare.loggedIn === false ? 'bad' : 'warn',
+      title: 'Cloudflare',
+      sub: (env.cloudflare && env.cloudflare.message) || 'Không xác định'
+    });
+    rows.push({
+      kind: env.project && env.project.name ? 'ok' : 'bad',
+      title: 'Dự án Pages',
+      sub: env.project && env.project.name
+        ? env.project.name + (env.project.d1 ? ' · D1 đã cấu hình' : ' · thiếu cấu hình D1')
+        : 'Chưa đọc được wrangler.jsonc'
+    });
+    rows.push({
+      kind: env.library && env.library.ok ? 'ok' : 'bad',
+      title: 'Danh mục đề',
+      sub: env.library && env.library.ok
+        ? env.library.exams + ' đề · ' + env.library.subjects + ' môn'
+        : (env.library && env.library.error) || 'Không đọc được'
+    });
+    (env.errors || []).forEach((message) => rows.push({ kind: 'bad', title: 'Lỗi cấu hình', sub: message }));
+    (env.warnings || []).forEach((message) => rows.push({ kind: 'warn', title: 'Cần lưu ý', sub: message }));
+
+    rows.forEach((row) => {
+      const icon = row.kind === 'ok' ? '✓' : row.kind === 'bad' ? '!' : '•';
+      list.append(el('div', { class: 'check-item ' + row.kind },
+        el('span', { class: 'ci', text: icon }),
+        el('div', {}, el('div', { class: 'ct', text: row.title }), el('div', { class: 'cs', text: row.sub }))
+      ));
+    });
+
+    if (!state.shutdown) {
+      if (env.readyForDeploy) setConnected('ok', 'Sẵn sàng đăng');
+      else if (env.ok) setConnected('warn', 'Đã kết nối · cần kiểm tra');
+      else setConnected('bad', 'Cần xử lý cấu hình');
+    }
+  }
+
+  async function loadEnv(refreshBtn) {
+    if (refreshBtn) setBusy(refreshBtn, true, 'Đang kiểm tra…');
+    try {
+      state.env = await api('/api/env' + (refreshBtn ? '?refresh=1' : ''));
+      renderEnv();
+    } catch (error) {
+      handleError(error);
+      if (error.status !== 401) {
+        state.env = null;
+        els.envList.replaceChildren(el('div', { class: 'check-item bad' },
+          el('span', { class: 'ci', text: '!' }),
+          el('div', {}, el('div', { class: 'ct', text: 'Không kiểm tra được môi trường' }), el('div', { class: 'cs', text: error.message }))
+        ));
+      }
+    } finally {
+      if (refreshBtn) setBusy(refreshBtn, false);
+    }
+  }
+
+  function renderLibrary() {
+    const lib = state.library;
+    if (!lib) return;
+    els.libExams.textContent = String(lib.examCount == null ? '—' : lib.examCount);
+    els.libSubjects.textContent = String(Array.isArray(lib.subjects) ? lib.subjects.length : '—');
+    els.subjectChips.replaceChildren();
+    (lib.subjects || []).forEach((subject) => {
+      els.subjectChips.append(el('span', { class: 'chip' },
+        (subject.icon ? subject.icon + ' ' : '') + subject.name,
+        el('b', { text: String(subject.examCount || 0) })
+      ));
+    });
+    els.libUpdated.textContent = lib.updatedAt ? 'Cập nhật: ' + lib.updatedAt : '';
+    renderSubjectChips();
+    renderManageList();
+  }
+
+  function renderSubjectChips() {
+    els.subjectChips.replaceChildren();
+    const lib = state.library;
+    if (!lib || !Array.isArray(lib.subjects)) return;
+    (lib.subjects || []).forEach((subject) => {
+      const chip = el('button', {
+        class: 'chip chip-btn' + (state.manageSubject === subject.id ? ' is-on' : ''),
+        type: 'button',
+        title: 'Bấm để xem các đề của môn ' + subject.name,
+        'aria-pressed': state.manageSubject === subject.id ? 'true' : 'false'
+      },
+      (subject.icon ? subject.icon + ' ' : '') + subject.name,
+      el('b', { text: String(subject.examCount || 0) }));
+      chip.addEventListener('click', () => setManageSubject(subject.id));
+      els.subjectChips.append(chip);
+    });
+  }
+
+  function setManageSubject(subjectId) {
+    state.manageSubject = state.manageSubject === subjectId ? '' : subjectId;
+    renderSubjectChips();
+    renderManageList();
+    if (state.manageSubject) {
+      const card = $('manageCard');
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  /* ---------- Quản lý đề đã có (xóa / đổi tên) ---------- */
+  function maintenanceBusy() {
+    return state.deploying || state.manageBusy || !state.connected || state.shutdown;
+  }
+
+  function renderManageList() {
+    const list = els.manageList;
+    if (!list) return;
+    list.replaceChildren();
+    const lib = state.library;
+    if (!lib || !Array.isArray(lib.subjects)) return;
+    const query = (els.manageSearch.value || '').trim().toLowerCase();
+    let shown = 0;
+
+    let subjects = lib.subjects;
+    if (state.manageSubject) {
+      subjects = subjects.filter((subject) => subject.id === state.manageSubject);
+      const current = subjects[0];
+      const back = el('button', {
+        class: 'btn btn-sm btn-ghost manage-back',
+        type: 'button',
+        title: 'Xem tất cả các môn'
+      }, '‹ Tất cả môn');
+      back.addEventListener('click', () => setManageSubject(''));
+      list.append(el('div', { class: 'manage-filter' },
+        back,
+        el('span', { class: 'manage-filter-name' },
+          current ? (current.icon ? current.icon + ' ' : '') + current.name : state.manageSubject),
+        current ? el('span', { class: 'manage-count' },
+          (current.exams || []).length + ' đề') : null
+      ));
+    }
+
+    subjects.forEach((subject) => {
+      const exams = (subject.exams || []).filter((exam) => {
+        if (!exam || !exam.id) return false;
+        if (!query) return true;
+        return ((exam.id + ' ' + (exam.title || '')).toLowerCase().indexOf(query) >= 0);
+      });
+      if (!exams.length) {
+        list.append(el('div', { class: 'manage-empty' },
+          query
+            ? 'Môn này không có đề nào khớp từ khóa.'
+            : 'Môn này chưa có đề nào.'));
+        return;
+      }
+      if (!state.manageSubject) {
+        list.append(el('div', { class: 'manage-subject' },
+          (subject.icon ? subject.icon + ' ' : '') + subject.name
+        ));
+      }
+      exams.forEach((exam) => {
+        shown += 1;
+        const busy = maintenanceBusy();
+        const renameBtn = el('button', {
+          class: 'btn btn-sm btn-ghost btn-icon',
+          type: 'button',
+          title: 'Đổi tên đề ' + exam.id,
+          'aria-label': 'Đổi tên đề ' + exam.id
+        }, '✏️');
+        renameBtn.disabled = busy;
+        renameBtn.addEventListener('click', () => renameExam(exam));
+        const deleteBtn = el('button', {
+          class: 'btn btn-sm btn-ghost btn-icon danger-text',
+          type: 'button',
+          title: 'Xóa đề ' + exam.id,
+          'aria-label': 'Xóa đề ' + exam.id
+        }, '🗑');
+        deleteBtn.disabled = busy;
+        deleteBtn.addEventListener('click', () => deleteExam(exam));
+        list.append(el('div', { class: 'manage-item' },
+          el('div', { class: 'mi' },
+            el('div', { class: 'mi-name', text: exam.title || exam.id }),
+            el('div', { class: 'mi-sub', text: [
+              exam.id,
+              exam.questions ? exam.questions + ' câu' : '',
+              exam.minutes ? exam.minutes + ' phút' : ''
+            ].filter(Boolean).join(' · ') })
+          ),
+          el('div', { class: 'mi-btns' }, renameBtn, deleteBtn)
+        ));
+      });
+    });
+
+    if (!shown && !state.manageSubject) {
+      list.append(el('div', { class: 'manage-empty' },
+        query ? 'Không có đề nào khớp từ khóa.' : 'Thư viện chưa có đề nào.'
+      ));
+    }
+  }
+
+  async function startMaintenance(action, payload) {
+    if (state.shutdown || !state.connected) {
+      toast('Trợ lý chưa kết nối. Hãy chạy lại START.bat.', 'err');
+      return;
+    }
+    if (state.deploying || state.manageBusy) {
+      toast('Đang có tiến trình chạy. Hãy chờ hoàn tất.', 'err');
+      return;
+    }
+    state.manageBusy = true;
+    state.jobActionLabel = action === 'delete' ? 'Xóa đề' : 'Đổi tên đề';
+    renderManageList();
+    try {
+      const response = await api(action === 'delete' ? '/api/exams/delete' : '/api/exams/rename', {
+        method: 'POST',
+        body: payload
+      });
+      state.manageBusy = false;
+      if (response && response.job) {
+        beginJob(response.job);
+      } else {
+        renderManageList();
+        toast('Local Helper không nhận được yêu cầu.', 'err');
+      }
+    } catch (error) {
+      state.manageBusy = false;
+      handleError(error);
+      renderManageList();
+    }
+  }
+
+  async function renameExam(exam) {
+    if (maintenanceBusy()) {
+      if (state.deploying) toast('Đang có tiến trình chạy. Hãy chờ hoàn tất.', 'err');
+      return;
+    }
+    const answer = window.prompt(
+      'Nhập tiêu đề mới cho đề "' + exam.id + '":',
+      exam.title || ''
+    );
+    if (answer === null) return;
+    const title = String(answer).trim();
+    if (!title) { toast('Tiêu đề không được để trống.', 'err'); return; }
+    if (title === exam.title) { toast('Tiêu đề mới giống tiêu đề cũ.', 'err'); return; }
+    const ok = window.confirm(
+      'Đổi tên đề?\n\n' +
+      exam.id + '\n' +
+      '"' + (exam.title || '(không có)') + '"\n  →  "' + title + '"\n\n' +
+      'Tiêu đề mới được cập nhật vào file đề và catalog, rồi deploy lên Cloudflare.' +
+      (state.env && state.env.cloudflare && state.env.cloudflare.loggedIn === false
+        ? '\n\nLưu ý: chưa đăng nhập Cloudflare, deploy có thể lỗi (dữ liệu cũ được khôi phục).'
+        : '')
+    );
+    if (!ok) return;
+    await startMaintenance('rename', { examId: exam.id, title });
+  }
+
+  async function deleteExam(exam) {
+    if (maintenanceBusy()) {
+      if (state.deploying) toast('Đang có tiến trình chạy. Hãy chờ hoàn tất.', 'err');
+      return;
+    }
+    const ok = window.confirm(
+      'Xóa đề khỏi thư viện?\n\n' +
+      exam.id + ' — ' + (exam.title || exam.id) + '\n\n' +
+      'File đề cũ được chuyển vào backups/exam-deletes/ trên máy này trước khi xóa,' +
+      ' rồi bản còn lại được deploy lên Cloudflare.'
+    );
+    if (!ok) return;
+    await startMaintenance('delete', { examId: exam.id });
+  }
+
+  async function loadLibrary() {
+    try {
+      state.library = await api('/api/library');
+      if (Array.isArray(state.library.subjects)) {
+        state.subjects = state.library.subjects.map((s) => ({ id: s.id, name: s.name, icon: s.icon }));
+      }
+      renderLibrary();
+      if (!state.subjects.length) {
+        const envSubjects = state.env && state.env.library && state.env.library.subjects;
+        if (Array.isArray(envSubjects)) state.subjects = envSubjects;
+      }
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  /* ---------- File intake ---------- */
+  const MAX_FILES = 20;
+  const MAX_FILE_BYTES = 12 * 1024 * 1024;
+  const ACCEPT_RE = /\.(html?|zip)$/i;
+
+  function toBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+  }
+
+  function walkEntry(entry, prefix, out) {
+    return new Promise((resolve) => {
+      if (!entry) { resolve(); return; }
+      if (entry.isFile) {
+        entry.file((file) => {
+          out.push({ file, relativePath: prefix + entry.name });
+          resolve();
+        }, () => resolve());
+        return;
+      }
+      if (entry.isDirectory) {
+        const reader = entry.createReader();
+        const readBatch = () => {
+          reader.readEntries(async (batch) => {
+            if (!batch.length) { resolve(); return; }
+            for (const child of batch) {
+              await walkEntry(child, prefix + entry.name + '/', out);
+            }
+            readBatch();
+          }, () => resolve());
+        };
+        readBatch();
+        return;
+      }
+      resolve();
+    });
+  }
+
+  async function addFiles(collected) {
+    if (state.uploadBusy) return;
+    if (state.shutdown) { toast('Trợ lý đã tắt. Hãy chạy lại START.bat.', 'err'); return; }
+    if (!state.connected) { toast('Chưa kết nối được Local Helper.', 'err'); return; }
+
+    const remaining = MAX_FILES - state.files.length;
+    const accepted = [];
+    const rejected = [];
+    const seen = new Set(state.files.map((item) => item.name + '|' + item.size));
+
+    (collected || []).forEach((entry) => {
+      const file = entry && entry.file ? entry.file : entry;
+      if (!file || !file.name) return;
+      if (!ACCEPT_RE.test(file.name)) {
+        rejected.push(file.name + ' (không hỗ trợ)');
+        return;
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        rejected.push(file.name + ' (quá ' + formatBytes(MAX_FILE_BYTES) + ')');
+        return;
+      }
+      if (seen.has(file.name + '|' + file.size)) {
+        rejected.push(file.name + ' (đã chọn)');
+        return;
+      }
+      if (accepted.length >= remaining) {
+        rejected.push(file.name + ' (vượt giới hạn ' + MAX_FILES + ' file)');
+        return;
+      }
+      seen.add(file.name + '|' + file.size);
+      accepted.push({ file, relativePath: entry.relativePath || file.webkitRelativePath || file.name });
+    });
+
+    if (rejected.length) {
+      toast('Bỏ qua ' + rejected.length + ' mục: ' + rejected.slice(0, 3).join(', ') + (rejected.length > 3 ? '…' : ''), 'err');
+    }
+    if (!accepted.length) return;
+
+    state.uploadBusy = true;
+    els.pickFilesBtn.disabled = true;
+    els.pickFolderBtn.disabled = true;
+    const originalFiles = els.pickFilesBtn.textContent;
+    const originalFolder = els.pickFolderBtn.textContent;
+    els.pickFilesBtn.replaceChildren(el('span', { class: 'spinner' }), ' Đang đọc…');
+    els.pickFolderBtn.disabled = true;
+
+    try {
+      const payload = [];
+      for (const item of accepted) {
+        const isZip = /\.zip$/i.test(item.file.name);
+        let content;
+        if (isZip) {
+          content = toBase64(await item.file.arrayBuffer());
+        } else {
+          content = await item.file.text();
+        }
+        payload.push({
+          name: item.file.name,
+          relativePath: item.relativePath,
+          encoding: isZip ? 'base64' : 'text',
+          content
+        });
+      }
+
+      const response = await api('/api/files', { method: 'POST', body: { files: payload } });
+      if (Array.isArray(response.subjects) && response.subjects.length) {
+        state.subjects = response.subjects.map((s) => ({ id: s.id, name: s.name, icon: s.icon }));
+      }
+      (response.files || []).forEach((record) => {
+        const duplicate = record.duplicate;
+        const subjectId = record.inferredSubjectId || (duplicate && duplicate.subjectId) || '';
+        state.files.push(Object.assign({}, record, {
+          localId: 'f' + (++state.localSeq),
+          mode: 'new',
+          subjectId
+        }));
+      });
+
+      if (state.files.length >= MAX_FILES) toast('Đã đạt giới hạn ' + MAX_FILES + ' file mỗi lần.', 'err');
+      const failed = (response.files || []).filter((record) => !record.ok).length;
+      if (failed) toast(failed + ' file cần sửa. Xem chi tiết bên dưới.', 'err');
+      else toast('Đã thêm ' + (response.files || []).length + ' mục vào danh sách kiểm tra.', 'ok');
+
+      renderAll();
+      schedulePlan(60);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      state.uploadBusy = false;
+      els.pickFilesBtn.disabled = false;
+      els.pickFilesBtn.textContent = originalFiles;
+      els.pickFolderBtn.disabled = false;
+      els.pickFolderBtn.textContent = originalFolder;
+      els.fileInput.value = '';
+      els.folderInput.value = '';
+    }
+  }
+
+  function planItemFor(uploadId) {
+    if (!state.plan || !uploadId) return null;
+    let found = null;
+    state.plan.items.forEach((item) => {
+      if (item.uploadId === uploadId) found = item;
+    });
+    return found;
+  }
+
+  function subjectName(id) {
+    const subject = state.subjects.find((item) => item.id === id);
+    return subject ? subject.name : id;
+  }
+
+  function fileStatus(file) {
+    const plan = planItemFor(file.uploadId);
+    if (plan) {
+      if (plan.action === 'error') return { cls: 'is-error', icon: '!' };
+      if (plan.action === 'update') return { cls: 'is-duplicate', icon: '↻' };
+      if (plan.action === 'skip') return { cls: 'is-ok', icon: '↷' };
+      return { cls: 'is-ok', icon: '+' };
+    }
+    if (!file.ok) return { cls: 'is-error', icon: '!' };
+    if (file.duplicate) return { cls: 'is-duplicate', icon: '⚠' };
+    return { cls: 'is-ok', icon: '✓' };
+  }
+
+  function actionTag(action) {
+    if (action === 'add') return el('span', { class: 'tag new', text: 'Thêm mới' });
+    if (action === 'update') return el('span', { class: 'tag update', text: 'Cập nhật' });
+    if (action === 'skip') return el('span', { class: 'tag skip', text: 'Bỏ qua' });
+    return el('span', { class: 'tag error', text: 'Cần sửa' });
+  }
+
+  function renderFiles() {
+    const list = els.fileList;
+    list.replaceChildren();
+    els.uploadEmpty.hidden = state.files.length > 0;
+    els.clearAllBtn.hidden = state.files.length === 0;
+
+    state.files.forEach((file) => {
+      const status = fileStatus(file);
+      const plan = planItemFor(file.uploadId);
+      const canToggle = Boolean(file.duplicate && file.uploadId);
+
+      const nameRow = el('div', { class: 'file-name' }, file.name);
+      if (file.duplicate) nameRow.append(el('span', { class: 'tag dup', text: 'Trùng mã' }));
+      if (file.uploadId && plan) nameRow.append(actionTag(plan.action));
+      if (canToggle && !plan) nameRow.append(el('span', { class: 'tag', text: file.mode === 'update' ? 'Cập nhật' : 'Thêm mới' }));
+
+      const meta = el('div', { class: 'file-meta' },
+        el('span', { text: formatBytes(file.size) }),
+        file.exam && file.exam.questions ? el('span', { text: file.exam.questions + ' câu' }) : null,
+        file.exam && file.exam.points ? el('span', { text: file.exam.points + ' điểm' }) : null,
+        file.relativePath && file.relativePath !== file.name ? el('span', { text: file.relativePath }) : null
+      );
+
+      const main = el('div', { class: 'file-main' }, nameRow, meta);
+
+      if (file.uploadId && plan && plan.id) {
+        main.append(el('div', { class: 'file-meta' },
+          el('span', { text: (plan.action === 'update' ? 'Giữ mã ' : 'Mã mới ') + plan.id }),
+          el('span', { text: plan.file || '' })
+        ));
+      } else if (file.suggestion && file.suggestion.id && !file.duplicate) {
+        main.append(el('div', { class: 'file-meta' },
+          el('span', { text: 'Dự kiến: ' + file.suggestion.id }),
+          el('span', { text: file.suggestion.file || '' })
+        ));
+      }
+
+      (file.errors || []).forEach((message) => {
+        main.append(el('div', { class: 'file-msg err', text: message }));
+      });
+      (file.warnings || []).forEach((message) => {
+        main.append(el('div', { class: 'file-msg warn', text: message }));
+      });
+      if (!file.errors || !file.errors.length) {
+        if (plan && plan.action === 'skip') {
+          main.append(el('div', { class: 'file-msg ok', text: 'Nội dung giống bản hiện có — sẽ bỏ qua.' }));
+        } else if (plan && plan.action === 'update') {
+          main.append(el('div', { class: 'file-msg warn', text: 'Bản cũ sẽ được sao lưu trước khi thay thế.' }));
+        }
+      }
+
+      const controls = el('div', { class: 'file-controls' });
+
+      if (file.uploadId && file.mode === 'new') {
+        const select = el('select', {
+          'aria-label': 'Chọn môn cho ' + file.name,
+          title: 'Môn học'
+        });
+        select.append(el('option', { value: '', text: 'Chọn môn…' }));
+        state.subjects.forEach((subject) => {
+          select.append(el('option', {
+            value: subject.id,
+            text: (subject.icon ? subject.icon + ' ' : '') + subject.name
+          }));
+        });
+        select.value = file.subjectId || '';
+        select.addEventListener('change', () => {
+          file.subjectId = select.value;
+          schedulePlan();
+        });
+        const wrap = el('span', { class: 'select-wrap' }, select);
+        controls.append(wrap);
+      } else if (file.uploadId) {
+        controls.append(el('span', { class: 'chip', text: subjectName(file.duplicate ? file.duplicate.subjectId : file.subjectId) }));
+      }
+
+      if (canToggle) {
+        const toggle = el('div', { class: 'mode-toggle', role: 'group', 'aria-label': 'Cách xử lý đề trùng mã' });
+        const btnNew = el('button', { type: 'button', 'data-mode': 'new', text: 'Thêm mới' });
+        const btnUpdate = el('button', { type: 'button', 'data-mode': 'update', text: 'Cập nhật' });
+        btnNew.classList.toggle('is-on', file.mode !== 'update');
+        btnUpdate.classList.toggle('is-on', file.mode === 'update');
+        btnNew.addEventListener('click', () => {
+          if (file.mode === 'new') return;
+          file.mode = 'new';
+          if (!file.subjectId) file.subjectId = file.inferredSubjectId || (file.duplicate && file.duplicate.subjectId) || '';
+          renderAll();
+          schedulePlan();
+        });
+        btnUpdate.addEventListener('click', () => {
+          if (file.mode === 'update') return;
+          const existing = file.duplicate;
+          const ok = window.confirm(
+            'Thay thế đề cũ bằng nội dung mới?\n\n' +
+            'Đề cũ: ' + (existing ? existing.id + ' — ' + existing.title : 'không rõ') + '\n' +
+            'Hệ thống sẽ tự sao lưu bản cũ trước khi cập nhật.'
+          );
+          if (!ok) return;
+          file.mode = 'update';
+          renderAll();
+          schedulePlan();
+        });
+        toggle.append(btnNew, btnUpdate);
+        controls.append(toggle);
+      }
+
+      const remove = el('button', {
+        class: 'icon-btn',
+        type: 'button',
+        title: 'Bỏ khỏi danh sách',
+        'aria-label': 'Bỏ ' + file.name + ' khỏi danh sách'
+      }, '✕');
+      remove.addEventListener('click', () => {
+        state.files = state.files.filter((item) => item !== file);
+        renderAll();
+        schedulePlan(60);
+      });
+      controls.append(remove);
+
+      list.append(el('div', { class: 'file-row ' + status.cls, role: 'listitem' },
+        el('div', { class: 'file-status', 'aria-hidden': 'true', text: status.icon }),
+        main,
+        controls
+      ));
+    });
+  }
+
+  /* ---------- Plan ---------- */
+  function schedulePlan(delay) {
+    clearTimeout(state.planTimer);
+    state.planTimer = setTimeout(refreshPlan, delay == null ? 240 : delay);
+  }
+
+  async function refreshPlan() {
+    const sendable = state.files.filter((file) => file.uploadId);
+    if (!sendable.length) {
+      state.plan = null;
+      state.planning = false;
+      renderAll();
+      return;
+    }
+    const seq = (state.planSeq || 0) + 1;
+    state.planSeq = seq;
+    state.planning = true;
+    renderPlan();
+    try {
+      const plan = await api('/api/plan', {
+        method: 'POST',
+        body: {
+          items: sendable.map((file) => ({
+            uploadId: file.uploadId,
+            mode: file.mode === 'update' ? 'update' : 'new',
+            subjectId: file.mode === 'update' ? '' : (file.subjectId || '')
+          }))
+        }
+      });
+      if (seq !== state.planSeq) return;
+      state.plan = plan;
+    } catch (error) {
+      if (seq !== state.planSeq) return;
+      state.plan = null;
+      handleError(error);
+    } finally {
+      if (seq === state.planSeq) {
+        state.planning = false;
+        renderAll();
+      }
+    }
+  }
+
+  function hasLocalErrors() {
+    return state.files.some((file) => !file.uploadId || !file.ok);
+  }
+
+  function canDeploy() {
+    return Boolean(
+      state.connected && !state.shutdown && !state.planning && !state.deploying &&
+      state.plan && state.plan.summary && state.plan.summary.canDeploy && !hasLocalErrors() &&
+      TOKEN
+    );
+  }
+
+  function renderPlan() {
+    const plan = state.plan;
+    const summary = plan && plan.summary ? plan.summary : { add: 0, update: 0, skip: 0, error: 0, duplicates: 0, total: 0 };
+    els.statAdd.textContent = String(summary.add || 0);
+    els.statUpdate.textContent = String(summary.update || 0);
+    els.statSkip.textContent = String(summary.skip || 0);
+    els.statError.textContent = String(summary.error || 0);
+
+    els.planState.className = 'pill pill-muted';
+    if (!state.files.length) {
+      els.planState.textContent = 'Chưa có đề';
+    } else if (state.planning) {
+      els.planState.className = 'pill pill-warn';
+      els.planState.replaceChildren(el('span', { class: 'spinner' }), ' Đang kiểm tra');
+    } else if (hasLocalErrors() || summary.error) {
+      els.planState.className = 'pill pill-bad';
+      els.planState.textContent = 'Cần sửa ' + Math.max(summary.error, state.files.filter((f) => !f.uploadId || !f.ok).length) + ' mục';
+    } else if (plan && plan.summary.canDeploy) {
+      els.planState.className = 'pill pill-ok';
+      els.planState.textContent = 'Sẵn sàng đăng';
+    } else if (plan && plan.summary.nothingToDo) {
+      els.planState.className = 'pill pill-muted';
+      els.planState.textContent = 'Không có thay đổi';
+    } else {
+      els.planState.textContent = 'Chưa sẵn sàng';
+    }
+
+    const list = els.planList;
+    list.replaceChildren();
+    els.planEmpty.hidden = state.files.length > 0;
+    const items = plan && Array.isArray(plan.items) ? plan.items : [];
+
+    items.forEach((item) => {
+      const tag = actionTag(item.action);
+      const detail = el('div', {},
+        el('div', { class: 'plan-name', text: item.name }),
+        el('div', { class: 'plan-sub', text: [
+          item.subjectName || item.subjectId || '',
+          item.title || '',
+          (item.questions ? item.questions + ' câu' : ''),
+          (item.action === 'update' ? 'sao lưu bản cũ trước khi ghi' : '')
+        ].filter(Boolean).join(' · ') })
+      );
+      if (item.errors && item.errors.length) {
+        item.errors.forEach((message) => detail.append(el('div', { class: 'file-msg err', text: message })));
+      }
+      const code = el('span', { class: 'plan-code', text: item.id || item.file || '—' });
+      list.append(el('div', { class: 'plan-row' }, tag, detail, code));
+    });
+
+    els.planNotices.replaceChildren();
+    const notices = [];
+    if (plan && Array.isArray(plan.warnings)) {
+      plan.warnings.forEach((message) => notices.push({ kind: 'warn', icon: '⚠️', text: message }));
+    }
+    if (summary.duplicates > 0) {
+      notices.push({
+        kind: 'warn',
+        icon: '🛡️',
+        text: summary.duplicates + ' đề trùng mã đang được xử lý an toàn: mặc định thêm thành đề mới, chỉ cập nhật khi bạn chủ động chọn "Cập nhật". Bản cũ luôn được sao lưu trước khi ghi đè.'
+      });
+    }
+    if (plan && plan.summary && plan.summary.nothingToDo && !summary.error) {
+      notices.push({ kind: 'info', icon: 'ℹ️', text: 'Không có đề nào cần thêm hoặc cập nhật. Hãy chọn đề khác hoặc đổi cách xử lý đề trùng.' });
+    }
+    if (hasLocalErrors()) {
+      notices.push({ kind: 'err', icon: '⛔', text: 'Có file không hợp lệ hoặc không đọc được. Hãy xóa các file báo đỏ trước khi đăng.' });
+    }
+    notices.forEach((notice) => {
+      els.planNotices.append(el('div', { class: 'notice ' + notice.kind },
+        el('span', { class: 'notice-icon', text: notice.icon }),
+        el('span', { text: notice.text })
+      ));
+    });
+
+    const deployable = canDeploy();
+    els.deployBtn.disabled = !deployable;
+    if (state.planning) {
+      els.deployHint.textContent = 'Đang kiểm tra danh sách…';
+    } else if (!state.files.length) {
+      els.deployHint.textContent = 'Chưa sẵn sàng để đăng.';
+    } else if (hasLocalErrors() || summary.error) {
+      els.deployHint.textContent = 'Còn ' + Math.max(summary.error, state.files.filter((f) => !f.uploadId || !f.ok).length) + ' mục cần sửa trước khi đăng.';
+    } else if (plan && plan.summary.nothingToDo) {
+      els.deployHint.textContent = 'Không có thay đổi nào để đăng.';
+    } else if (deployable) {
+      els.deployHint.textContent = [
+        summary.add ? summary.add + ' đề thêm mới' : '',
+        summary.update ? summary.update + ' đề cập nhật' : '',
+        summary.skip ? summary.skip + ' bỏ qua' : ''
+      ].filter(Boolean).join(' · ');
+    } else {
+      els.deployHint.textContent = state.connected ? 'Chưa sẵn sàng để đăng.' : 'Chưa kết nối Local Helper.';
+    }
+  }
+
+  function renderAll() {
+    renderFiles();
+    renderPlan();
+    if (!state.deploying) setStep(state.files.length ? 2 : 1);
+  }
+
+  /* ---------- Deploy & progress ---------- */
+  function openConfirm() {
+    if (!canDeploy()) {
+      toast('Danh sách chưa sẵn sàng để đăng.', 'err');
+      return;
+    }
+    const plan = state.plan;
+    const actionable = plan.items.filter((item) => item.action === 'add' || item.action === 'update');
+    const updates = actionable.filter((item) => item.action === 'update');
+    const duplicateAdds = actionable.filter((item) => item.action === 'add' && item.duplicate);
+    const skipped = plan.items.filter((item) => item.action === 'skip');
+
+    els.confirmList.replaceChildren();
+    actionable.forEach((item) => {
+      const li = el('li', {},
+        el('b', { text: item.action === 'update' ? '↻ Cập nhật: ' : '+ Thêm: ' }),
+        item.name
+      );
+      li.append(el('div', { class: 'file-meta' },
+        el('span', { text: item.id || '' }),
+        el('span', { text: item.file || '' })
+      ));
+      if (item.action === 'update') {
+        li.append(el('div', { class: 'file-msg warn', text: 'Bản cũ sẽ được sao lưu vào backups/exam-updates/ trước khi ghi đè.' }));
+      } else if (item.duplicate) {
+        li.append(el('div', { class: 'file-msg warn', text: 'Trùng mã nguồn với đề cũ — sẽ thêm thành đề mới, không ghi đè.' }));
+      }
+      els.confirmList.append(li);
+    });
+    skipped.forEach((item) => {
+      els.confirmList.append(el('li', {},
+        el('b', { text: '↷ Bỏ qua: ' }),
+        item.name,
+        el('span', { class: 'file-meta', text: 'Nội dung không thay đổi.' })
+      ));
+    });
+
+    els.confirmIcon.textContent = updates.length ? '🛡️' : '🚀';
+    els.confirmTitle.textContent = updates.length
+      ? 'Xác nhận cập nhật ' + updates.length + ' đề cũ'
+      : 'Xác nhận đăng ' + actionable.length + ' đề';
+    els.confirmText.textContent = updates.length
+      ? 'Thao tác này thay thế nội dung đề đang có. Hệ thống tạo bản sao lưu trước khi cập nhật; nếu deploy lỗi, dữ liệu cũ được khôi phục.'
+      : (duplicateAdds.length
+        ? 'Có ' + duplicateAdds.length + ' đề trùng mã nguồn. Các đề này sẽ được thêm thành đề mới với mã riêng; bản cũ giữ nguyên.'
+        : 'Kiểm tra lại danh sách trước khi tải lên Cloudflare Pages.');
+    els.confirmOk.textContent = updates.length ? 'Xác nhận cập nhật' : 'Xác nhận đăng';
+    els.confirmDialog.showModal();
+  }
+
+  async function startDeploy() {
+    if (!canDeploy()) return;
+    const items = state.files.filter((file) => file.uploadId).map((file) => ({
+      uploadId: file.uploadId,
+      mode: file.mode === 'update' ? 'update' : 'new',
+      subjectId: file.mode === 'update' ? '' : (file.subjectId || '')
+    }));
+
+    state.deploying = true;
+    state.pollFailures = 0;
+    renderAll();
+    setBusy(els.deployBtn, true, 'Đang gửi…');
+    try {
+      const response = await api('/api/deploy', { method: 'POST', body: { items } });
+      setBusy(els.deployBtn, false);
+      if (response && response.job) {
+        beginJob(response.job);
+      } else {
+        state.deploying = false;
+        renderAll();
+        toast('Không nhận được tiến trình deploy.', 'err');
+      }
+    } catch (error) {
+      setBusy(els.deployBtn, false);
+      state.deploying = false;
+      renderAll();
+      handleError(error);
+    }
+  }
+
+  function beginJob(job) {
+    state.job = job;
+    state.currentJobId = job.id;
+    state.pollSince = 0;
+    state.logRendered = 0;
+    state.pollFailures = 0;
+    els.log.textContent = '';
+    els.progressCard.hidden = false;
+    els.resultCard.hidden = true;
+    renderJob(job, []);
+    renderAll();
+    setStep(3);
+    els.progressCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    schedulePoll(350);
+  }
+
+  function schedulePoll(delay) {
+    clearTimeout(state.pollTimer);
+    state.pollTimer = setTimeout(() => {
+      if (state.currentJobId) pollJob(state.currentJobId);
+    }, delay || 900);
+  }
+
+  async function pollJob(id) {
+    if (state.shutdown) return;
+    try {
+      const since = state.pollSince || 0;
+      const job = await api('/api/jobs/' + encodeURIComponent(id) + '?since=' + since);
+      if (job.id !== state.currentJobId) return;
+      state.pollFailures = 0;
+      const logs = Array.isArray(job.logs) ? job.logs : [];
+      state.pollSince = job.nextSince != null ? job.nextSince : since + logs.length;
+      renderJob(job, logs);
+      if (job.state === 'running') schedulePoll(900);
+      else finishJob(job);
+    } catch (error) {
+      if (error.status === 404) {
+        state.deploying = false;
+        state.job = null;
+        els.progressCard.hidden = true;
+        state.currentJobId = '';
+        renderAll();
+        handleError(error);
+        return;
+      }
+      state.pollFailures = (state.pollFailures || 0) + 1;
+      if (state.pollFailures > 8) {
+        state.deploying = false;
+        renderAll();
+        toast('Mất kết nối với Local Helper khi đang theo dõi tiến trình.', 'err');
+        return;
+      }
+      schedulePoll(1600);
+    }
+  }
+
+  function appendLogs(entries) {
+    if (!entries || !entries.length) return;
+    const nearBottom = els.log.scrollHeight - els.log.scrollTop - els.log.clientHeight < 110;
+    const fragment = document.createDocumentFragment();
+    entries.forEach((entry) => {
+      const level = entry.level || 'raw';
+      const line = el('span', { class: 'ln ' + level });
+      let stamp = '';
+      if (entry.at) {
+        const date = new Date(entry.at);
+        if (!isNaN(date.getTime())) stamp = date.toLocaleTimeString('vi-VN', { hour12: false }) + '  ';
+      }
+      line.textContent = stamp + String(entry.text == null ? '' : entry.text);
+      fragment.append(line);
+    });
+    els.log.append(fragment);
+    state.logRendered += entries.length;
+    if (nearBottom) els.log.scrollTop = els.log.scrollHeight;
+  }
+
+  function renderJob(job, logs) {
+    if (!job) return;
+    state.job = job;
+    const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
+    els.progressPhase.textContent = job.phaseLabel || 'Đang xử lý';
+    els.progressMsg.textContent = job.message || '';
+    els.progressPct.textContent = progress + '%';
+    els.progressBar.style.width = progress + '%';
+    els.progressTrack.setAttribute('aria-valuenow', String(progress));
+    els.progressJob.textContent = 'Mã tiến trình: ' + job.id;
+    const summary = job.summary || {};
+    if (job.actionLabel) {
+      els.progressSummary.textContent = job.actionLabel + ' · ' +
+        ((job.maintenance && job.maintenance.examId) || '');
+    } else {
+      els.progressSummary.textContent = 'Thêm ' + (summary.add || 0) +
+        ' · Cập nhật ' + (summary.update || 0) + ' · Bỏ qua ' + (summary.skip || 0);
+    }
+
+    if (job.state === 'running') {
+      els.progressState.className = 'pill pill-warn';
+      els.progressState.replaceChildren(el('span', { class: 'dot pulse' }), 'Đang chạy');
+    } else if (job.state === 'success') {
+      els.progressState.className = 'pill pill-ok';
+      els.progressState.replaceChildren(el('span', { class: 'dot' }), 'Hoàn tất');
+    } else if (job.state === 'cancelled') {
+      els.progressState.className = 'pill pill-warn';
+      els.progressState.replaceChildren(el('span', { class: 'dot' }), 'Đã dừng');
+    } else {
+      els.progressState.className = 'pill pill-bad';
+      els.progressState.replaceChildren(el('span', { class: 'dot' }), 'Thất bại');
+    }
+
+    els.cancelBtn.disabled = !(job.state === 'running' && job.canCancel);
+    if (job.deployStarted && job.state === 'running') {
+      els.cancelBtn.textContent = 'Đang tải lên — không thể dừng';
+    } else {
+      els.cancelBtn.textContent = 'Dừng tiến trình';
+    }
+
+    appendLogs(logs);
+  }
+
+  function finishJob(job) {
+    state.deploying = false;
+    state.pollFailures = 0;
+    if (job.state === 'success') {
+      state.files = [];
+      state.plan = null;
+      state.currentJobId = '';
+      renderAll();
+      setStep(4);
+      loadLibrary();
+      loadEnv();
+    } else {
+      renderAll();
+      schedulePlan(120);
+    }
+    showResult(job);
+    setTimeout(() => {
+      els.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+  }
+
+  function showResult(job) {
+    const success = job.state === 'success';
+    const cancelled = job.state === 'cancelled';
+    const actionLabel = job.actionLabel || (job.result && job.result.action === 'delete' ? 'Xóa đề'
+      : job.result && job.result.action === 'rename' ? 'Đổi tên đề' : 'Đăng đề')
+      || 'Đăng đề';
+    els.resultCard.hidden = false;
+    els.resultHero.className = 'result-hero' + (success ? '' : cancelled ? ' is-cancelled' : ' is-failed');
+    els.resultIcon.textContent = success ? '✓' : cancelled ? '⏹' : '✕';
+    els.resultTitle.textContent = success ? actionLabel + ' thành công' : cancelled ? 'Đã dừng an toàn' : actionLabel + ' thất bại';
+    const result = job.result || {};
+    const summary = job.summary || {};
+    if (success) {
+      els.resultMsg.textContent = result.message ||
+        (job.actionLabel ? actionLabel + ' đã hoàn tất.' : 'Đã thêm ' + (result.added || 0) + ' và cập nhật ' + (result.updated || 0) + ' đề.');
+      els.resultHint.textContent = (result.deployed === false ? 'Chế độ thử: chưa tải lên Cloudflare. ' : '') + 'Mã tiến trình: ' + job.id;
+      els.retryBtn.textContent = job.actionLabel ? 'Về trang chính' : 'Đăng thêm đề';
+    } else if (cancelled) {
+      els.resultMsg.textContent = 'Tiến trình đã dừng trước khi tải lên. Dữ liệu thư viện được giữ nguyên.';
+      els.resultHint.textContent = 'Mã tiến trình: ' + job.id;
+      els.retryBtn.textContent = 'Thử lại';
+    } else {
+      els.resultMsg.textContent = job.error || 'Quy trình kiểm tra hoặc deploy không hoàn tất.';
+      els.resultHint.textContent = 'Đề cũ và danh mục đã được khôi phục. Mã tiến trình: ' + job.id;
+      els.retryBtn.textContent = 'Thử lại';
+    }
+    els.resultAdded.textContent = String(result.added != null ? result.added : (summary.add || 0));
+    els.resultUpdated.textContent = String(result.updated != null ? result.updated : (summary.update || 0));
+    els.resultSkipped.textContent = String(result.skipped != null ? result.skipped : (summary.skip || 0));
+    els.resultDeployed.textContent = result.deployed ? 'Đã đăng' : (result.deployed === false ? 'Chưa đăng' : '—');
+    const url = job.publicUrl || (state.env && state.env.publicUrl) || 'https://de-toan-thpt.pages.dev/';
+    els.openLibraryBtn.href = url;
+  }
+
+  async function resumeJob(jobId) {
+    try {
+      const job = jobId
+        ? await api('/api/jobs/' + encodeURIComponent(jobId))
+        : await api('/api/jobs/current');
+      if (!job) return;
+      state.currentJobId = job.id;
+      state.logRendered = 0;
+      els.log.textContent = '';
+      const logs = Array.isArray(job.logs) ? job.logs : [];
+      renderJob(job, logs);
+      state.pollSince = job.nextSince != null ? job.nextSince : logs.length;
+      if (job.state === 'running') {
+        state.deploying = true;
+        els.progressCard.hidden = false;
+        els.resultCard.hidden = true;
+        els.progressCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setStep(3);
+        schedulePoll(500);
+      } else {
+        state.deploying = false;
+        els.progressCard.hidden = true;
+        showResult(job);
+      }
+      renderAll();
+    } catch (error) {
+      if (error.status === 404) return;
+      handleError(error);
+    }
+  }
+
+  /* ---------- Clipboard & controls ---------- */
+  async function copyLog() {
+    const text = els.log.textContent || '';
+    if (!text.trim()) { toast('Chưa có log để sao chép.', 'err'); return; }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Đã sao chép nhật ký.', 'ok');
+    } catch (error) {
+      const range = document.createRange();
+      range.selectNodeContents(els.log);
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      toast('Đã chọn toàn bộ log. Nhấn Ctrl+C để sao chép.', 'ok');
+    }
+  }
+
+  async function cancelJob() {
+    const job = state.job;
+    if (!job || job.state !== 'running') return;
+    if (!window.confirm('Dừng tiến trình đang chạy?\n\nNếu chưa tải lên Cloudflare, hệ thống sẽ khôi phục dữ liệu về trạng thái trước khi đăng.')) return;
+    try {
+      const result = await api('/api/jobs/' + encodeURIComponent(job.id) + '/cancel', { method: 'POST', body: {} });
+      if (result.ok) toast('Đã yêu cầu dừng an toàn.', 'ok');
+      else toast(result.reason || 'Chưa thể dừng lúc này.', 'err');
+      schedulePoll(400);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async function shutdownHelper() {
+    if (state.deploying) {
+      toast('Không thể tắt khi đang đăng đề. Hãy chờ hoàn tất hoặc dừng trước khi tải lên.', 'err');
+      return;
+    }
+    if (!window.confirm('Tắt Local Helper?\n\nGiao diện sẽ ngừng hoạt động. Chạy lại START.bat khi cần đăng đề.')) return;
+    try {
+      await api('/api/shutdown', { method: 'POST', body: {} });
+    } catch (error) {
+      // Server có thể đóng kết nối ngay sau khi trả lời.
+    }
+    state.shutdown = true;
+    state.connected = false;
+    setConnected('bad', 'Đã tắt');
+    els.shutdownBtn.disabled = true;
+    els.refreshBtn.disabled = true;
+    els.deployBtn.disabled = true;
+    els.pickFilesBtn.disabled = true;
+    els.pickFolderBtn.disabled = true;
+    renderManageList();
+    showBanner('Local Helper đã tắt. Nhấp đúp START.bat trong thư mục đề thi để mở lại.', null, null);
+    toast('Đã tắt Local Helper.', 'ok');
+  }
+
+  /* ---------- Events ---------- */
+  els.pickFilesBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    els.fileInput.click();
+  });
+  els.pickFolderBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    els.folderInput.click();
+  });
+  els.dropzone.addEventListener('click', (event) => {
+    if (event.target.closest('button')) return;
+    els.fileInput.click();
+  });
+  els.fileInput.addEventListener('change', () => {
+    const files = Array.from(els.fileInput.files || []).map((file) => ({
+      file,
+      relativePath: file.webkitRelativePath || file.name
+    }));
+    if (files.length) addFiles(files);
+  });
+  els.folderInput.addEventListener('change', () => {
+    const files = Array.from(els.folderInput.files || []).map((file) => ({
+      file,
+      relativePath: file.webkitRelativePath || file.name
+    }));
+    if (files.length) addFiles(files);
+  });
+
+  let dragDepth = 0;
+  els.dropzone.addEventListener('dragenter', (event) => {
+    event.preventDefault();
+    dragDepth += 1;
+    els.dropzone.classList.add('is-dragging');
+  });
+  els.dropzone.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+  });
+  els.dropzone.addEventListener('dragleave', (event) => {
+    event.preventDefault();
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (!dragDepth) els.dropzone.classList.remove('is-dragging');
+  });
+  els.dropzone.addEventListener('drop', async (event) => {
+    event.preventDefault();
+    dragDepth = 0;
+    els.dropzone.classList.remove('is-dragging');
+    const transfer = event.dataTransfer;
+    if (!transfer) return;
+    const items = transfer.items ? Array.from(transfer.items) : [];
+    const entries = items
+      .filter((item) => item.kind === 'file')
+      .map((item) => (item.webkitGetAsEntry ? item.webkitGetAsEntry() : null))
+      .filter(Boolean);
+    if (entries.length) {
+      const collected = [];
+      for (const entry of entries) await walkEntry(entry, '', collected);
+      await addFiles(collected);
+    } else {
+      await addFiles(Array.from(transfer.files || []).map((file) => ({ file, relativePath: file.name })));
+    }
+  });
+
+  els.clearAllBtn.addEventListener('click', () => {
+    if (!state.files.length) return;
+    if (!window.confirm('Xóa toàn bộ danh sách đang chọn? Thư viện trên Cloudflare không bị thay đổi.')) return;
+    state.files = [];
+    state.plan = null;
+    els.fileInput.value = '';
+    els.folderInput.value = '';
+    renderAll();
+  });
+
+  els.deployBtn.addEventListener('click', openConfirm);
+  els.confirmOk.addEventListener('click', (event) => {
+    event.preventDefault();
+    els.confirmDialog.close('ok');
+    startDeploy();
+  });
+  els.cancelBtn.addEventListener('click', cancelJob);
+  els.copyLogBtn.addEventListener('click', copyLog);
+  els.shutdownBtn.addEventListener('click', shutdownHelper);
+  els.refreshBtn.addEventListener('click', async () => {
+    setBusy(els.refreshBtn, true, 'Đang tải…');
+    try {
+      await Promise.all([loadEnv(), loadLibrary()]);
+      await resumeJob();
+      renderAll();
+      toast('Đã tải lại trạng thái.', 'ok');
+    } finally {
+      setBusy(els.refreshBtn, false);
+    }
+  });
+  els.recheckBtn.addEventListener('click', () => loadEnv(els.recheckBtn));
+  els.manageSearch.addEventListener('input', () => renderManageList());
+  els.retryBtn.addEventListener('click', () => {
+    els.resultCard.hidden = true;
+    if (state.files.length) {
+      schedulePlan(60);
+      $('reviewCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      toast('Kiểm tra lại danh sách rồi bấm "Đăng lên thư viện".', 'ok');
+    } else {
+      $('uploadCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      els.fileInput.click();
+    }
+  });
+
+  window.addEventListener('beforeunload', (event) => {
+    if (!state.deploying) return;
+    event.preventDefault();
+    event.returnValue = 'Tiến trình đăng đề vẫn đang chạy. Bạn có chắc muốn đóng?';
+    return event.returnValue;
+  });
+
+  /* ---------- Init ---------- */
+  async function init() {
+    renderEnv();
+    renderLibrary();
+    renderAll();
+
+    if (!TOKEN) {
+      setConnected('bad', 'Thiếu mã phiên');
+      showBanner('Không tìm thấy mã phiên trong đường dẫn. Hãy đóng tab này và mở lại bằng START.bat (không mở trực tiếp add-exam.html).', null, null);
+      return;
+    }
+
+    try {
+      const status = await api('/api/status');
+      if (!status || status.app !== 'exam-library-helper') throw new Error('Không phải Local Helper.');
+      state.connected = true;
+      setConnected('ok', 'Đã kết nối');
+      hideBanner();
+    } catch (error) {
+      setConnected('bad', 'Không kết nối');
+      showBanner('Không kết nối được Local Helper. Hãy chạy START.bat trong thư mục đề thi, sau đó thử lại.', 'Thử lại', () => location.reload());
+      els.deployBtn.disabled = true;
+      return;
+    }
+
+    await Promise.all([loadEnv(), loadLibrary()]);
+    if (!state.connected) return;
+    await resumeJob();
+    renderAll();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

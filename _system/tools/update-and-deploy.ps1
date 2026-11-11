@@ -1,21 +1,21 @@
 # =====================================================================
 # Cap nhat de thi va deploy len Cloudflare Pages.
 #
-#   powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1
-#   powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
-#   powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1 -CheckOnly
+#   powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1
+#   powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
+#   powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1 -CheckOnly
 #
 # Cac buoc:
-#   1. (tuy chon) Nhap de moi bang tools/import-exam.js
-#   2. tools/patch-exams.js       - o lop + hang doi nop bai
-#   3. tools/build-exam-data.js   - dap an chuan phia server
-#   4. tools/build-cache-manifest.js - hash de de chi tai de thay doi
-#   5. tools/check-library.js     - kiem tra danh muc/file de
-#   6. tools/test-sw-lazy.js      - chac chan khong tai truoc toan bo de
-#   7. tools/test-scoring.js      - doi chieu cham diem client/server
-#   8. tools/patch-exams.js --check
-#   9. tools/bump-cache-version.js - tang CACHE_VERSION
-#  10. tools/deploy-pages.ps1     - chi deploy file tinh da whitelist
+#   1. (tuy chon) Nhap de moi bang _system/tools/import-exam.js
+#   2. _system/tools/patch-exams.js       - o lop + hang doi nop bai
+#   3. _system/tools/build-exam-data.js   - dap an chuan phia server
+#   4. _system/tools/build-cache-manifest.js - hash de de chi tai de thay doi
+#   5. _system/tools/check-library.js     - kiem tra danh muc/file de
+#   6. _system/tools/test-sw-lazy.js      - chac chan khong tai truoc toan bo de
+#   7. _system/tools/test-scoring.js      - doi chieu cham diem client/server
+#   8. _system/tools/patch-exams.js --check
+#   9. _system/tools/bump-cache-version.js - tang CACHE_VERSION
+#  10. _system/tools/deploy-pages.ps1     - chi deploy file tinh da whitelist
 #
 # Khong commit, khong push GitHub, khong dung `wrangler pages deploy .`.
 # =====================================================================
@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
+$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $root
 
 function Write-Section([string]$text) {
@@ -67,48 +67,48 @@ if ($CheckOnly) {
     $importArgs += '--yes'
   }
 
-  Invoke-Node (@('tools/import-exam.js') + $importArgs)
+  Invoke-Node (@('_system/tools/import-exam.js') + $importArgs)
 }
 
 # 2 + 6. patch-exams
 Write-Section '2/8 Tich hop o lop + hang doi nop bai'
 if ($CheckOnly) {
-  Invoke-Node @('tools/patch-exams.js', '--check')
+  Invoke-Node @('_system/tools/patch-exams.js', '--check')
 } else {
-  Invoke-Node @('tools/patch-exams.js')
+  Invoke-Node @('_system/tools/patch-exams.js')
 }
 
 # 3. build-exam-data
 Write-Section '3/8 Cap nhat dap an chuan phia server'
 if ($CheckOnly) {
-  Invoke-Node @('tools/build-exam-data.js', '--check')
+  Invoke-Node @('_system/tools/build-exam-data.js', '--check')
 } else {
-  Invoke-Node @('tools/build-exam-data.js')
+  Invoke-Node @('_system/tools/build-exam-data.js')
 }
 
 # 4. build-cache-manifest
 Write-Section '4/8 Cap nhat hash de cho Service Worker'
 if ($CheckOnly) {
-  Invoke-Node @('tools/build-cache-manifest.js', '--check')
+  Invoke-Node @('_system/tools/build-cache-manifest.js', '--check')
 } else {
-  Invoke-Node @('tools/build-cache-manifest.js')
+  Invoke-Node @('_system/tools/build-cache-manifest.js')
 }
 
 # 5. check-library
 Write-Section '5/9 Kiem tra thu vien de'
-Invoke-Node @('tools/check-library.js')
+Invoke-Node @('_system/tools/check-library.js')
 
 # 6. test-sw-lazy
 Write-Section '6/9 Kiem tra cache luoi (khong tai truoc de)'
-Invoke-Node @('tools/test-sw-lazy.js')
+Invoke-Node @('_system/tools/test-sw-lazy.js')
 
 # 7. test-scoring
 Write-Section '7/9 Doi chieu cham diem client/server'
-Invoke-Node @('tools/test-scoring.js')
+Invoke-Node @('_system/tools/test-scoring.js')
 
 # 8. patch-exams --check
 Write-Section '8/9 Xac nhan de da duoc tich hop day du'
-Invoke-Node @('tools/patch-exams.js', '--check')
+Invoke-Node @('_system/tools/patch-exams.js', '--check')
 
 if ($CheckOnly) {
   Write-Host ''
@@ -118,7 +118,7 @@ if ($CheckOnly) {
 
 # 9. Tang cache version
 Write-Section '9/9 Tang CACHE_VERSION de trinh duyet nhan ban moi'
-Invoke-Node @('tools/bump-cache-version.js')
+Invoke-Node @('_system/tools/bump-cache-version.js')
 
 if ($NoDeploy) {
   Write-Host ''

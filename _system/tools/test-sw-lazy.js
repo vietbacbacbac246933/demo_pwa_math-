@@ -5,7 +5,7 @@
  *   - Mở đề nào thì chỉ tải và lưu đề đó.
  *   - Đề đã mở vẫn mở được khi ngoại tuyến; đề chưa mở hiện trang thông báo.
  *
- *   node tools/test-sw-lazy.js
+ *   node _system/tools/test-sw-lazy.js
  *
  * Không cần trình duyệt: mô phỏng Cache Storage + fetch bằng Node.
  */
@@ -15,7 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const ORIGIN = 'https://example.test';
 
 function main() {

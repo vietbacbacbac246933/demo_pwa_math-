@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
  * Kiểm tra migration D1 mà không cần kết nối Cloudflare:
- *   node tools/check-migrations.js
+ *   node _system/tools/check-migrations.js
  *
  * - Nạp toàn bộ migrations/*.sql vào SQLite trong bộ nhớ.
  * - Kiểm tra bảng, cột, index, UNIQUE và CHECK constraints.
@@ -16,8 +16,8 @@ const fs = require('fs');
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
 
-const ROOT = path.resolve(__dirname, '..');
-const MIGRATIONS_DIR = path.join(ROOT, 'migrations');
+const ROOT = path.resolve(__dirname, '..', '..');
+const MIGRATIONS_DIR = path.join(ROOT, '_system', 'migrations');
 const errors = [];
 
 function fail(message) {

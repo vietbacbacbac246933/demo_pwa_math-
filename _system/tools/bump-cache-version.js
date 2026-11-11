@@ -2,8 +2,8 @@
 /*
  * Tăng CACHE_VERSION trong sw.js lên 1 đơn vị (v17 -> v18).
  *
- *   node tools/bump-cache-version.js
- *   node tools/bump-cache-version.js --dry-run
+ *   node _system/tools/bump-cache-version.js
+ *   node _system/tools/bump-cache-version.js --dry-run
  *
  * Cần tăng mỗi lần deploy thay đổi file tĩnh, để Service Worker cài lại
  * cache và người dùng nhận bản mới.
@@ -13,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SW_PATH = path.join(__dirname, '..', 'sw.js');
+const SW_PATH = path.join(__dirname, '..', '..', 'sw.js');
 const dryRun = process.argv.indexOf('--dry-run') >= 0;
 
 const text = fs.readFileSync(SW_PATH, 'utf8');

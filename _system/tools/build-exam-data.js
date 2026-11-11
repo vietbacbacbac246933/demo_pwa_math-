@@ -2,8 +2,8 @@
 /*
  * Sinh dữ liệu đề thi phía server từ các file HTML trong exams/.
  *
- *   node tools/build-exam-data.js
- *   node tools/build-exam-data.js --check
+ *   node _system/tools/build-exam-data.js
+ *   node _system/tools/build-exam-data.js --check
  *
  * File sinh ra: functions/_lib/exam-data.js
  * Chỉ chứa metadata + đáp án tối thiểu để chấm điểm. Không chứa nội dung
@@ -16,7 +16,7 @@ const path = require('path');
 const vm = require('vm');
 const crypto = require('crypto');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const CATALOG_PATH = path.join(ROOT, 'assets', 'js', 'catalog.js');
 const OUT_PATH = path.join(ROOT, 'functions', '_lib', 'exam-data.js');
 const errors = [];
@@ -193,7 +193,7 @@ if (errors.length) {
   const banner = [
     '/*',
     ' * AUTO-GENERATED — không sửa tay.',
-    ' * Sinh bởi tools/build-exam-data.js từ các file trong exams/.',
+    ' * Sinh bởi _system/tools/build-exam-data.js từ các file trong exams/.',
     ' * File này chỉ dùng phía server (Pages Functions), không được trả ra API.',
     ' */',
     ''
@@ -206,7 +206,7 @@ if (errors.length) {
   if (process.argv.indexOf('--check') >= 0) {
     const current = fs.existsSync(OUT_PATH) ? fs.readFileSync(OUT_PATH, 'utf8') : '';
     if (current !== content) {
-      console.error('exam-data.js chưa đồng bộ. Chạy: node tools/build-exam-data.js');
+      console.error('exam-data.js chưa đồng bộ. Chạy: node _system/tools/build-exam-data.js');
       process.exitCode = 1;
     } else {
       console.log('exam-data.js đồng bộ: ' + EXAM_LIST.length + ' đề.');

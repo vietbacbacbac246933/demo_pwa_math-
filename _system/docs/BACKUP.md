@@ -121,7 +121,7 @@ chiếu.
 
 ## 7. Quy trình trước migration production
 
-1. `node tools/check-migrations.js` phải OK.
+1. `node _system/tools/check-migrations.js` phải OK.
 2. Xuất SQL backup mới.
 3. Ghi lại bookmark Time Travel.
 4. Chạy `wrangler d1 migrations apply results-db --remote`.

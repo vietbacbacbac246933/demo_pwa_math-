@@ -21,7 +21,7 @@
    ================================================================== */
 'use strict';
 
-var CACHE_VERSION = 'v24';
+var CACHE_VERSION = 'v33';
 var CACHE_PREFIX = 'exam-library-';
 var CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 var LEGACY_CACHE_PREFIX = 'de-toan-thpt-pwa-';
@@ -58,7 +58,7 @@ var CRITICAL_PATHS = [
   './assets/js/library.js'
 ];
 
-// Nạp manifest hash nội dung từng đề (do tools/build-cache-manifest.js sinh).
+// Nạp manifest hash nội dung từng đề (do _system/tools/build-cache-manifest.js sinh).
 // Chỉ dùng để gắn nhãn phiên bản nội dung cho đề đã cache; KHÔNG tải trước đề.
 try {
   importScripts(new URL('./assets/js/exam-revs.js?v=' + CACHE_VERSION, self.location.href).href);

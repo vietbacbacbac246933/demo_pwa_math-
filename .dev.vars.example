@@ -2,7 +2,7 @@
 # KHÔNG commit .dev.vars.
 #
 # Sinh hash mật khẩu:
-#   node tools/hash-password.js
+#   node _system/tools/hash-password.js
 #
 # Sinh SESSION_SECRET (ví dụ bằng Node):
 #   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -17,7 +17,8 @@ TEACHER_SESSION_HOURS=12
 # TURNSTILE_SECRET_KEY=0x4AAAAAAA...
 
 # Tùy chọn: chỉnh giới hạn tần suất nộp bài (mặc định bên dưới).
-# SUBMIT_RATE_LIMIT_MAX=60
+# Ngưỡng cao để cả lớp dùng chung IP của trường vẫn nộp được bình thường.
+# SUBMIT_RATE_LIMIT_MAX=1000
 # SUBMIT_RATE_LIMIT_WINDOW_SECONDS=600
-# SUBMIT_RATE_BURST_MAX=20
+# SUBMIT_RATE_BURST_MAX=300
 # SUBMIT_RATE_BURST_WINDOW_SECONDS=60

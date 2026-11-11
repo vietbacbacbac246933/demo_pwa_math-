@@ -18,7 +18,7 @@ theo thứ tự tên và ghi lại lịch sử trong bảng `d1_migrations`.
 ## Kiểm tra cục bộ (không cần Cloudflare)
 
 ```bash
-node tools/check-migrations.js
+node _system/tools/check-migrations.js
 ```
 
 Lệnh này nạp toàn bộ migration vào SQLite trong bộ nhớ, kiểm tra cột/index/

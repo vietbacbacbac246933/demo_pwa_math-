@@ -2,8 +2,8 @@
 /*
  * Tích hợp hàng đợi nộp bài vào tất cả file đề trong exams/.
  *
- *   node tools/patch-exams.js
- *   node tools/patch-exams.js --check
+ *   node _system/tools/patch-exams.js
+ *   node _system/tools/patch-exams.js --check
  *
  * Thay đổi:
  * - Thêm ô nhập lớp, bắt buộc họ tên + lớp trước khi bắt đầu.
@@ -17,7 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const CHECK = process.argv.indexOf('--check') >= 0;
 
 function eolOf(text) {
@@ -196,7 +196,7 @@ listExams().forEach(function (file) {
 
   if (CHECK) {
     if (original !== updated) {
-      errors.push(relative + ': chưa được tích hợp (chạy node tools/patch-exams.js)');
+      errors.push(relative + ': chưa được tích hợp (chạy node _system/tools/patch-exams.js)');
     }
     return;
   }

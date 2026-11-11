@@ -12,6 +12,8 @@ một file HTML độc lập, giữ nguyên câu hỏi, cách chấm và giao di
   khi có mạng; mất mạng thì xếp hàng trong IndexedDB và tự thử lại.
 - Giáo viên đăng nhập bằng mật khẩu dùng chung để xem, lọc và xuất CSV toàn bộ
   kết quả.
+- Trang giáo viên tự cập nhật mỗi 10 giây và hiển thị số bài đã nộp, nên cả lớp
+  nộp xong là giáo viên thấy đủ mà không phải bấm tải lại.
 - Giáo viên có thể xóa kết quả ngay trên trang quản trị; bản ghi được chép
   sang `submissions_archive` trước khi xóa nên hoàn tác được.
 - Không dùng R2, Supabase, Firebase, VPS, database ngoài hay Worker riêng.
@@ -27,6 +29,9 @@ một file HTML độc lập, giữ nguyên câu hỏi, cách chấm và giao di
 
 ```text
 repository/
+├── START.bat                      # Mở giao diện quản lý đề (giáo viên)
+├── START-CLOUDFLARE.bat           # Deploy trực tiếp bằng terminal (dự phòng)
+├── START-GITHUB.bat               # Quy trình GitHub Pages cũ
 ├── index.html                     # Trang chủ thư viện
 ├── teacher.html                   # Trang kết quả cho giáo viên
 ├── manifest.webmanifest           # Manifest PWA dùng chung
@@ -70,30 +75,41 @@ repository/
 │       ├── results/delete.js       # POST xóa/hoàn tác (giáo viên)
 │       └── auth/{login,logout}.js
 │
-├── migrations/
-│   ├── 0001_create_submissions.sql
-│   ├── 0002_create_submissions_archive.sql
-│   ├── 0003_create_rate_limits.sql
-│   └── README.md
-│
-├── docs/
-│   ├── DEPLOY.md                   # Triển khai Cloudflare Pages + D1
-│   └── BACKUP.md                   # Sao lưu và khôi phục
-│
-└── tools/
-    ├── check-library.js            # Kiểm tra danh mục/file đề
-    ├── check-migrations.js         # Kiểm tra migration trên SQLite in-memory
-    ├── build-exam-data.js          # Sinh exam-data.js từ các file đề
-    ├── build-cache-manifest.js     # Sinh hash đề cho Service Worker
-    ├── patch-exams.js              # Tích hợp ô lớp + hàng đợi vào đề
-    ├── bump-cache-version.js       # Tăng CACHE_VERSION trong sw.js
-    ├── update-and-deploy.ps1       # Cập nhật đề + deploy một lần
-    ├── deploy-pages.ps1            # Chỉ deploy file tĩnh đã whitelist
-    ├── hash-password.js            # Sinh TEACHER_PASSWORD_HASH
-    ├── test-sw-lazy.js             # Kiểm tra cache lười (không tải trước đề)
-    ├── test-scoring.js             # Đối chiếu chấm điểm client/server
-    └── test-api.js                 # Kiểm thử API trên Wrangler local
+└── _system/                       # FILE HỆ THỐNG — không sửa tay
+    ├── migrations/
+    │   ├── 0001_create_submissions.sql
+    │   ├── 0002_create_submissions_archive.sql
+    │   ├── 0003_create_rate_limits.sql
+    │   └── README.md
+    ├── docs/
+    │   ├── DEPLOY.md               # Triển khai Cloudflare Pages + D1
+    │   ├── BACKUP.md               # Sao lưu và khôi phục
+    │   └── QUAN-LY-DE.md           # Hướng dẫn Local Helper
+    ├── ui/
+    │   └── add-exam.html           # Giao diện Local Helper (chỉ chạy trên máy)
+    └── tools/
+        ├── local-helper.js         # Local Helper (127.0.0.1)
+        ├── manage-exam.js          # Đổi tên / xóa đề
+        ├── import-exam.js          # Nhập đề mới
+        ├── check-library.js        # Kiểm tra danh mục/file đề
+        ├── check-migrations.js     # Kiểm tra migration trên SQLite in-memory
+        ├── build-exam-data.js      # Sinh exam-data.js từ các file đề
+        ├── build-cache-manifest.js # Sinh hash đề cho Service Worker
+        ├── patch-exams.js          # Tích hợp ô lớp + hàng đợi vào đề
+        ├── bump-cache-version.js   # Tăng CACHE_VERSION trong sw.js
+        ├── update-and-deploy.ps1   # Cập nhật đề + deploy một lần
+        ├── deploy-pages.ps1        # Chỉ deploy file tĩnh đã whitelist
+        ├── hash-password.js        # Sinh TEACHER_PASSWORD_HASH
+        ├── test-sw-lazy.js         # Kiểm tra cache lười (không tải trước đề)
+        ├── test-scoring.js         # Đối chiếu chấm điểm client/server
+        └── test-api.js             # Kiểm thử API trên Wrangler local
 ```
+
+> `index.html`, `assets/`, `exams/`, `functions/`, `sw.js` và `wrangler.jsonc`
+> **phải nằm ở gốc repo** vì GitHub Pages phục vụ từ gốc và Cloudflare đọc
+> `functions/` + `wrangler.jsonc` tại gốc. Chỉ các công cụ, tài liệu và migration
+> được gom vào `_system/` để giáo viên không sửa nhầm.
+
 
 ---
 
@@ -137,8 +153,9 @@ Body tối đa 64 KB, `Content-Type: application/json`:
 - Trả `201` khi lưu mới, `200` + `duplicate: true` khi gửi lặp cùng dữ liệu,
   `409` khi dùng lại `submission_id` với dữ liệu khác.
 - `score`, `total_score`, `exam_title`, `submitted_at` do máy chủ tạo.
-- Rate limit theo IP (mặc định 60 lượt/10 phút, 20 lượt/phút) trả
-  `429 SUBMIT_RATE_LIMITED` kèm `Retry-After`.
+- Rate limit theo IP (mặc định 1000 lượt/10 phút, 300 lượt/phút) trả
+  `429 SUBMIT_RATE_LIMITED` kèm `Retry-After`. Ngưỡng cao để cả lớp dùng chung
+  IP của trường vẫn nộp được; không hạ thấp chỉ vì một lớp có ~45 học sinh.
 - Nếu bật Turnstile, body có thể kèm `turnstile_token`; thiếu/sai token trả
   `403 TURNSTILE_REQUIRED` hoặc `403 TURNSTILE_FAILED`.
 
@@ -191,7 +208,7 @@ Wrangler (chạy qua `npx wrangler`).
 Copy-Item .dev.vars.example .dev.vars
 
 # 2. Sinh hash mật khẩu giáo viên (nhập mật khẩu ẩn)
-node tools/hash-password.js
+node _system/tools/hash-password.js
 # Dán TEACHER_PASSWORD_HASH vào .dev.vars
 
 # 3. Sinh SESSION_SECRET
@@ -211,17 +228,17 @@ Mở `http://127.0.0.1:8788/`. `.dev.vars` và `.wrangler/` đã nằm trong
 ### Kiểm thử
 
 ```powershell
-node tools/build-exam-data.js --check
-node tools/build-cache-manifest.js --check
-node tools/check-migrations.js
-node tools/check-library.js
-node tools/patch-exams.js --check
-node tools/test-sw-lazy.js
-node tools/test-scoring.js
+node _system/tools/build-exam-data.js --check
+node _system/tools/build-cache-manifest.js --check
+node _system/tools/check-migrations.js
+node _system/tools/check-library.js
+node _system/tools/patch-exams.js --check
+node _system/tools/test-sw-lazy.js
+node _system/tools/test-scoring.js
 
 # Cần dev server đang chạy và mật khẩu giáo viên local
 $env:TEST_TEACHER_PASSWORD = "mật-khẩu-local"
-node tools/test-api.js
+node _system/tools/test-api.js
 ```
 
 `test-api.js` chỉ ghi vào D1 **local**. Mỗi lần chạy dùng một lớp riêng
@@ -230,6 +247,42 @@ hợp lệ, rate limit nộp bài, chấm lại phía máy chủ, gửi trùng, 
 thời, ~100 lượt nộp, phân quyền, SQL injection, CSV đầy đủ/BOM/chống formula,
 và đăng xuất.
 
+### Kiểm thử tải tại local
+
+Mở một cửa sổ PowerShell riêng để chạy dev server:
+
+```powershell
+npx wrangler pages dev . --port 8788
+```
+
+Cửa sổ thứ hai chạy load test, tăng dần số học sinh ảo:
+
+```powershell
+# Chạy từng mức riêng
+node _system/tools/loadtest.js http://127.0.0.1:8788 toan_01 10
+node _system/tools/loadtest.js http://127.0.0.1:8788 toan_01 25
+node _system/tools/loadtest.js http://127.0.0.1:8788 toan_01 45
+node _system/tools/loadtest.js http://127.0.0.1:8788 toan_01 100
+
+# Hoặc chạy lần lượt nhiều mức trong một lệnh
+node _system/tools/loadtest.js http://127.0.0.1:8788 toan_01 --ramp=10,25,45,100
+
+# Gửi lặp mỗi bài 2 lần để kiểm tra chống trùng, bỏ thời gian chờ ngẫu nhiên
+node _system/tools/loadtest.js http://127.0.0.1:8788 toan_01 45 --duplicate --delay=0
+```
+
+- Mỗi mức dùng một tên lớp riêng (in ra màn hình). Mở `teacher.html`, lọc đúng
+  lớp đó để kiểm tra đủ số dòng, rồi dùng chức năng xóa theo lớp.
+- Mặc định chờ ngẫu nhiên 0–3 giây như người thật. Dùng `--delay=0` để dồn
+  request sát nhau hơn; dùng `--concurrency=50` nếu máy yếu hoặc chạy n rất lớn.
+- Script chỉ cho chạy với `localhost`. Muốn chạy với site thật phải thêm
+  `--allow-remote` và chỉ chạy trên site của chính bạn.
+- Request local đi từ loopback nên được miễn rate limit; muốn kiểm tra
+  `429 SUBMIT_RATE_LIMITED`, dùng `test-api.js`.
+- Đây là môi trường Wrangler local (một tiến trình, D1 local), không phản ánh
+  chính xác hiệu năng mạng/edge của Cloudflare. Chỉ so sánh giữa các lần chạy
+  trên cùng một máy.
+
 > Khi đổi `teacher.js`, `result-queue.js`, `sw.js` hoặc bất kỳ file nào trong
 > `CORE_PATHS`, tăng `CACHE_VERSION` trong `sw.js` để trình duyệt cài lại cache.
 
@@ -237,7 +290,7 @@ và đăng xuất.
 
 ## 4. Triển khai
 
-Xem hướng dẫn chi tiết tại [`docs/DEPLOY.md`](docs/DEPLOY.md). Tóm tắt:
+Xem hướng dẫn chi tiết tại [`_system/docs/DEPLOY.md`](_system/docs/DEPLOY.md). Tóm tắt:
 
 1. Tạo D1 database `results-db` trên Cloudflare (hoặc dùng database đã có).
 2. Điền `database_id` thật vào `wrangler.jsonc` (file trong repo đã trỏ tới
@@ -254,22 +307,22 @@ Xem hướng dẫn chi tiết tại [`docs/DEPLOY.md`](docs/DEPLOY.md). Tóm t�
 Bản production hiện tại: <https://de-toan-thpt.pages.dev/>. Deploy bằng script an toàn:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/deploy-pages.ps1
+powershell -ExecutionPolicy Bypass -File _system/tools/deploy-pages.ps1
 ```
 
 > **Không chạy `wrangler pages deploy .`**: lệnh đó upload cả `.dev.vars`,
-> `backups/`, `tools/`, `migrations/`, `docs/`... lên web. `.assetsignore`
+> `backups/`, `_system/tools/`, `_system/migrations/`, `_system/docs/`... lên web. `.assetsignore`
 > không có tác dụng với Cloudflare Pages.
 
 > Hash mật khẩu phải dùng 50.000 vòng PBKDF2 (mặc định của
-> `tools/hash-password.js`). Hash vài trăm nghìn vòng có thể vượt giới hạn CPU
+> `_system/tools/hash-password.js`). Hash vài trăm nghìn vòng có thể vượt giới hạn CPU
 > của gói miễn phí và làm đăng nhập luôn trả `401`.
 
 ---
 
 ## 5. Sao lưu và khôi phục
 
-Xem chi tiết tại [`docs/BACKUP.md`](docs/BACKUP.md). Tóm tắt:
+Xem chi tiết tại [`_system/docs/BACKUP.md`](_system/docs/BACKUP.md). Tóm tắt:
 
 - **D1 Time Travel**: mốc khôi phục theo thời gian của Cloudflare.
 - **Xuất SQL định kỳ**: `wrangler d1 export results-db --remote --output backups/...`
@@ -282,7 +335,33 @@ Xem chi tiết tại [`docs/BACKUP.md`](docs/BACKUP.md). Tóm tắt:
 
 ## 6. Thêm / cập nhật đề
 
-### Cách nhanh (Cloudflare) — giống `START.bat`
+### Cách nhanh (khuyến nghị) — giao diện Local Helper
+
+1. Nhấp đúp `START.bat`.
+2. Kéo thả file `.html`, cả thư mục export hoặc `.zip` vào giao diện.
+3. Kiểm tra môn, kế hoạch thêm/cập nhật rồi bấm **Đăng lên thư viện**.
+
+Local Helper chỉ lắng nghe trên `127.0.0.1`, dùng token ngẫu nhiên cho mỗi
+phiên và mở giao diện `_system/ui/add-exam.html` trong trình duyệt. Giao diện
+gọi lại đúng quy trình cũ (`import-exam.js` → `update-and-deploy.ps1` →
+`deploy-pages.ps1`), không tạo thêm dịch vụ hay cơ sở dữ liệu nào.
+
+- Đề **trùng mã** mặc định được thêm thành **đề mới** để không ghi đè bản cũ.
+  Chỉ khi chủ động chọn **Cập nhật** thì bản cũ mới bị thay thế, và luôn được
+  sao lưu vào `backups/exam-updates/`.
+- **Đổi tên / xóa đề đã có** (kể cả đề đã đăng Cloudflare từ trước) nằm trong
+  thẻ **Quản lý đề đã có**: bấm chip môn để xem danh sách, rồi chọn ✏️ hoặc 🗑.
+  Đổi tên chỉ sửa tiêu đề hiển thị (giữ mã đề để không mất lịch sử làm bài);
+  xóa thì chuyển file vào `backups/exam-deletes/` trước khi gỡ khỏi catalog.
+  Cả hai thao tác đều tự kiểm tra thư viện, tăng `CACHE_VERSION` và deploy.
+- Nếu pipeline kiểm tra/deploy lỗi, catalog và thư mục `exams/` được khôi phục
+  về trạng thái trước khi đăng.
+- Snapshot và log của trợ lý nằm trong `%LOCALAPPDATA%\ExamLibraryHelper\`,
+  không nằm trong repo.
+- Đóng trình duyệt không làm mất tiến trình đang chạy; mở lại giao diện để
+  xem tiếp. Bấm **Tắt trợ lý** hoặc để trợ lý tự tắt sau 60 phút không dùng.
+
+### Deploy bằng terminal (dự phòng)
 
 1. Chép file `.html` (hoặc thư mục export / `.zip`) đề mới vào thư mục project.
 2. Nhấp đúp `START-CLOUDFLARE.bat`.
@@ -299,10 +378,10 @@ Chạy bằng dòng lệnh:
 
 ```powershell
 # Tự quét file mới trong thư mục project
-powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1
+powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1
 
 # Chỉ định rõ file
-powershell -ExecutionPolicy Bypass -File tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
+powershell -ExecutionPolicy Bypass -File _system/tools/update-and-deploy.ps1 -ExamPath "C:\de-moi.html"
 ```
 
 Truyền tham số của `import-exam` qua `START-CLOUDFLARE.bat`:
@@ -316,23 +395,26 @@ START-CLOUDFLARE.bat --no-deploy
 Tùy chọn của script PowerShell: `-CheckOnly` (chỉ kiểm tra), `-NoDeploy`
 (chuẩn bị, chưa deploy), `-Yes` (không hỏi lại).
 
-> `START.bat` là quy trình cũ cho GitHub Pages: nó yêu cầu nhánh `main`,
-> không chạy `build-exam-data` và không deploy Cloudflare. Không dùng
-> `START.bat` cho `de-toan-thpt.pages.dev`.
+### Quy trình GitHub Pages cũ
+
+`START-GITHUB.bat` giữ nguyên luồng cũ (yêu cầu nhánh `main`, không chạy
+`build-exam-data`, không deploy Cloudflare). `START.bat --github` hoặc
+`START.bat --dry-run`/`--no-push` sẽ chuyển tiếp sang script này. Không dùng
+luồng GitHub cho `de-toan-thpt.pages.dev`.
 
 ### Cách thủ công
 
 1. Đặt file vào `exams/<môn>/de_<môn>_<số>.html`, giữ khối
    `<script id="quiz-data" type="application/json">` và đúng `id`.
 2. Thêm mục vào `assets/js/catalog.js`.
-3. Chạy `node tools/patch-exams.js` để thêm ô lớp + hàng đợi nộp bài.
-4. Chạy `node tools/build-exam-data.js` để cập nhật bộ đáp án máy chủ.
-5. Chạy `node tools/build-cache-manifest.js` để cập nhật hash đề.
-6. Chạy `node tools/check-library.js`, `node tools/test-scoring.js`,
-   `node tools/patch-exams.js --check`.
-7. Chạy `node tools/bump-cache-version.js`.
+3. Chạy `node _system/tools/patch-exams.js` để thêm ô lớp + hàng đợi nộp bài.
+4. Chạy `node _system/tools/build-exam-data.js` để cập nhật bộ đáp án máy chủ.
+5. Chạy `node _system/tools/build-cache-manifest.js` để cập nhật hash đề.
+6. Chạy `node _system/tools/check-library.js`, `node _system/tools/test-scoring.js`,
+   `node _system/tools/patch-exams.js --check`.
+7. Chạy `node _system/tools/bump-cache-version.js`.
 
-> Mỗi thay đổi cấu trúc database phải là một file mới trong `migrations/`.
+> Mỗi thay đổi cấu trúc database phải là một file mới trong `_system/migrations/`.
 > Không sửa migration đã chạy trên môi trường thật.
 
 ---
@@ -340,7 +422,7 @@ Tùy chọn của script PowerShell: `-CheckOnly` (chỉ kiểm tra), `-NoDeploy
 ## 7. Câu hỏi thường gặp
 
 **Thêm đề mà trang chủ không đổi?**
-Kiểm tra `assets/js/catalog.js`, chạy `node tools/check-library.js`. Nếu đang
+Kiểm tra `assets/js/catalog.js`, chạy `node _system/tools/check-library.js`. Nếu đang
 offline, tăng `CACHE_VERSION` rồi mở online một lần.
 
 **Đề mới mở được nhưng không dùng offline?**
