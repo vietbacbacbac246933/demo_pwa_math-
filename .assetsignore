@@ -1,0 +1,20 @@
+# LƯU Ý: file này KHÔNG được `wrangler pages deploy .` sử dụng.
+# Với Cloudflare Pages, hãy deploy bằng _system/tools/deploy-pages.ps1 (chỉ copy file
+# tĩnh cần thiết). File này chỉ có tác dụng nếu chuyển sang Workers Static Assets.
+
+# Không upload mã nguồn backend / migration / tool lên phần static assets.
+.git
+.github
+.dev.vars
+.dev.vars.example
+.gitignore
+.wrangler
+node_modules
+functions
+_system
+backups
+wrangler.jsonc
+
+# Tài liệu nội bộ / script tiện ích không cần phục vụ như tài nguyên tĩnh.
+README.md
+Start

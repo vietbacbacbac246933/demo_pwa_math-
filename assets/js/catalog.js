@@ -21,7 +21,7 @@
     version: 1,
     title: 'Thư viện đề thi THPT',
     subtitle: 'Ôn tập và kiểm tra trực tuyến, dùng được ngoại tuyến trên điện thoại và máy tính.',
-    updatedAt: '2026-11-07',
+    updatedAt: '2026-11-11',
 
     subjects: [
       {
@@ -161,7 +161,7 @@
             mode: 'practice',
             tags: [],
             addedAt: '2026-11-06'
-          }
+          },
         ]
       },
       {
@@ -169,7 +169,9 @@
         name: 'Lịch sử',
         icon: '🏛',
         description: 'Đề trắc nghiệm Lịch sử THPT, chấm điểm và lưu lịch sử ngay trên thiết bị.',
-        exams: []
+        exams: [
+
+        ]
       },
       {
         id: 'anh',

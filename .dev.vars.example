@@ -1,0 +1,24 @@
+# Sao chép file này thành .dev.vars khi chạy local.
+# KHÔNG commit .dev.vars.
+#
+# Sinh hash mật khẩu:
+#   node _system/tools/hash-password.js
+#
+# Sinh SESSION_SECRET (ví dụ bằng Node):
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+TEACHER_PASSWORD_HASH=pbkdf2_sha256$50000$THAY_SALT_HEX$THAY_HASH_HEX
+SESSION_SECRET=THAY_BANG_CHUOI_NGAU_NHIEN_DAI_IT_NHAT_32_KY_TU
+TEACHER_SESSION_HOURS=12
+
+# Tùy chọn: bật Cloudflare Turnstile cho /api/submit.
+# Phải đặt cả hai biến; thiếu một biến thì Turnstile tắt.
+# TURNSTILE_SITE_KEY=0x4AAAAAAA...
+# TURNSTILE_SECRET_KEY=0x4AAAAAAA...
+
+# Tùy chọn: chỉnh giới hạn tần suất nộp bài (mặc định bên dưới).
+# Ngưỡng cao để cả lớp dùng chung IP của trường vẫn nộp được bình thường.
+# SUBMIT_RATE_LIMIT_MAX=1000
+# SUBMIT_RATE_LIMIT_WINDOW_SECONDS=600
+# SUBMIT_RATE_BURST_MAX=300
+# SUBMIT_RATE_BURST_WINDOW_SECONDS=60

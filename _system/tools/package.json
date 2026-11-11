@@ -1,0 +1,11 @@
+{
+  "name": "exam-library-tools",
+  "private": true,
+  "description": "Công cụ tuỳ chọn cho dự án. Chỉ cần cài khi muốn tối ưu ảnh trong đề thi (WebP).",
+  "scripts": {
+    "optimize-images": "node optimize-exam-images.js"
+  },
+  "dependencies": {
+    "sharp": "^0.35.5"
+  }
+}

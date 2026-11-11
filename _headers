@@ -1,0 +1,19 @@
+/api/*
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
+
+/teacher
+  Cache-Control: no-store
+  X-Robots-Tag: noindex
+
+/teacher.html
+  Cache-Control: no-store
+  X-Robots-Tag: noindex
+
+# Manifest hash của đề: luôn kiểm tra lại để Service Worker thấy hash mới.
+/assets/js/exam-revs.js
+  Cache-Control: no-cache
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

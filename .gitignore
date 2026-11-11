@@ -1,0 +1,11 @@
+# Thư mục trạng thái local của Wrangler (D1 local, cache...)
+.wrangler/
+
+# Biến môi trường / secret dùng khi chạy local
+.dev.vars
+
+# Bản sao lưu SQL chứa dữ liệu học sinh — không commit
+backups/
+
+# Thư viện cài đặt (nếu sau này thêm package.json)
+node_modules/

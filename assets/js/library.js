@@ -7,8 +7,10 @@
 (function () {
   'use strict';
 
-  var LIB = window.EXAM_LIBRARY || { subjects: [] };
-  var SUBJECTS = Array.isArray(LIB.subjects) ? LIB.subjects : [];
+  var LIB = window.EXAM_LIBRARY;
+  var CATALOG_MISSING = !LIB || !Array.isArray(LIB.subjects);
+  if (CATALOG_MISSING) LIB = { subjects: [] };
+  var SUBJECTS = LIB.subjects;
   var ACCENTS = {
     toan: { color: '#4338ca', soft: '#eef0ff' },
     sinh: { color: '#15803d', soft: '#e8f7ee' },
@@ -232,6 +234,15 @@
   if (LIB.updatedAt) {
     els.footerUpdated.textContent = 'Cập nhật ' + formatDate(LIB.updatedAt);
   }
+  if (CATALOG_MISSING) {
+    els.resultCount.textContent = navigator.onLine === false
+      ? 'Không tải được danh mục đề khi đang ngoại tuyến. Hãy kết nối Internet và mở lại trang một lần.'
+      : 'Không tải được danh mục đề. Hãy tải lại trang để thử lại.';
+    if (els.offline) {
+      els.offline.textContent = 'Chưa có danh mục đề trên thiết bị. Cần Internet ở lần mở đầu tiên để lưu thư viện dùng ngoại tuyến.';
+      els.offline.setAttribute('data-state', 'limited');
+    }
+  }
   renderStats();
   renderFilters();
   render();
@@ -279,7 +290,10 @@
     });
 
     navigator.serviceWorker.register('sw.js').then(function (registration) {
-      setOfflineStatus('Đang lưu bản dùng ngoại tuyến. Giữ trang mở thêm vài giây rồi tải lại một lần.', 'limited');
+      setOfflineStatus('Đang lưu thư viện để dùng ngoại tuyến. Đề sẽ được lưu khi bạn mở đề đó.', 'limited');
+      if (navigator.onLine !== false) {
+        try { registration.update().catch(function () {}); } catch (error) {}
+      }
       if (registration.waiting && navigator.serviceWorker.controller) offerUpdate(registration);
 
       registration.addEventListener('updatefound', function () {
@@ -294,7 +308,7 @@
 
       window.setTimeout(function () {
         if (navigator.serviceWorker.controller) {
-          setOfflineStatus('Chế độ ngoại tuyến đã sẵn sàng. Bạn có thể mở lại thư viện và các đề đã tải khi mất mạng.', 'ready');
+          setOfflineStatus('Thư viện đã sẵn sàng ngoại tuyến. Mỗi đề sẽ được lưu khi bạn mở đề đó.', 'ready');
         } else {
           setOfflineStatus('Đang lưu bản dùng ngoại tuyến. Hãy mở lại trang một lần khi còn mạng để hoàn tất.', 'limited');
         }
@@ -305,6 +319,9 @@
 
     window.addEventListener('online', function () {
       setOfflineStatus('Đã có kết nối mạng. Lịch sử làm bài vẫn được lưu trên thiết bị này.', 'ready');
+      navigator.serviceWorker.getRegistration().then(function (registration) {
+        if (registration) registration.update().catch(function () {});
+      }).catch(function () {});
     });
     window.addEventListener('offline', function () {
       setOfflineStatus('Bạn đang ngoại tuyến. Các đề đã lưu trước đó vẫn mở được.', 'ready');

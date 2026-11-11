@@ -1,7 +1,10 @@
 @echo off
 chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
-cd /d "%~dp0"
+cd /d "%~dp0.."
+
+rem Giu cac file web o goc o trang thai an cho gon (chi doi thuoc tinh Windows).
+powershell -NoProfile -ExecutionPolicy Bypass -File "_system\tools\hide-runtime.ps1" >nul 2>nul
 
 rem ==================================================================
 rem  START.bat - Nhap de moi + kiem tra + commit + push len GitHub Pages
@@ -28,7 +31,7 @@ echo %* | findstr /i /c:"--dry-run" >nul && set "DRY_RUN=1"
 echo %* | findstr /i /c:"--yes" >nul && set "NO_CONFIRM=1"
 
 echo %* | findstr /i /c:"--help" >nul && (
-  node tools\import-exam.js --help
+  node _system\tools\import-exam.js --help
   exit /b 0
 )
 
@@ -74,16 +77,22 @@ for %%A in ("%DIRTY_BEFORE%") do if %%~zA GTR 0 (
 
 rem ---------- 1. Import ----------
 :run_import
-echo [1/4] Nhap de moi vao thu vien...
+echo [1/5] Nhap de moi vao thu vien...
 echo.
-node tools\import-exam.js %*
+node _system\tools\import-exam.js %*
 if errorlevel 2 goto cancelled
 if errorlevel 1 goto import_failed
 
-rem ---------- 2. Kiem tra ----------
+rem ---------- 2. Manifest hash cho Service Worker ----------
 echo.
-echo [2/4] Kiem tra thu vien...
-node tools\check-library.js
+echo [2/5] Cap nhat hash de cho Service Worker...
+node _system\tools\build-cache-manifest.js
+if errorlevel 1 goto failed
+
+rem ---------- 3. Kiem tra ----------
+echo.
+echo [3/5] Kiem tra thu vien...
+node _system\tools\check-library.js
 if errorlevel 1 goto failed
 
 if "%DRY_RUN%"=="1" (
@@ -92,9 +101,9 @@ if "%DRY_RUN%"=="1" (
   goto success
 )
 
-rem ---------- 3. Commit ----------
+rem ---------- 4. Commit ----------
 echo.
-echo [3/4] Commit thay doi...
+echo [4/5] Commit thay doi...
 git add -A
 git diff --cached --quiet
 if not errorlevel 1 (
@@ -117,12 +126,12 @@ if errorlevel 1 goto failed
 rem ---------- 4. Push ----------
 if "%NO_PUSH%"=="1" (
   echo.
-  echo [4/4] Bo qua push vi co --no-push.
+  echo [5/5] Bo qua push vi co --no-push.
   goto success
 )
 
 echo.
-echo [4/4] Push len origin main...
+echo [5/5] Push len origin main...
 git push origin main
 if errorlevel 1 goto push_failed
 

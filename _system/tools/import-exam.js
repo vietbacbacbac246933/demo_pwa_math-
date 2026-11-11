@@ -2,7 +2,7 @@
 /*
  * Nhập một đề mới vào thư viện tĩnh.
  *
- *   node tools/import-exam.js [đường-dẫn-nguồn] [tùy chọn]
+ *   node _system/tools/import-exam.js [đường-dẫn-nguồn] [tùy chọn]
  *
  * Việc cần làm (tự động):
  *   1. Tìm file HTML có khối <script id="quiz-data"> trong file/thư mục bạn vừa thêm.
@@ -12,7 +12,7 @@
  *      đổi khóa lịch sử sang exam_history_<id> (giữ lịch sử cũ qua legacyIds).
  *   5. Thêm mục vào assets/js/catalog.js (và môn mới nếu cần).
  *   6. Tăng CACHE_VERSION trong sw.js.
- *   7. Chạy tools/check-library.js; nếu lỗi thì hoàn tác toàn bộ.
+ *   7. Chạy _system/tools/check-library.js; nếu lỗi thì hoàn tác toàn bộ.
  *
  * Tùy chọn:
  *   --subject <id>          Môn đã có (toan, ly, hoa, sinh, van, su, anh, ...)
@@ -25,9 +25,11 @@
  *   --description <mô tả>   Mô tả trên thẻ đề
  *   --tags <a,b,c>          Nhãn tìm kiếm, cách nhau bằng dấu phẩy
  *   --yes                   Không hỏi, dùng mặc định
+ *   --update-existing       Ghi đè đúng đề đã có (theo id trong quiz-data).
+ *                           Luôn sao lưu bản cũ vào backups/exam-updates/.
  *   --dry-run               Chỉ in kế hoạch, không sửa file
  *   --include-legacy        Quét cả thư mục mẫu cũ (de-kt-15p, de-toan-thpt)
- *   --no-push               Được START.bat truyền vào; importer bỏ qua
+ *   --no-push               Được Start/START.bat truyền vào; importer bỏ qua
  *
  * Chỉ dùng thư viện có sẵn của Node, không cần npm install.
  */
@@ -39,16 +41,18 @@ const os = require('os');
 const vm = require('vm');
 const readline = require('readline');
 const { spawnSync } = require('child_process');
+// sw.js ở gốc đang mang thuộc tính Hidden (thư mục gọn) nên phải ghi qua wrapper.
+const winFile = require('./helper/win-file');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const CATALOG_REL = 'assets/js/catalog.js';
 const SW_REL = 'sw.js';
 const LIBRARY_REL = 'assets/js/library.js';
-const CHECK_REL = 'tools/check-library.js';
+const CHECK_REL = '_system/tools/check-library.js';
 const EXAMS_DIR = path.join(ROOT, 'exams');
 
 const IGNORED_TOP_DIRS = new Set([
-  '.git', 'assets', 'tools', 'exams', 'node_modules',
+  '.git', 'assets', '_system', 'exams', 'node_modules',
   'de-kt-15p', 'de-toan-thpt' // đề mẫu cũ, đã có sẵn trong repo
 ]);
 
@@ -98,7 +102,7 @@ function readText(rel) {
 
 function writeText(abs, text) {
   fs.mkdirSync(path.dirname(abs), { recursive: true });
-  fs.writeFileSync(abs, text, 'utf8');
+  winFile.writeFileSync(abs, text, 'utf8');
 }
 
 function detectNl(text) {
@@ -199,6 +203,7 @@ const opts = {
   tags: null,
   yes: false,
   dryRun: false,
+  updateExisting: false,
   includeLegacy: false,
   help: false
 };
@@ -227,8 +232,9 @@ const sourceArgs = [];
         break;
       case '--yes': case '-y': opts.yes = true; break;
       case '--dry-run': opts.dryRun = true; break;
+      case '--update-existing': opts.updateExisting = true; break;
       case '--include-legacy': opts.includeLegacy = true; break;
-      case '--no-push': break; // do START.bat dùng, importer không cần
+      case '--no-push': break; // do Start/START.bat dùng, importer không cần
       case '--help': case '-h': opts.help = true; break;
       default:
         if (arg.indexOf('-') === 0) die('Tham số không hợp lệ: ' + arg + ' (xem --help)');
@@ -239,7 +245,7 @@ const sourceArgs = [];
 
 if (opts.help) {
   console.log([
-    'Cách dùng: node tools/import-exam.js [nguồn...] [tùy chọn]',
+    'Cách dùng: node _system/tools/import-exam.js [nguồn...] [tùy chọn]',
     '',
     'Nguồn có thể là file .html, thư mục export hoặc .zip đặt ở thư mục gốc repo.',
     'Không truyền nguồn: tự quét file/thư mục mới ở thư mục gốc.',
@@ -253,12 +259,13 @@ if (opts.help) {
     '  --description <mô tả>',
     '  --tags <a,b,c>',
     '  --yes                 Không hỏi lại',
+    '  --update-existing     Cập nhật đúng đề đã có (theo id trong quiz-data)',
     '  --dry-run             Chỉ xem kế hoạch',
     '  --include-legacy      Quét cả de-kt-15p và de-toan-thpt',
     '',
     'Ví dụ:',
-    '  node tools/import-exam.js de_toan_02.html --subject toan --yes',
-    '  node tools/import-exam.js "de sinh 3" --subject sinh --title "Đề Sinh số 3"'
+    '  node _system/tools/import-exam.js de_toan_02.html --subject toan --yes',
+    '  node _system/tools/import-exam.js "de sinh 3" --subject sinh --title "Đề Sinh số 3"'
   ].join('\n'));
   process.exit(0);
 }
@@ -686,6 +693,39 @@ function addExamToCatalog(text, plan, subjectMeta, createSubject) {
   return before + (needsComma ? ',' : '') + nl + subjectEntry(subjectMeta, plan, nl) + nl + '    ' + after;
 }
 
+function updateExamInCatalog(text, plan) {
+  const range = findSubjectRange(text, plan.subjectMeta.id);
+  if (!range) {
+    die('Không tìm thấy môn "' + plan.subjectMeta.id + '" trong catalog để cập nhật đề.');
+  }
+  const examsIndex = text.indexOf('exams:', range.start);
+  if (examsIndex < 0 || examsIndex > range.end) {
+    die('Không tìm thấy mảng exams của môn "' + plan.subjectMeta.id + '".');
+  }
+  const arrayStart = text.indexOf('[', examsIndex);
+  const arrayEnd = findMatching(text, arrayStart, '[', ']');
+  if (arrayEnd < 0) die('Ngoặc của mảng exams môn "' + plan.subjectMeta.id + '" bị lệch.');
+
+  const nl = detectNl(text);
+  let i = arrayStart + 1;
+  while (i < arrayEnd) {
+    while (i < arrayEnd && /[\s,]/.test(text[i])) i += 1;
+    if (text[i] !== '{') break;
+    const end = findMatching(text, i, '{', '}');
+    if (end < 0) break;
+    const block = text.slice(i, end + 1);
+    const idMatch = block.match(/^\{\s*id\s*:\s*['"]([^'"]+)['"]/);
+    if (idMatch && idMatch[1] === plan.id) {
+      const lineStart = text.lastIndexOf('\n', i) + 1;
+      const indent = text.slice(lineStart, i).replace(/[^\s]/g, '');
+      const replacement = examEntry(plan, indent.length, nl);
+      return text.slice(0, i) + replacement + text.slice(end + 1);
+    }
+    i = end + 1;
+  }
+  die('Không tìm thấy đề "' + plan.id + '" trong catalog để cập nhật.');
+}
+
 function bumpUpdatedAt(text) {
   return text.replace(/(updatedAt\s*:\s*['"])[^'"]*(['"])/, '$1' + today() + '$2');
 }
@@ -862,9 +902,98 @@ async function planOne(sourceAbs, sourceRel) {
     die('Đề không có câu hỏi: ' + sourceRel);
   }
 
-  const subjectChoice = await pickSubject(sourceRel);
+  const settings = data.settings || {};
+  const questions = data.questions.length;
+  const points = Math.round(data.questions.reduce((sum, q) => {
+    const n = Number(q.points);
+    return sum + (isFinite(n) && n > 0 ? Math.min(n, 100) : 1);
+  }, 0) * 100) / 100;
+  const generatedDescription = 'Đề trắc nghiệm ';
+
+  let subjectChoice;
+  let updateTarget = null;
+  if (opts.updateExisting) {
+    if (opts.number) die('--number không dùng được với --update-existing.');
+    const existingId = typeof data.id === 'string' ? data.id.trim() : '';
+    if (!existingId) die('--update-existing cần "id" có sẵn trong quiz-data: ' + sourceRel);
+    updateTarget = findExistingExam(existingId);
+    if (!updateTarget) {
+      die('Không tìm thấy mã đề "' + existingId + '" trong catalog để cập nhật.');
+    }
+    if (opts.subject && opts.subject !== updateTarget.subject.id) {
+      die('Đề "' + existingId + '" thuộc môn ' + updateTarget.subject.id +
+        ', không phải môn ' + opts.subject + '.');
+    }
+    subjectChoice = {
+      meta: {
+        id: updateTarget.subject.id,
+        name: updateTarget.subject.name,
+        icon: updateTarget.subject.icon,
+        description: updateTarget.subject.description
+      },
+      isNew: false
+    };
+  } else {
+    subjectChoice = await pickSubject(sourceRel);
+  }
   const subjectMeta = subjectChoice.meta;
   const subjectIsNew = subjectChoice.isNew;
+
+  if (opts.updateExisting) {
+    const existing = updateTarget.exam;
+    const parts = existing.id.match(/_(\d+)$/);
+    const number = parts ? padNumber(parts[1]) : '';
+    const id = existing.id;
+    const destRel = existing.file;
+    const destAbs = path.join(ROOT, destRel);
+    if (!destRel || !fs.existsSync(destAbs)) {
+      die('Không tìm thấy file đề cũ để cập nhật: ' + (destRel || '(catalog thiếu file)'));
+    }
+    if (isSameSource(destAbs, sourceAbs)) {
+      die('File nguồn trùng với file đề đang có. Hãy chọn bản sao khác để tránh tự di chuyển file.');
+    }
+    if (plannedIds.has(id) || plannedDests.has(destRel)) {
+      die('Đề "' + id + '" xuất hiện nhiều lần trong một lần cập nhật.');
+    }
+    plannedIds.add(id);
+    plannedDests.add(destRel);
+
+    const generatedTitle = 'Đề ' + subjectMeta.name + ' số ' + String(Number(number));
+    const originalTitle = typeof data.title === 'string' ? data.title.trim() : '';
+    const looksLikeId = !originalTitle || originalTitle === data.id ||
+      /^[a-f0-9]{10,}$/i.test(originalTitle);
+    const title = opts.title || existing.title ||
+      (looksLikeId ? generatedTitle : originalTitle) || generatedTitle;
+    const description = opts.description || existing.description ||
+      (generatedDescription + subjectMeta.name + ': ' + questions + ' câu, ' + points + ' điểm.');
+    const tags = opts.tags || (Array.isArray(existing.tags) ? existing.tags : []) ||
+      (Array.isArray(data.tags) ? data.tags : []);
+
+    return {
+      sourceAbs,
+      sourceRel,
+      html,
+      subjectMeta,
+      subjectIsNew: false,
+      number,
+      id,
+      destRel,
+      destAbs,
+      title,
+      description,
+      tags,
+      questions,
+      points,
+      minutes: Number(settings.minutes) || 0,
+      mode: settings.mode === 'exam' ? 'exam' : 'practice',
+      addedAt: existing.addedAt || today(),
+      legacyIds: [],
+      patchedHistory: patchHistory(html).patchedKey,
+      addedMigration: false,
+      update: true,
+      existingExam: existing
+    };
+  }
 
   let number;
   if (opts.number) {
@@ -903,13 +1032,6 @@ async function planOne(sourceAbs, sourceRel) {
     destAbs = path.join(ROOT, destRel);
   }
 
-  const settings = data.settings || {};
-  const questions = data.questions.length;
-  const points = Math.round(data.questions.reduce((sum, q) => {
-    const n = Number(q.points);
-    return sum + (isFinite(n) && n > 0 ? Math.min(n, 100) : 1);
-  }, 0) * 100) / 100;
-
   const generatedTitle = 'Đề ' + subjectMeta.name + ' số ' + String(Number(number));
   const originalTitle = typeof data.title === 'string' ? data.title.trim() : '';
   const looksLikeId = !originalTitle || originalTitle === data.id ||
@@ -924,9 +1046,9 @@ async function planOne(sourceAbs, sourceRel) {
 
   let description = opts.description || '';
   if (!description && !opts.yes) {
-    description = await ask('Mô tả ngắn [' + ('Đề trắc nghiệm ' + subjectMeta.name + ': ' + questions + ' câu, ' + points + ' điểm.') + ']: ');
+    description = await ask('Mô tả ngắn [' + (generatedDescription + subjectMeta.name + ': ' + questions + ' câu, ' + points + ' điểm.') + ']: ');
   }
-  description = description || ('Đề trắc nghiệm ' + subjectMeta.name + ': ' + questions + ' câu, ' + points + ' điểm.');
+  description = description || (generatedDescription + subjectMeta.name + ': ' + questions + ' câu, ' + points + ' điểm.');
 
   const tags = opts.tags || (Array.isArray(data.tags) ? data.tags : []);
 
@@ -953,7 +1075,8 @@ async function planOne(sourceAbs, sourceRel) {
     addedAt: today(),
     legacyIds: [],
     patchedHistory: patchHistory(html).patchedKey,
-    addedMigration: false
+    addedMigration: false,
+    update: false
   };
 }
 
@@ -963,6 +1086,15 @@ function fileExistsFor(subjectId, number) {
 
 function isSameSource(destAbs, sourceAbs) {
   return path.resolve(destAbs).toLowerCase() === path.resolve(sourceAbs).toLowerCase();
+}
+
+function findExistingExam(examId) {
+  for (const subject of library.subjects) {
+    const exams = Array.isArray(subject.exams) ? subject.exams : [];
+    const exam = exams.find((item) => item && item.id === examId);
+    if (exam) return { subject, exam };
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -981,12 +1113,25 @@ function rollback(store) {
       if (content === null) {
         if (fs.existsSync(abs)) fs.unlinkSync(abs);
       } else {
-        fs.writeFileSync(abs, content);
+        winFile.writeFileSync(abs, content);
       }
     } catch (error) {
       console.error('Không hoàn tác được ' + abs + ': ' + error.message);
     }
   });
+}
+
+function backupExistingForUpdate(plan, stamp) {
+  if (!fs.existsSync(plan.destAbs)) return '';
+  const backupRoot = path.join(ROOT, 'backups', 'exam-updates', stamp);
+  const target = path.resolve(backupRoot, plan.destRel);
+  const prefix = path.resolve(backupRoot) + path.sep;
+  if (!target.toLowerCase().startsWith(prefix.toLowerCase())) {
+    die('Đường dẫn sao lưu không an toàn: ' + plan.destRel);
+  }
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.copyFileSync(plan.destAbs, target);
+  return target;
 }
 
 function moveOut(abs, stamp) {
@@ -1030,7 +1175,7 @@ async function main() {
     console.log('Không tìm thấy đề mới nào ở thư mục gốc.');
     console.log('Hãy chép file .html (hoặc thư mục export / .zip) vào:');
     console.log('  ' + ROOT);
-    console.log('rồi chạy lại START.bat.');
+    console.log('rồi chạy lại Start/START.bat hoặc Start/START-CLOUDFLARE.bat.');
     return 0;
   }
 
@@ -1053,7 +1198,8 @@ async function main() {
   console.log('');
   console.log('KẾ HOẠCH IMPORT');
   plans.forEach((plan, index) => {
-    console.log('  ' + (index + 1) + '. ' + plan.sourceRel);
+    console.log('  ' + (index + 1) + '. ' + plan.sourceRel +
+      (plan.update ? '   [CẬP NHẬT ĐỀ CŨ]' : ''));
     console.log('     -> ' + plan.destRel + '   (id: ' + plan.id + ')');
     console.log('     Môn: ' + plan.subjectMeta.name + ' (' + plan.subjectMeta.id + ')' +
       (plan.subjectIsNew ? ' [môn mới]' : '') +
@@ -1099,11 +1245,19 @@ async function main() {
 
     for (const plan of plans) {
       backupFile(plan.destAbs, store);
+      if (plan.update) {
+        const backup = backupExistingForUpdate(plan, stamp);
+        if (backup) console.log('Đã sao lưu bản đề cũ: ' + describe(backup));
+      }
       const normalized = normalizeExamHtml(plan.html, plan);
       writeText(plan.destAbs, normalized);
-      console.log('Đã ghi ' + plan.destRel);
+      console.log((plan.update ? 'Đã cập nhật ' : 'Đã ghi ') + plan.destRel);
 
-      catalogText = addExamToCatalog(catalogText, plan, plan.subjectMeta, plan.subjectIsNew);
+      if (plan.update) {
+        catalogText = updateExamInCatalog(catalogText, plan);
+      } else {
+        catalogText = addExamToCatalog(catalogText, plan, plan.subjectMeta, plan.subjectIsNew);
+      }
       if (!existingSubjectIds.has(plan.subjectMeta.id)) {
         existingSubjectIds.add(plan.subjectMeta.id);
       }
@@ -1122,7 +1276,7 @@ async function main() {
     writeText(path.join(ROOT, CATALOG_REL), catalogText);
     writeText(swAbs, swText);
     writeText(libraryAbs, libraryText);
-    console.log('Đã cập nhật ' + CATALOG_REL + ' (thêm ' + plans.length + ' đề)');
+    console.log('Đã cập nhật ' + CATALOG_REL + ' (' + plans.length + ' đề)');
     console.log('Đã tăng CACHE_VERSION: ' + cache.from + ' -> ' + cache.to);
 
     // Chuyển nguồn ra khỏi repo để check-library không báo "đề mồ côi".
@@ -1160,11 +1314,13 @@ async function main() {
   console.log('');
   console.log('== HOÀN TẤT ==');
   plans.forEach((plan) => {
-    console.log('  + ' + plan.destRel + '  (id: ' + plan.id + ', ' + plan.questions + ' câu)');
+    console.log('  ' + (plan.update ? '↻' : '+') + ' ' + plan.destRel +
+      '  (id: ' + plan.id + ', ' + plan.questions + ' câu' +
+      (plan.update ? ', đã sao lưu bản cũ' : '') + ')');
   });
   console.log('');
   console.log('Bản gốc đã được chuyển tới: ' + path.join(os.tmpdir(), 'opencode', 'imported-sources', stamp));
-  console.log('Chạy tiếp: git add -A && git commit && git push origin main (START.bat làm tự động).');
+  console.log('Chạy tiếp: Start/START-CLOUDFLARE.bat (Cloudflare) hoặc Start/START.bat (GitHub Pages).');
   return 0;
 }
 
